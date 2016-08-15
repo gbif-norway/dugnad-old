@@ -1,0 +1,19 @@
+title: Dugnadsportalen
+prefix: http://localhost:8080
+annotate:
+  order: [ general, geography, taxonomy, comment ]
+forms:
+  general:
+    - { name: "dwc:basisOfRecord", type: select, options: [ PreservedSpecimen, HumanObservation, MachineObservation ] }
+    - { name: 'dwc:recordedBy', type: text }
+    - { name: "dwc:eventDate", type: date }
+  geography:
+    - { name: "dwc:country", type: text }
+    - { name: "dwc:stateProvince", type: text }
+    - { name: "dwc:county", type: text }
+    - { name: "dwc:locality", type: text }
+  taxonomy:
+    - { name: "dwc:scientificName", type: text }
+  comment:
+    - { name: "annotationRemarks", type: textfield }
+
