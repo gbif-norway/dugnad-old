@@ -79,6 +79,15 @@ class transcribe:
     def GET(self):
         return render.transcribe(key, record, forms, zoom)
 
+class showannotations:
+    def GET(self, key):
+        q = { 'key': key }
+        annos = db.select('annotations', q, where ="key = $key")
+        final = []
+        for anno in annos:
+            final.append(json.loads(anno.get('annotation')))
+        return json.dumps(final)
+
 class annotate:
     def GET(self, key):
         url = "%s%s.json" % (RESOLVER, key)
@@ -121,6 +130,7 @@ urls = (
     '/dugnad/', 'index',
     '/dugnad/collection/(.+)', 'collection',
     '/dugnad/transcribe/(.+)', 'transcribe',
+    '/dugnad/annotations/(.+)', 'showannotations',
     '/dugnad/(.+)', 'annotate',
 )
 
