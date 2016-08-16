@@ -20,7 +20,7 @@ $if 'dwc:associatedMedia' in record:
     <img class='nozoom' src='$record.get('dwc:associatedMedia')'>
 
 <div id="tr">
-  <form id='transcription' method='post' action="/$key">
+  <form id='transcription' method='post' action="/dugnad/$key">
     <h3>$key</h3>
 
 		$for name, form in forms.iteritems():

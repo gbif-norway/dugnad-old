@@ -113,12 +113,15 @@ class annotate:
             annotation=json.dumps(web.input()),
             original=json.dumps(record)
         )
+        raise web.seeother('/dugnad')
+
 
 urls = (
-    '/', 'index',
-    '/collection/(.+)', 'collection',
-    '/transcribe/(.+)', 'transcribe',
-    '/(.+)', 'annotate',
+    '/dugnad', 'index',
+    '/dugnad/', 'index',
+    '/dugnad/collection/(.+)', 'collection',
+    '/dugnad/transcribe/(.+)', 'transcribe',
+    '/dugnad/(.+)', 'annotate',
 )
 
 languages = ['en_US']
