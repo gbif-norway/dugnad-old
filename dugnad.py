@@ -81,8 +81,8 @@ class transcribe:
 
 class showannotation:
     def GET(self, key):
-        q = { 'id': key }
         key, ext = os.path.splitext(key)
+        q = { 'id': key }
         annos = db.select('annotations', q, where='id = $id')
         if ext:
           if ext == ".json":
@@ -93,12 +93,18 @@ class showannotation:
 
 class showannotations:
     def GET(self, key):
+        key, ext = os.path.splitext(key)
         q = { 'key': key }
-        annos = db.select('annotations', q, where ="key = $key")
         final = []
+        annos = db.select('annotations', q, where ="key = $key")
         for anno in annos:
             final.append(json.loads(anno.get('annotation')))
-        return json.dumps(final)
+        if ext:
+          if ext == ".json":
+            return json.dumps(final)
+          else:
+            return web.notfound()
+        return render.annotations(final)
 
 class annotate:
     def GET(self, key):
@@ -135,9 +141,9 @@ class annotate:
             annotation=json.dumps(web.input()),
             original=json.dumps(record)
         )
-        #web.sendmail('noreply@nhmbif.uio.no',
-        #    'gbif-drift@nhm.uio.no', '[dugnad] ny annotering',
-        #    "http://nhmbif.uio.no/dugnad/annotations/%s" % key)
+        web.sendmail('noreply@nhmbif.uio.no',
+            'gbif-drift@nhm.uio.no', '[dugnad] ny annotering',
+            "http://nhmbif.uio.no/dugnad/annotation/%s / http://nhmbif.uio.no/dugnad/annotations/%s" % (id, key))
         raise web.seeother('/dugnad/annotation/%s' % id)
 
 urls = (
@@ -155,7 +161,7 @@ gettext.install('messages', 'lang', unicode=True)
 for lang in languages:
     gettext.translation('messages', 'lang', languages = [lang]).install(True)
 
-render = template.render('templates', base='layout', globals= { '_': _ })
+render = template.render('templates', base='layout', globals= { '_': _, 'json': json })
 
 app = web.application(urls, locals())
 session = web.session.Session(app, web.session.DiskStore('sessions'))

@@ -1,0 +1,9 @@
+$def with(annotations)
+
+$for anno in annotations:
+  <dl>
+  $for k,v in anno.iteritems():
+    <dt>$k</dt>
+    <dd>$v</dd>
+  </dl>
+  <hr>
