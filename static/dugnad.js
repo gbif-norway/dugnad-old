@@ -1,5 +1,24 @@
 var T = {};
 
+T.georeference = function(layer) {
+  document.getElementById('dwc:decimalLatitude').value = "";
+  document.getElementById('dwc:decimalLongitude').value = "";
+  document.getElementById('dwc:coordinateUncertaintyInMeters').value = "";
+  document.getElementById('dwc:footprintWKT').value = "";
+
+  if (layer instanceof L.Circle) {
+    var latlng = layer.getLatLng();
+    document.getElementById('dwc:decimalLatitude').value = latlng.lat;
+    document.getElementById('dwc:decimalLongitude').value = latlng.lng;
+    document.getElementById('dwc:coordinateUncertaintyInMeters').value =
+      layer.getRadius();
+  } else {
+    var wkt = new Wkt.Wkt();
+    wkt.read(JSON.stringify(layer.toGeoJSON()));
+    document.getElementById('dwc:footprintWKT').value = wkt.write();
+  }
+}
+
 T.checkcoordinates = function(e) {
   var latitude = document.getElementsByName('latitude')[0];
   var longitude = document.getElementsByName('longitude')[0];
@@ -7,7 +26,7 @@ T.checkcoordinates = function(e) {
   T.map.removeLayer(T.marker);
 
   var degexp = /^([\d\-.*,°d\s]+)[\s'm]*([nsew])/i
-  var rawlat = latitude.value.match(degexp);
+    var rawlat = latitude.value.match(degexp);
   var rawlon = longitude.value.match(degexp);
   if(rawlat && rawlon) {
     var lat = degtodec(rawlat[2], rawlat[1]);
@@ -125,12 +144,33 @@ function precision(lat, lon) {
 document.addEventListener("DOMContentLoaded", function(e) {
   window.ActiveXObject = null;
 
-  var url = 'http://otile2.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg';
-  var att = 'Data, imagery and map information provided by MapQuest, <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> and contributors, <a href="http://wiki.openstreetmap.org/wiki/Legal_FAQ#I_would_like_to_use_OpenStreetMap_maps._How_should_I_credit_you">ODbL</a>.';
+  var url = "http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png";
+  var att = '<a href="https://www.mapzen.com/rights">Attribution.</a>. Data &copy;<a href="https://openstreetmap.org/copyright">OSM</a> contributors.';
   var osm = new L.TileLayer(url, { minZoom: 1, maxZoom: 16, attribution: att });
 
   T.map = L.map('map').setView([0, 0], 2);
   T.map.addLayer(osm);
+
+  var georef = new L.FeatureGroup();
+  T.map.addLayer(georef);
+
+  var control = new L.Control.Draw({
+    edit: { featureGroup: georef }
+  });
+  T.map.addControl(control);
+	
+	T.map.on('draw:created', function(e) {
+    georef.clearLayers();
+    T.georeference(e.layer);
+    georef.addLayer(e.layer);
+	});
+	T.map.on('draw:edited', function(e) {
+    e.layers.eachLayer(function(layer) {
+      georef.clearLayers();
+      T.georeference(layer);
+      georef.addLayer(layer);
+    });
+  });
 
   T.toggle('toggle-help', 'help');
   T.toggle('toggle-map', 'map', function() {
@@ -145,13 +185,15 @@ document.addEventListener("DOMContentLoaded", function(e) {
       form.elements[i].addEventListener('focus', T.help, false);
     }
     var save = document.getElementsByName('save')[0];
-    save.onclick = function(e) {
-      var nodate = document.getElementsByName('nodate')[0];
-      if(nodate.checked)
-        return true;
-      var year = document.getElementsByName('year')[0];
-      if(year && !year.value || year.value == "")
-        return false;
+    if(save) {
+      save.onclick = function(e) {
+        var nodate = document.getElementsByName('nodate')[0];
+        if(nodate.checked)
+          return true;
+        var year = document.getElementsByName('year')[0];
+        if(year && !year.value || year.value == "")
+          return false;
+      }
     }
   }
 
@@ -162,7 +204,5 @@ document.addEventListener("DOMContentLoaded", function(e) {
     latitude.onkeyup = T.checkcoordinates;
     longitude.onkeyup = T.checkcoordinates;
   }
-  document.getElementsByName("province")[0].focus();
-
 });
 

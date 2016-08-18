@@ -79,6 +79,12 @@ class transcribe:
     def GET(self):
         return render.transcribe(key, record, forms, zoom)
 
+class showannotation:
+    def GET(self, key):
+        q = { 'id': id }
+        anno = db.select('annotations', q, where='id = $id')
+        return json.dumps(anno[0])
+
 class showannotations:
     def GET(self, key):
         q = { 'key': key }
@@ -117,22 +123,23 @@ class annotate:
         url = "%s%s.json" % (RESOLVER, key)
         record = json.loads(urllib2.urlopen(url).read())
         today = str(datetime.date.today())
+        id = str(uuid.uuid4())
         db.insert('annotations',
-            id=str(uuid.uuid4()), key=key, user=uid, date=today,
+            id=id, key=key, user=uid, date=today,
             annotation=json.dumps(web.input()),
             original=json.dumps(record)
         )
-        web.sendmail('noreply@nhmbif.uio.no',
-            'gbif-drift@nhm.uio.no', '[dugnad] ny annotering',
-            "http://nhmbif.uio.no/dugnad/annotations/%s" % key)
-        raise web.seeother('/dugnad')
-
+        #web.sendmail('noreply@nhmbif.uio.no',
+        #    'gbif-drift@nhm.uio.no', '[dugnad] ny annotering',
+        #    "http://nhmbif.uio.no/dugnad/annotations/%s" % key)
+        raise web.seeother('/dugnad/annotation/%s' % id)
 
 urls = (
     '/dugnad', 'index',
     '/dugnad/', 'index',
     '/dugnad/collection/(.+)', 'collection',
     '/dugnad/transcribe/(.+)', 'transcribe',
+    '/dugnad/annotation/(.+)', 'showannotation',
     '/dugnad/annotations/(.+)', 'showannotations',
     '/dugnad/(.+)', 'annotate',
 )

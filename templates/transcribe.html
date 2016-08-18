@@ -1,8 +1,20 @@
 $def with (key, record, forms, zoom)
 
+<script src='/static/openseadragon.js'></script>
+<script src='/static/leaflet.js'></script>
+<script src='/static/leaflet.draw.js'></script>
+<script src='/static/wicket.js'></script>
+<script src='/static/wicket-leaflet.js'></script>
+<script src='/static/dugnad.js'></script>
+
+<div id=menu>
+  <p>
+    <a href='#map' id='toggle-map'>Show map…</a>
+</div>
+
 $if 'dwc:associatedMedia' in record:
   $if zoom:
-    <div id="dz"></div>
+    <div id=dz></div>
     <script>
     var viewer = OpenSeadragon({
       id: "dz",
@@ -19,7 +31,8 @@ $if 'dwc:associatedMedia' in record:
   $else:
     <img class='nozoom' src='$record.get('dwc:associatedMedia')'>
 
-<div id="tr">
+<div id=map></div>
+<div id=tr>
   <form id='transcription' method='post' action="/dugnad/$key">
     <h3>$key</h3>
 
@@ -32,5 +45,4 @@ $if 'dwc:associatedMedia' in record:
       <input type=submit value="$_('Annotate')">
   </form>
 </div>
-
 

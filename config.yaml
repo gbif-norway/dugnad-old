@@ -12,6 +12,10 @@ forms:
     - { name: "dwc:stateProvince", type: text }
     - { name: "dwc:county", type: text }
     - { name: "dwc:locality", type: text }
+    - { name: "dwc:decimalLatitude", type: text }
+    - { name: "dwc:decimalLongitude", type: text }
+    - { name: "dwc:coordinateUncertaintyInMeters", type: text }
+    - { name: "dwc:footprintWKT", type: textfield }
   taxonomy:
     - { name: "dwc:scientificName", type: text }
   comment:
