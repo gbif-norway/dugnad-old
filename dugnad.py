@@ -110,7 +110,7 @@ class annotate:
                     urllib.urlretrieve(source, "%s.jpg" % name)
                     image = Vips.Image.new_from_file("%s.jpg" % name)
                     image.dzsave(name, layout="dz")
-                zoom = True
+                zoom = "%s.dzi" % imagekey
 
         if date:
             record['year'], record['month'], record['day'] = date.split("-")
