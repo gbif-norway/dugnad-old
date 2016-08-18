@@ -122,6 +122,9 @@ class annotate:
             annotation=json.dumps(web.input()),
             original=json.dumps(record)
         )
+        web.sendmail('noreply@nhmbif.uio.no',
+            'gbif-drift@nhm.uio.no', '[dugnad] ny annotering',
+            "http://nhmbif.uio.no/dugnad/annotations/%s" % key)
         raise web.seeother('/dugnad')
 
 
