@@ -81,10 +81,15 @@ class transcribe:
 
 class showannotation:
     def GET(self, key):
-        q = { 'id': id }
+        q = { 'id': key }
+        key, ext = os.path.splitext(key)
         annos = db.select('annotations', q, where='id = $id')
-        for anno in annos:
-            return json.dumps(anno)
+        if ext:
+          if ext == ".json":
+            return annos[0]['annotation']
+          else:
+            return web.notfound()
+        return render.show(annos[0])
 
 class showannotations:
     def GET(self, key):
