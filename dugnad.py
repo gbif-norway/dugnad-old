@@ -82,8 +82,9 @@ class transcribe:
 class showannotation:
     def GET(self, key):
         q = { 'id': id }
-        anno = db.select('annotations', q, where='id = $id')
-        return json.dumps(anno[0])
+        annos = db.select('annotations', q, where='id = $id')
+        for anno in annos:
+            return json.dumps(anno)
 
 class showannotations:
     def GET(self, key):
