@@ -108,29 +108,33 @@ class showannotations:
 
 class annotate:
     def GET(self, key):
+        key = key.replace("urn:catalog:", "")
         url = "%s%s.json" % (RESOLVER, key)
-        record = json.loads(urllib2.urlopen(url).read())
-        date = record.get('dwc:eventDate')
-
-        zoom = False
-        if record.get("dwc:associatedMedia"):
-            source = urllib.unquote(record.get('dwc:associatedMedia').strip())
-            imagekey = hashlib.sha256(source).hexdigest()
-            if deepzoom and source.find("http://www.unimus.no/") == 0:
-                name = "static/tmp/" + imagekey
-                if not os.path.exists(name + "_files"):
-                    urllib.urlretrieve(source, "%s.jpg" % name)
-                    image = Vips.Image.new_from_file("%s.jpg" % name)
-                    image.dzsave(name, layout="dz")
-                zoom = "%s.dzi" % imagekey
-
-        if date:
+        try:
+          record = json.loads(urllib2.urlopen(url).read())
+          date = record.get('dwc:eventDate')
+          zoom = False
+          if record.get("dwc:associatedMedia"):
+              source = urllib.unquote(record.get('dwc:associatedMedia').strip())
+              imagekey = hashlib.sha256(source).hexdigest()
+              if deepzoom and source.find("http://www.unimus.no/") == 0:
+                  name = "static/tmp/" + imagekey
+                  if not os.path.exists(name + "_files"):
+                      urllib.urlretrieve(source, "%s.jpg" % name)
+                      image = Vips.Image.new_from_file("%s.jpg" % name)
+                      image.dzsave(name, layout="dz")
+                  zoom = "%s.dzi" % imagekey
+          if date:
             record['year'], record['month'], record['day'] = date.split("-")
-	forms = OrderedDict((form, buildform(form)) for form in config['annotate']['order'])
-        for _, form in forms.iteritems(): form.validates(record)
-        return render.transcribe(key, record, forms, zoom)
+          forms = OrderedDict((form, buildform(form)) for form in config['annotate']['order'])
+          for _, form in forms.iteritems(): form.validates(record)
+          return render.transcribe(key, record, forms, zoom)
+        except Exception as e:
+          message = "%s not found (%s)" % (key, e)
+          return render.error(message)
 
     def POST(self, key):
+        key = key.replace("urn:catalog:", "")
         uid = session.get('id')
         url = "%s%s.json" % (RESOLVER, key)
         record = json.loads(urllib2.urlopen(url).read())
