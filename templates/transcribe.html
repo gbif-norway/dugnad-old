@@ -1,4 +1,4 @@
-$def with (key, record, forms, zoom)
+$def with (key, record, forms, zoom, uid, config)
 
 <script src='/static/openseadragon.js'></script>
 <script src='/static/leaflet.js'></script>
@@ -7,43 +7,65 @@ $def with (key, record, forms, zoom)
 <script src='/static/wicket-leaflet.js'></script>
 <script src='/static/dugnad.js'></script>
 
-<div id=menu>
+<div id=header>
+  $if uid:
+    $if config.get('filter'):
+      <form method=get>
+        <p><b>Filter records by area of interest:</b>
+          $ form = helper.showfilter(config)
+          $ form.validates(web.input())
+          $for input in form.inputs:
+            $:input.render()
+          <input type=submit value="$_('filter')">
+      </form>
+  $else:
+    <p>
+      <small>Not signed in. <a href='/user/'>Log in or register</a> to have your annotations attributed to you.</small>
+</div>
+
+$if record:
+  <div id=menu>
   <p>
     <a href='#map' id='toggle-map'>Show map…</a>
-</div>
-
-$if 'dwc:associatedMedia' in record:
-  $if zoom:
-    <div id=dz></div>
-    <script>
-    var viewer = OpenSeadragon({
-      id: "dz",
-      showRotationControl: true,
-      minZoomImageRatio: 0.5,
-      maxZoomImageRatio: 1.0,
-      showFullPageControl: false,
-      degrees: 90,
-      showHomeControl: false,
-      zoomPerScroll: 1.1,
-      prefixUrl: "/static/images/",
-      tileSources: "/static/tmp/$zoom"
-    });
-    </script>
-  $else:
-    <img class='nozoom' src='$record.get('dwc:associatedMedia')'>
-
-<div id=map></div>
-<div id=tr>
-  <form id='transcription' method='post' action="/dugnad/$key">
-    <h3>$key</h3>
-
-		$for name, form in forms.iteritems():
-			<fieldset>
-				<legend>$_(name)</legend>
-				$:form.render()
-			</fieldset>
-    <p>
-      <input name=save type=submit value="$_('Annotate')">
-  </form>
-</div>
+  </div>
+  $if 'associatedMedia' in record:
+    $if zoom:
+      <div id=dz></div>
+      <script>
+      var viewer = OpenSeadragon({
+        id: "dz",
+        showRotationControl: true,
+        minZoomImageRatio: 0.5,
+        maxZoomImageRatio: 1.0,
+        showFullPageControl: false,
+        degrees: 0,
+        showHomeControl: false,
+        zoomPerScroll: 1.1,
+        prefixUrl: "/static/images/",
+        tileSources: "/static/tmp/$zoom"
+      });
+      </script>
+    $else:
+      <img class='nozoom' src='$record.get('associatedMedia')'>
+  
+  <div id=map></div>
+  <div id=tr>
+    <form id='transcription' method='post' action="/dugnad/$key">
+      $if record.get('occurrenceID'):
+        <h3>$record['occurrenceID']</h3>
+      $else:
+        <h3>$key</h3>
+      $for name, form in forms.iteritems():
+  			<fieldset>
+  				<legend>$_(name)</legend>
+  				$:form.render()
+  			</fieldset>
+      <p>
+        <input name=save type=submit value="$_('submit')">
+        <input disabled name=skip type=submit value="$_('skip')">
+        <input disabled name=skip type=submit value="$_('finish-later')">
+    </form>
+  </div>
+$else:
+  <div id=error><p>No records matching your area of interest!</div>
 

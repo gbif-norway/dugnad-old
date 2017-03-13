@@ -3,7 +3,6 @@
 
 # todo:
 # - frie termer
-# - geogeo for å sette lat/long (bruk /kart)
 
 import os
 import sys
@@ -25,7 +24,7 @@ from collections import OrderedDict
 from web import form, template
 from tokyo import cabinet
 
-RESOLVER = "http://data.gbif.no/resolver/"
+RESOLVER = "https://data.gbif.no/resolver/"
 
 config = yaml.load(file('config.yaml'))
 
@@ -37,7 +36,11 @@ except ImportError:
 
 db = web.database(dbn='sqlite', db='dugnad.db')
 
-def buildform(key):
+class helpers:
+  def showfilter(self, config):
+    return buildform('filter', config)
+
+def buildform(key, config):
     if not key in config['forms']: raise Exception("Form not found")
     inputs = []
     recipe = config['forms'][key]
@@ -47,23 +50,33 @@ def buildform(key):
         k = i['name']
         if i['type'] == "text":
             inputs.append(form.Textbox(k, description = _(k)))
+        elif i['type'] == "hidden":
+            inputs.append(form.Hidden(k, description = _(k)))
         elif i['type'] == "checkbox":
             inputs.append(form.Checkbox(k, value = "y", description = _(k)))
         elif i['type'] == 'select':
+            default = i.get('default', '')
             if 'options' in i:
                 options = [''] + i['options']
                 inputs.append(form.Dropdown(k, options, description = _(k)))
+            elif 'sql' in i:
+              db = web.database(dbn='sqlite', db=config['source']['database'])
+              results = [v.values()[0] for v in db.query(i['sql'])]
+              results = filter(None, results)
+              results = [(v, _(v)) for v in results]
+              results.insert(0, default)
+              inputs.append(form.Dropdown(k, results, description = _(k)))
             elif 'source' in i:
                 key = i['source'] + "-" + i['name']
                 source = json.loads(web.ctx.metadata.get(key))
                 options = [''] + [d['label'] for d in sorted(source)]
                 inputs.append(form.Dropdown(k, options, description = _(k)))
-	elif i['type'] == 'textfield':
-	    inputs.append(form.Textarea(k, description = _(k)))
-	elif i['type'] == 'date':
-	    inputs.append(form.Textbox("year", description = _('year')))
-	    inputs.append(form.Textbox("month", description = _('month')))
-	    inputs.append(form.Textbox("day", description = _('day')))
+        elif i['type'] == 'textfield':
+          inputs.append(form.Textarea(k, description = _(k)))
+        elif i['type'] == 'date':
+          inputs.append(form.Textbox("year", description = _('year')))
+          inputs.append(form.Textbox("month", description = _('month')))
+          inputs.append(form.Textbox("day", description = _('day')))
         else: raise Exception("Unknown type %s" % i['type'])
     return form.Form(*inputs)
 
@@ -71,13 +84,60 @@ class index:
     def GET(self):
         return render.index()
 
-class collection:
+class project:
     def GET(self, key):
-        return render.collection(key)
+      uid = session.get('id')
+      try:
+        project = yaml.load(open('projects/' + key + '.yaml'))
+        url = "%s%s.json" % (RESOLVER, key)
+        pdb = web.database(dbn='sqlite', db=project['source']['database'])
+        filters = {}
+        data = web.input()
+        if project['forms'].get('filter'):
+          for f in project['forms']['filter']:
+            if data.get(f['name']) and data[f['name']] != "None":
+              filters[f['name']] = data[f['name']]
+        if len(filters) < 1: filters = None
+        recs = pdb.select(project['source']['table'], where=filters,
+            limit=1, order="RANDOM()")
+        zoom = False
+        try:
+          record = recs[0]
+          if record.get('genus'):
+            record['scientificName'] = "%s %s" % (
+                record.get('genus'), record.get('species')
+            )
+          if record.get("associatedMedia"):
+            source = urllib.unquote(record.get('associatedMedia').strip())
+            imagekey = hashlib.sha256(source).hexdigest()
+            if deepzoom and source.find("http://www.unimus.no/") == 0:
+              name = "static/tmp/" + imagekey
+              if not os.path.exists(name + "_files"):
+                urllib.urlretrieve(source, "%s.jpg" % name)
+                image = Vips.Image.new_from_file("%s.jpg" % name)
+                image.dzsave(name, layout="dz")
+              zoom = "%s.dzi" % imagekey
+        except IndexError as e:
+          record = None
+        forms = OrderedDict((form, buildform(form, project)) for form in project['annotate']['order'])
+        for _, form in forms.iteritems(): form.validates(record)
+        return render.transcribe("project/" + key, record, forms, zoom, uid, project)
+      except ValueError as e:
+        raise web.seeother('/dugnad/')
 
-class transcribe:
-    def GET(self):
-        return render.transcribe(key, record, forms, zoom)
+    def POST(self, pkey):
+      uid = session.get('id')
+      project = yaml.load(open('projects/' + pkey + '.yaml'))
+      data = web.input()
+      today = str(datetime.date.today())
+      key = data[project['key']]
+      id = str(uuid.uuid4())
+      db.insert('transcriptions',
+          id=id, project=pkey, key=key, user=uid, date=today,
+          annotation=json.dumps(data)
+      )
+      referer = web.ctx.env.get('HTTP_REFERER', '/dugnad/')
+      raise web.seeother(referer)
 
 class showannotation:
     def GET(self, key):
@@ -108,14 +168,18 @@ class showannotations:
 
 class annotate:
     def GET(self, key):
+        uid = session.get('id')
         key = key.replace("urn:catalog:", "")
         url = "%s%s.json" % (RESOLVER, key)
         try:
-          record = json.loads(urllib2.urlopen(url).read())
-          date = record.get('dwc:eventDate')
+          raw = json.loads(urllib2.urlopen(url).read())
+          record = {}
+          for k,v in record.iteritems():
+            record[k.replace("dwc:", "")] = v
+          date = record.get('eventDate')
           zoom = False
-          if record.get("dwc:associatedMedia"):
-              source = urllib.unquote(record.get('dwc:associatedMedia').strip())
+          if record.get("c:associatedMedia"):
+              source = urllib.unquote(record.get('associatedMedia').strip())
               imagekey = hashlib.sha256(source).hexdigest()
               if deepzoom and source.find("http://www.unimus.no/") == 0:
                   name = "static/tmp/" + imagekey
@@ -126,16 +190,16 @@ class annotate:
                   zoom = "%s.dzi" % imagekey
           if date:
             record['year'], record['month'], record['day'] = date.split("-")
-          forms = OrderedDict((form, buildform(form)) for form in config['annotate']['order'])
+          forms = OrderedDict((form, buildform(form, config)) for form in config['annotate']['order'])
           for _, form in forms.iteritems(): form.validates(record)
-          return render.transcribe(key, record, forms, zoom)
+          return render.transcribe(key, record, forms, zoom, uid, config)
         except Exception as e:
           message = "%s not found (%s)" % (key, e)
           return render.error(message)
 
     def POST(self, key):
-        key = key.replace("urn:catalog:", "")
         uid = session.get('id')
+        key = key.replace("urn:catalog:", "")
         url = "%s%s.json" % (RESOLVER, key)
         record = json.loads(urllib2.urlopen(url).read())
         today = str(datetime.date.today())
@@ -147,14 +211,13 @@ class annotate:
         )
         web.sendmail('noreply@nhmbif.uio.no',
             'gbif-drift@nhm.uio.no', '[dugnad] ny annotering',
-            "http://nhmbif.uio.no/dugnad/annotation/%s / http://nhmbif.uio.no/dugnad/annotations/%s" % (id, key))
+            "https://nhmbif.uio.no/dugnad/annotation/%s / https://nhmbif.uio.no/dugnad/annotations/%s" % (id, key))
         raise web.seeother('/dugnad/annotation/%s' % id)
 
 urls = (
     '/dugnad', 'index',
     '/dugnad/', 'index',
-    '/dugnad/collection/(.+)', 'collection',
-    '/dugnad/transcribe/(.+)', 'transcribe',
+    '/dugnad/project/(.+)', 'project',
     '/dugnad/annotation/(.+)', 'showannotation',
     '/dugnad/annotations/(.+)', 'showannotations',
     '/dugnad/(.+)', 'annotate',
@@ -165,10 +228,14 @@ gettext.install('messages', 'lang', unicode=True)
 for lang in languages:
     gettext.translation('messages', 'lang', languages = [lang]).install(True)
 
-render = template.render('templates', base='layout', globals= { '_': _, 'json': json })
+render = template.render('templates', base='layout', globals= { '_': _, 'json': json, 'helper': helpers(), 'web': web })
 
 app = web.application(urls, locals())
-session = web.session.Session(app, web.session.DiskStore('sessions'))
+session = web.session.Session(app, web.session.DiskStore('/site/gbif/sessions'))
+web.config.session_parameters['timeout'] = 2592000 # 30 * 24 * 60 * 60
+web.config.session_parameters['cookie_domain'] = "data.gbif.no"
+web.config.session_parameters['cookie_path'] = "/"
+web.config.debug = True
 
 if __name__ == "__main__":
     app.run()

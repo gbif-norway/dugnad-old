@@ -1,0 +1,31 @@
+title: Vascular plants from Telemark
+source:
+  database: projects.db
+  table: telemark
+key: "occurrenceID"
+annotate:
+  order: [ general, taxonomy, geography, comment ]
+filter: filter
+forms:
+  general:
+    - { name: 'occurrenceID', type: hidden }
+    - { name: 'recordedBy', type: text }
+    - { name: "eventDate", type: date }
+  geography:
+    - { name: "country", type: text }
+    - { name: "stateProvince", type: text }
+    - { name: "county", type: text }
+    - { name: "locality", type: text }
+    - { name: "decimalLatitude", type: text }
+    - { name: "decimalLongitude", type: text }
+    - { name: "coordinateUncertaintyInMeters", type: text }
+    - { name: "footprintWKT", type: textfield }
+  taxonomy:
+    - { name: "scientificName", type: text }
+  comment:
+    - { name: "annotationRemarks", type: textfield }
+  filter:
+    - { name: 'genus', type: select, sql: 'SELECT DISTINCT "genus" from telemark ORDER BY "genus"', default: [ '', '~ Genus ~' ] }
+    - { name: '_labelType', type: select, sql: 'SELECT DISTINCT "_labelType" from telemark ORDER BY "_labelType"', default: [ '', '~ Label Type ~' ] }
+    - { name: 'recordedBy', type: select, sql: 'SELECT DISTINCT "recordedBy" from telemark ORDER BY "recordedBy"', default: [ '', '~ Collector ~' ] }
+submit: transcribe

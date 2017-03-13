@@ -1,21 +1,21 @@
 var T = {};
 
 T.georeference = function(layer) {
-  document.getElementById('dwc:decimalLatitude').value = "";
-  document.getElementById('dwc:decimalLongitude').value = "";
-  document.getElementById('dwc:coordinateUncertaintyInMeters').value = "";
-  document.getElementById('dwc:footprintWKT').value = "";
+  document.getElementById('decimalLatitude').value = "";
+  document.getElementById('decimalLongitude').value = "";
+  document.getElementById('coordinateUncertaintyInMeters').value = "";
+  document.getElementById('footprintWKT').value = "";
 
   if (layer instanceof L.Circle) {
     var latlng = layer.getLatLng();
-    document.getElementById('dwc:decimalLatitude').value = latlng.lat;
-    document.getElementById('dwc:decimalLongitude').value = latlng.lng;
-    document.getElementById('dwc:coordinateUncertaintyInMeters').value =
+    document.getElementById('decimalLatitude').value = latlng.lat;
+    document.getElementById('decimalLongitude').value = latlng.lng;
+    document.getElementById('coordinateUncertaintyInMeters').value =
       layer.getRadius();
   } else {
     var wkt = new Wkt.Wkt();
     wkt.read(JSON.stringify(layer.toGeoJSON()));
-    document.getElementById('dwc:footprintWKT').value = wkt.write();
+    document.getElementById('footprintWKT').value = wkt.write();
   }
 }
 
@@ -144,7 +144,7 @@ function precision(lat, lon) {
 document.addEventListener("DOMContentLoaded", function(e) {
   window.ActiveXObject = null;
 
-  var url = "http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png";
+  var url = "https://cartocdn_{s}.global.ssl.fastly.net/base-eco/{z}/{x}/{y}@2x.png";
   var att = '<a href="https://www.mapzen.com/rights">Attribution.</a>. Data &copy;<a href="https://openstreetmap.org/copyright">OSM</a> contributors.';
   var osm = new L.TileLayer(url, { minZoom: 1, maxZoom: 16, attribution: att });
 

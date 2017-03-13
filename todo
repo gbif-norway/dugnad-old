@@ -1,22 +1,19 @@
+* flexbox-css
 * mulighet til å se/endre tidligere?
+* hjelpetekst
+* autocomplete av provins/distrikt, innsamler?
+* norsk oversettelse
+* håndtere koordinater (mgrs, utm osv)
+* finpuss av design
+
 * statistikk (både for alle og for enkeltbrukere)
 * statistikkside med fargekodet kart etter hvor mange i hvert land
-* "premie" for...
+
+* "premiesystem"...
   - n transcriptons (+)
   - n transcriptions from country
   - 1 specimen from each country
   - stor variasjon i elevation
   - "nøyaktig" - mye tid brukt per post? må regne med max n minutter
   - registrert i x dager og n per dag!
-* finpuss, launch?
-* velge interesseområde
-
-= fremover i tid
-
-* autocomplete av provins/distrikt
-* skrive om til lua
-* takle fot i meter
-* sjekke høyde?
-* takle desimalgrader?
-* screencast?
 

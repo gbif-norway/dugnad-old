@@ -4,20 +4,20 @@ annotate:
   order: [ general, geography, taxonomy, comment ]
 forms:
   general:
-    - { name: "dwc:basisOfRecord", type: select, options: [ PreservedSpecimen, HumanObservation, MachineObservation ] }
-    - { name: 'dwc:recordedBy', type: text }
-    - { name: "dwc:eventDate", type: date }
+    - { name: "basisOfRecord", type: select, options: [ PreservedSpecimen, HumanObservation, MachineObservation ] }
+    - { name: 'recordedBy', type: text }
+    - { name: "eventDate", type: date }
   geography:
-    - { name: "dwc:country", type: text }
-    - { name: "dwc:stateProvince", type: text }
-    - { name: "dwc:county", type: text }
-    - { name: "dwc:locality", type: text }
-    - { name: "dwc:decimalLatitude", type: text }
-    - { name: "dwc:decimalLongitude", type: text }
-    - { name: "dwc:coordinateUncertaintyInMeters", type: text }
-    - { name: "dwc:footprintWKT", type: textfield }
+    - { name: "country", type: text }
+    - { name: "stateProvince", type: text }
+    - { name: "county", type: text }
+    - { name: "locality", type: text }
+    - { name: "decimalLatitude", type: text }
+    - { name: "decimalLongitude", type: text }
+    - { name: "coordinateUncertaintyInMeters", type: text }
+    - { name: "footprintWKT", type: textfield }
   taxonomy:
-    - { name: "dwc:scientificName", type: text }
+    - { name: "scientificName", type: text }
   comment:
     - { name: "annotationRemarks", type: textfield }
 

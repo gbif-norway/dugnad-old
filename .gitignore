@@ -1,3 +1,5 @@
 static/*.png
 messages.mo
 sessions/
+*.db
+static/tmp
