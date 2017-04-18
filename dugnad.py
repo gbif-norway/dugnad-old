@@ -129,7 +129,6 @@ class index:
 class unfinished:
     def GET(self, id):
         uid = session.get('id')
-        uid = 1
         data = web.input()
         try:
             where = dict(id = id)
@@ -153,7 +152,6 @@ class unfinished:
 
     def POST(self, id):
         uid = session.get('id')
-        uid = 1
         updatetranscription(id, web.input())
         raise web.seeother("/dugnad/unfinished")
 
