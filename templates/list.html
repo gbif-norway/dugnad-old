@@ -1,0 +1,26 @@
+$def with(recs)
+
+<style>
+body { height: auto; }
+</style>
+
+<div class='info'>
+  <h1>Unfinished transcriptions</h1>
+  <table>
+    <tr>
+      <th>ID</th>
+      <th>Project</th>
+      <th>Last updated</th>
+      <th></th>
+    </tr>
+  
+    $for rec in recs:
+      <tr>
+        <td>$rec['id']</td>
+        <td>$rec['project']</td>
+        <td>$rec['date']</td>
+        <td><a href='/dugnad/unfinished/$rec['id']'>Continue</a></td>
+      </tr>
+  </table>
+</main>
+

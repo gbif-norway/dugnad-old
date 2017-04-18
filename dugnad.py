@@ -38,7 +38,9 @@ db = web.database(dbn='sqlite', db='dugnad.db')
 
 class helpers:
   def showfilter(self, config):
-    return buildform('filter', config)
+    form = buildform('filter', config)
+    form.validates(web.input())
+    return form
 
 def buildform(key, config):
     if not key in config['forms']: raise Exception("Form not found")
@@ -80,9 +82,87 @@ def buildform(key, config):
         else: raise Exception("Unknown type %s" % i['type'])
     return form.Form(*inputs)
 
+def zoomify(raw):
+    try:
+        source = urllib.unquote(raw.strip())
+        imagekey = hashlib.sha256(source).hexdigest()
+        if deepzoom and source.find("http://www.unimus.no/") == 0:
+          name = "static/tmp/" + imagekey
+          if not os.path.exists(name + "_files"):
+            urllib.urlretrieve(source, "%s.jpg" % name)
+            image = Vips.Image.new_from_file("%s.jpg" % name)
+            image.dzsave(name, layout="dz")
+          return "%s.dzi" % imagekey
+    except Exception as e:
+        raise e
+
+def updatetranscription(id, data):
+    finished = True
+    now = str(datetime.date.today())
+    if data.pop('later', False):
+        finished = False
+    where = dict(id=id)
+    db.update('transcriptions', where=web.db.sqlwhere(where),
+        date=now, finished=finished,
+        annotation=json.dumps(data)
+    )
+    
+def savetranscription(uid, pkey, data):
+    project = yaml.load(open('projects/' + pkey + '.yaml'))
+    finished = True
+    if data.pop('skip', False):
+        raise Exception("Skipped")
+    if data.pop('later', False):
+        finished = False
+    now = str(datetime.date.today())
+    key = data[project['key']]
+    id = str(uuid.uuid4())
+    db.insert('transcriptions',
+        id=id, project=pkey, key=key, user=uid, date=now, finished=finished,
+        annotation=json.dumps(data)
+    )
+
 class index:
     def GET(self):
         return render.index()
+
+class unfinished:
+    def GET(self, id):
+        uid = session.get('id')
+        uid = 1
+        data = web.input()
+        try:
+            where = dict(id = id)
+            recs = db.select('transcriptions', where = web.db.sqlwhere(where))
+            record = recs[0]
+            project = yaml.load(open('projects/' + record['project'] + '.yaml'))
+            anno = json.loads(record['annotation'])
+            pdb = web.database(dbn='sqlite', db=project['source']['database'])
+            origid = dict(occurrenceID = record['key'])
+            origs = pdb.select(project['source']['table'],
+                where = web.db.sqlwhere(origid), limit=1)
+            orig = origs[0]
+            zoom = False
+            if orig.get("associatedMedia"):
+                zoom = zoomify(orig['associatedMedia'])
+            forms = OrderedDict((form, buildform(form, project)) for form in project['annotate']['order'])
+            for _, form in forms.iteritems(): form.validates(anno)
+            return render.transcribe("unfinished/" + record['id'], anno, forms, zoom, uid, project, False)
+        except ValueError as e:
+            raise web.seeother('/dugnad/unfinished')
+
+    def POST(self, id):
+        uid = session.get('id')
+        uid = 1
+        updatetranscription(id, web.input())
+        raise web.seeother("/dugnad/unfinished")
+
+
+class listunfinished:
+    def GET(self):
+        uid = session.get('id')
+        recs = db.select('transcriptions')
+        return render.list(recs)
 
 class project:
     def GET(self, key):
@@ -108,36 +188,20 @@ class project:
                 record.get('genus'), record.get('species')
             )
           if record.get("associatedMedia"):
-            source = urllib.unquote(record.get('associatedMedia').strip())
-            imagekey = hashlib.sha256(source).hexdigest()
-            if deepzoom and source.find("http://www.unimus.no/") == 0:
-              name = "static/tmp/" + imagekey
-              if not os.path.exists(name + "_files"):
-                urllib.urlretrieve(source, "%s.jpg" % name)
-                image = Vips.Image.new_from_file("%s.jpg" % name)
-                image.dzsave(name, layout="dz")
-              zoom = "%s.dzi" % imagekey
+            zoom = zoomify(record['associatedMedia'])
         except IndexError as e:
           record = None
         forms = OrderedDict((form, buildform(form, project)) for form in project['annotate']['order'])
         for _, form in forms.iteritems(): form.validates(record)
-        return render.transcribe("project/" + key, record, forms, zoom, uid, project)
+        return render.transcribe("project/" + key, record, forms, zoom, uid, project, True)
       except ValueError as e:
         raise web.seeother('/dugnad/')
 
     def POST(self, pkey):
-      uid = session.get('id')
-      project = yaml.load(open('projects/' + pkey + '.yaml'))
-      data = web.input()
-      today = str(datetime.date.today())
-      key = data[project['key']]
-      id = str(uuid.uuid4())
-      db.insert('transcriptions',
-          id=id, project=pkey, key=key, user=uid, date=today,
-          annotation=json.dumps(data)
-      )
-      referer = web.ctx.env.get('HTTP_REFERER', '/dugnad/')
-      raise web.seeother(referer)
+        uid = session.get('id')
+        savetranscription(uid, pkey, web.input())
+        referer = web.ctx.env.get('HTTP_REFERER', '/dugnad/')
+        raise web.seeother(referer)
 
 class showannotation:
     def GET(self, key):
@@ -177,22 +241,12 @@ class annotate:
           for k,v in record.iteritems():
             record[k.replace("dwc:", "")] = v
           date = record.get('eventDate')
-          zoom = False
-          if record.get("c:associatedMedia"):
-              source = urllib.unquote(record.get('associatedMedia').strip())
-              imagekey = hashlib.sha256(source).hexdigest()
-              if deepzoom and source.find("http://www.unimus.no/") == 0:
-                  name = "static/tmp/" + imagekey
-                  if not os.path.exists(name + "_files"):
-                      urllib.urlretrieve(source, "%s.jpg" % name)
-                      image = Vips.Image.new_from_file("%s.jpg" % name)
-                      image.dzsave(name, layout="dz")
-                  zoom = "%s.dzi" % imagekey
+          zoom = zoomify(record['associatedMedia'])
           if date:
             record['year'], record['month'], record['day'] = date.split("-")
           forms = OrderedDict((form, buildform(form, config)) for form in config['annotate']['order'])
           for _, form in forms.iteritems(): form.validates(record)
-          return render.transcribe(key, record, forms, zoom, uid, config)
+          return render.transcribe(key, record, forms, zoom, uid, config, True)
         except Exception as e:
           message = "%s not found (%s)" % (key, e)
           return render.error(message)
@@ -202,10 +256,12 @@ class annotate:
         key = key.replace("urn:catalog:", "")
         url = "%s%s.json" % (RESOLVER, key)
         record = json.loads(urllib2.urlopen(url).read())
-        today = str(datetime.date.today())
+        now = str(datetime.date.today())
+        finished = True
         id = str(uuid.uuid4())
+        if 'later' in data: finished = False
         db.insert('annotations',
-            id=id, key=key, user=uid, date=today,
+            id=id, key=key, user=uid, date=now, finished=finished,
             annotation=json.dumps(web.input()),
             original=json.dumps(record)
         )
@@ -217,6 +273,8 @@ class annotate:
 urls = (
     '/dugnad', 'index',
     '/dugnad/', 'index',
+    '/dugnad/unfinished', 'listunfinished',
+    '/dugnad/unfinished/(.+)', 'unfinished',
     '/dugnad/project/(.+)', 'project',
     '/dugnad/annotation/(.+)', 'showannotation',
     '/dugnad/annotations/(.+)', 'showannotations',
@@ -228,12 +286,18 @@ gettext.install('messages', 'lang', unicode=True)
 for lang in languages:
     gettext.translation('messages', 'lang', languages = [lang]).install(True)
 
-render = template.render('templates', base='layout', globals= { '_': _, 'json': json, 'helper': helpers(), 'web': web })
+render = template.render('templates', base='layout', globals= {
+    '_': _,
+    'json': json,
+    'helper': helpers(),
+    'web': web,
+    'config': config
+})
 
 app = web.application(urls, locals())
-session = web.session.Session(app, web.session.DiskStore('/site/gbif/sessions'))
+session = web.session.Session(app, web.session.DiskStore('sessions'))
 web.config.session_parameters['timeout'] = 2592000 # 30 * 24 * 60 * 60
-web.config.session_parameters['cookie_domain'] = "data.gbif.no"
+web.config.session_parameters['cookie_domain'] = "127.0.0.1"
 web.config.session_parameters['cookie_path'] = "/"
 web.config.debug = True
 

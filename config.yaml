@@ -1,5 +1,6 @@
 title: Dugnadsportalen
 prefix: http://localhost:8080
+base: http://localhost:8080/static
 annotate:
   order: [ general, geography, taxonomy, comment ]
 forms:

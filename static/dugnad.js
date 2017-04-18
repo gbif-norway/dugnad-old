@@ -148,13 +148,14 @@ document.addEventListener("DOMContentLoaded", function(e) {
   var att = '<a href="https://www.mapzen.com/rights">Attribution.</a>. Data &copy;<a href="https://openstreetmap.org/copyright">OSM</a> contributors.';
   var osm = new L.TileLayer(url, { minZoom: 1, maxZoom: 16, attribution: att });
 
-  T.map = L.map('map').setView([0, 0], 2);
+  T.map = L.map('map').setView([59, 9], 8);
   T.map.addLayer(osm);
 
   var georef = new L.FeatureGroup();
   T.map.addLayer(georef);
 
   var control = new L.Control.Draw({
+    position: 'bottomleft',
     edit: { featureGroup: georef }
   });
   T.map.addControl(control);
@@ -204,5 +205,44 @@ document.addEventListener("DOMContentLoaded", function(e) {
     latitude.onkeyup = T.checkcoordinates;
     longitude.onkeyup = T.checkcoordinates;
   }
+
+  var chatln = document.getElementById('open-chat');
+  if(chatln) {
+    chatln.onclick = function(e) {
+      var chat = document.getElementById('chat-overlay');
+      if(chat) chat.style.display = "block";
+    }
+  }
+
+  var showMap = document.getElementById('show-map');
+  if(showMap) {
+    showMap.onclick = function(e) {
+      var overlay = document.getElementById('map-overlay');
+      if(!overlay) return;
+      if(overlay.style.visibility === "visible") {
+        e.target.textContent = "Show map";
+        overlay.style.visibility = "hidden";
+      } else {
+        e.target.textContent = "Show image";
+        overlay.style.visibility = "visible";
+      }
+    }
+  }
+
+//  var ring = document.getElementById('ring');
+//  if(ring) {
+//    ring.onclick = function(e) {
+//      var overlay = document.getElementById('map-overlay');
+//      if(!overlay) return;
+//      if(!T.pulledDown) {
+//        T.pulledDown = 1;
+//      } else {
+//        console.log("eh");
+//        overlay.style.animationPlayState = "paused";
+//        overlay.style.top = '50px';
+//        T.pulledDown = 0;
+//      }
+//    }
+//  }
 });
 

@@ -1,10 +1,10 @@
-* flexbox-css
+* sette eget brukernavn / avkrysninger
 * mulighet til å se/endre tidligere?
 * hjelpetekst
-* autocomplete av provins/distrikt, innsamler?
 * norsk oversettelse
+
+* autocomplete av provins/distrikt, innsamler?
 * håndtere koordinater (mgrs, utm osv)
-* finpuss av design
 
 * statistikk (både for alle og for enkeltbrukere)
 * statistikkside med fargekodet kart etter hvor mange i hvert land

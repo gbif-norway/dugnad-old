@@ -1,4 +1,4 @@
-$def with (key, record, forms, zoom, uid, config)
+$def with (key, record, forms, zoom, uid, config, showfilters)
 
 <script src='/static/openseadragon.js'></script>
 <script src='/static/leaflet.js'></script>
@@ -7,33 +7,45 @@ $def with (key, record, forms, zoom, uid, config)
 <script src='/static/wicket-leaflet.js'></script>
 <script src='/static/dugnad.js'></script>
 
-<div id=header>
+<header>
+  <section id=title>
+    <h1>dugnad</h1>
+  </section>
+  <section id=account>
   $if uid:
-    $if config.get('filter'):
+    $if config.get('filter') and showfilters:
       <form method=get>
-        <p><b>Filter records by area of interest:</b>
-          $ form = helper.showfilter(config)
-          $ form.validates(web.input())
-          $for input in form.inputs:
+        <p>
+          <b>Filter by area of interest:</b>
+          $for input in helper.showfilter(config).inputs:
             $:input.render()
           <input type=submit value="$_('filter')">
       </form>
   $else:
+    <p>Not signed in. <a href='/user/'>Log in or register</a> to have your annotations attributed to you.</small>
+  </section>
+  <section id=actions>
     <p>
-      <small>Not signed in. <a href='/user/'>Log in or register</a> to have your annotations attributed to you.</small>
-</div>
+      <a href='/dugnad/unfinished'>Unfinished transcriptions</a>
+      ·
+      <a id='open-chat' href='#'>Chat</a>
+  </section>
+</header>
 
-$if record:
-  <div id=menu>
-  <p>
-    <a href='#map' id='toggle-map'>Show map…</a>
-  </div>
-  $if 'associatedMedia' in record:
+<main>
+  <aside id=map-overlay class=overlay>
+    <div id="map"></div>
+    <a id=ring></a>
+  </aside>
+  $if record:
+    <section id="dz">
+    <p class=modes>
+      <a id=show-map href='#'>Show map</a>
     $if zoom:
-      <div id=dz></div>
+      <section id='dzi'></section>
       <script>
       var viewer = OpenSeadragon({
-        id: "dz",
+        id: "dzi",
         showRotationControl: true,
         minZoomImageRatio: 0.5,
         maxZoomImageRatio: 1.0,
@@ -47,25 +59,31 @@ $if record:
       </script>
     $else:
       <img class='nozoom' src='$record.get('associatedMedia')'>
-  
-  <div id=map></div>
-  <div id=tr>
-    <form id='transcription' method='post' action="/dugnad/$key">
-      $if record.get('occurrenceID'):
-        <h3>$record['occurrenceID']</h3>
-      $else:
-        <h3>$key</h3>
-      $for name, form in forms.iteritems():
-  			<fieldset>
-  				<legend>$_(name)</legend>
-  				$:form.render()
-  			</fieldset>
-      <p>
-        <input name=save type=submit value="$_('submit')">
-        <input disabled name=skip type=submit value="$_('skip')">
-        <input disabled name=skip type=submit value="$_('finish-later')">
-    </form>
-  </div>
-$else:
-  <div id=error><p>No records matching your area of interest!</div>
+    </section>
+    <section id=tr>
+      <form id='transcription' method='post' action="/dugnad/$key">
+        $if record.get('occurrenceID'):
+          <h2>$record['occurrenceID']</h2>
+        $else:
+          <h2>$key</h2>
+        $for name, form in forms.iteritems():
+    			<fieldset>
+    				<legend>$_(name)</legend>
+    				$:form.render()
+    			</fieldset>
+        <p>
+          <input name=save type=submit value="$_('submit')">
+          $if showfilters:
+            <input name=skip type=submit value="$_('skip')">
+          $if uid:
+            <input name=later type=submit value="$_('finish-later')">
+      </form>
+    </section>
+  $else:
+    <section id=error><p>No records matching your area of interest!</section>
+</main>
+
+<aside id=chat-overlay class=overlay>
+  <iframe src='http://localhost/~bie/chat/chat.cgi/dugnad'>
+</aside>
 
