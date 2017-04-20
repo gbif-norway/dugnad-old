@@ -11,7 +11,8 @@ main { height: calc(100% - 3.5em); top: 3.5em; }
 
 header { background: #fff; flex: 0 0 auto; border-bottom: 2px solid #000; display: flex; justify-content: space-between; align-items: flex-end; z-index: 3; }
 #title, #account, #actions{ margin: 0 1em; }
-header h1 { font-size: medium; }
+header h1 { font-size: large; }
+header * { vertical-align: middle; }
 
 main { display: flex; justify-content: flex-end; align-items: stretch; }
 

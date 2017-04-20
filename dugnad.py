@@ -129,6 +129,7 @@ class index:
 class unfinished:
     def GET(self, id):
         uid = session.get('id')
+        nick = session.get('name', "Anonymous")
         data = web.input()
         try:
             where = dict(id = id)
@@ -146,7 +147,7 @@ class unfinished:
                 zoom = zoomify(orig['associatedMedia'])
             forms = OrderedDict((form, buildform(form, project)) for form in project['annotate']['order'])
             for _, form in forms.iteritems(): form.validates(anno)
-            return render.transcribe("unfinished/" + record['id'], anno, forms, zoom, uid, project, False)
+            return render.transcribe("unfinished/" + record['id'], anno, forms, zoom, uid, project, False, nick)
         except ValueError as e:
             raise web.seeother('/dugnad/unfinished')
 
@@ -159,12 +160,15 @@ class unfinished:
 class listunfinished:
     def GET(self):
         uid = session.get('id')
-        recs = db.select('transcriptions')
+        if not uid: raise web.seeother('/dugnad')
+        reqs = { 'user': uid, 'finished': False }
+        recs = db.select('transcriptions', where=web.db.sqlwhere(reqs))
         return render.list(recs)
 
 class project:
     def GET(self, key):
       uid = session.get('id')
+      nick = session.get("name", "Anonymous")
       try:
         project = yaml.load(open('projects/' + key + '.yaml'))
         url = "%s%s.json" % (RESOLVER, key)
@@ -191,7 +195,7 @@ class project:
           record = None
         forms = OrderedDict((form, buildform(form, project)) for form in project['annotate']['order'])
         for _, form in forms.iteritems(): form.validates(record)
-        return render.transcribe("project/" + key, record, forms, zoom, uid, project, True)
+        return render.transcribe("project/" + key, record, forms, zoom, uid, project, True, nick)
       except ValueError as e:
         raise web.seeother('/dugnad/')
 
@@ -231,6 +235,7 @@ class showannotations:
 class annotate:
     def GET(self, key):
         uid = session.get('id')
+        nick = session.get("name", "Anonymous")
         key = key.replace("urn:catalog:", "")
         url = "%s%s.json" % (RESOLVER, key)
         try:
@@ -244,7 +249,7 @@ class annotate:
             record['year'], record['month'], record['day'] = date.split("-")
           forms = OrderedDict((form, buildform(form, config)) for form in config['annotate']['order'])
           for _, form in forms.iteritems(): form.validates(record)
-          return render.transcribe(key, record, forms, zoom, uid, config, True)
+          return render.transcribe(key, record, forms, zoom, uid, config, True, nick)
         except Exception as e:
           message = "%s not found (%s)" % (key, e)
           return render.error(message)
@@ -293,9 +298,9 @@ render = template.render('templates', base='layout', globals= {
 })
 
 app = web.application(urls, locals())
-session = web.session.Session(app, web.session.DiskStore('sessions'))
+session = web.session.Session(app, web.session.DiskStore('/site/gbif/sessions'))
 web.config.session_parameters['timeout'] = 2592000 # 30 * 24 * 60 * 60
-web.config.session_parameters['cookie_domain'] = "127.0.0.1"
+web.config.session_parameters['cookie_domain'] = "data.gbif.no"
 web.config.session_parameters['cookie_path'] = "/"
 web.config.debug = True
 

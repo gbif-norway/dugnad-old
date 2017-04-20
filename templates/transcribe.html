@@ -1,4 +1,4 @@
-$def with (key, record, forms, zoom, uid, config, showfilters)
+$def with (key, record, forms, zoom, uid, config, showfilters, nick)
 
 <script src='/static/openseadragon.js'></script>
 <script src='/static/leaflet.js'></script>
@@ -26,8 +26,9 @@ $def with (key, record, forms, zoom, uid, config, showfilters)
   </section>
   <section id=actions>
     <p>
-      <a href='/dugnad/unfinished'>Unfinished transcriptions</a>
-      ·
+      $if uid:
+        <a href='/dugnad/unfinished'>Unfinished transcriptions</a>
+        ·
       <a id='open-chat' href='#'>Chat</a>
   </section>
 </header>
@@ -84,6 +85,6 @@ $def with (key, record, forms, zoom, uid, config, showfilters)
 </main>
 
 <aside id=chat-overlay class=overlay>
-  <iframe src='http://localhost/~bie/chat/chat.cgi/dugnad'>
+  <iframe src='https://data.gbif.no/chat/chat.cgi/dugnad?name=$nick'>
 </aside>
 
