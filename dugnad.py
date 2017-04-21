@@ -36,11 +36,22 @@ except ImportError:
 
 db = web.database(dbn='sqlite', db='dugnad.db')
 
+class HelpBox(object):
+    def __init__(self, text):
+        self.text = text
+
+    def name(self):
+        return text
+
 class helpers:
   def showfilter(self, config):
     form = buildform('filter', config)
     form.validates(web.input())
     return form
+
+def helplink(text):
+    if not text: return ""
+    return "<a class=help title='%s'><img src='/static/help.png'></a>" % _(text)
 
 def buildform(key, config):
     if not key in config['forms']: raise Exception("Form not found")
@@ -51,11 +62,11 @@ def buildform(key, config):
         if not 'type' in i: raise Exception("Needs a type")
         k = i['name']
         if i['type'] == "text":
-            inputs.append(form.Textbox(k, description = _(k)))
+            inputs.append(form.Textbox(k, description = _(k), post = helplink(i.get('help'))))
         elif i['type'] == "hidden":
             inputs.append(form.Hidden(k, description = _(k)))
         elif i['type'] == "checkbox":
-            inputs.append(form.Checkbox(k, value = "y", description = _(k)))
+            inputs.append(form.Checkbox(k, value = "y", description = _(k), post = helplink(i.get('help'))))
         elif i['type'] == 'select':
             default = i.get('default', '')
             if 'options' in i:
@@ -76,10 +87,11 @@ def buildform(key, config):
         elif i['type'] == 'textfield':
           inputs.append(form.Textarea(k, description = _(k)))
         elif i['type'] == 'date':
-          inputs.append(form.Textbox("year", description = _('year')))
-          inputs.append(form.Textbox("month", description = _('month')))
-          inputs.append(form.Textbox("day", description = _('day')))
+          inputs.append(form.Textbox("year", description = _('year'), post = helplink('help-year')))
+          inputs.append(form.Textbox("month", description = _('month'), post = helplink('help-month')))
+          inputs.append(form.Textbox("day", description = _('day'), post = helplink('help-day')))
         else: raise Exception("Unknown type %s" % i['type'])
+
     return form.Form(*inputs)
 
 def zoomify(raw):
@@ -103,12 +115,14 @@ def updatetranscription(id, data):
         finished = False
     where = dict(id=id)
     db.update('transcriptions', where=web.db.sqlwhere(where),
-        date=now, finished=finished,
+        updated=now, finished=finished,
         annotation=json.dumps(data)
     )
     
 def savetranscription(uid, pkey, data):
     project = yaml.load(open('projects/' + pkey + '.yaml'))
+    pdb = web.database(dbn='sqlite', db=project['source']['database'])
+
     finished = True
     if data.pop('skip', False):
         raise Exception("Skipped")
@@ -119,8 +133,12 @@ def savetranscription(uid, pkey, data):
     id = str(uuid.uuid4())
     db.insert('transcriptions',
         id=id, project=pkey, key=key, user=uid, date=now, finished=finished,
-        annotation=json.dumps(data)
+        updated=now, annotation=json.dumps(data)
     )
+    where = dict(occurrenceID=key)
+    if finished:
+        pdb.update(project['source']['table'], where=web.db.sqlwhere(where),
+                completed = web.db.SQLLiteral("completed + 1"))
 
 class index:
     def GET(self):
@@ -162,7 +180,7 @@ class listunfinished:
         uid = session.get('id')
         if not uid: raise web.seeother('/dugnad')
         reqs = { 'user': uid, 'finished': False }
-        recs = db.select('transcriptions', where=web.db.sqlwhere(reqs))
+        recs = db.select('transcriptions', order="updated DESC", where=web.db.sqlwhere(reqs))
         return render.list(recs)
 
 class project:
@@ -179,8 +197,12 @@ class project:
           for f in project['forms']['filter']:
             if data.get(f['name']) and data[f['name']] != "None":
               filters[f['name']] = data[f['name']]
-        if len(filters) < 1: filters = None
-        recs = pdb.select(project['source']['table'], where=filters,
+        if len(filters) < 1:
+            where = "completed < 2"
+        else:
+            where = web.db.sqlwhere(filters)
+        print(filters)
+        recs = pdb.select(project['source']['table'], where=where,
             limit=1, order="RANDOM()")
         zoom = False
         try:
@@ -284,7 +306,7 @@ urls = (
     '/dugnad/(.+)', 'annotate',
 )
 
-languages = ['en_US']
+languages = ['en_US', "nb_NO"]
 gettext.install('messages', 'lang', unicode=True)
 for lang in languages:
     gettext.translation('messages', 'lang', languages = [lang]).install(True)
@@ -298,7 +320,7 @@ render = template.render('templates', base='layout', globals= {
 })
 
 app = web.application(urls, locals())
-session = web.session.Session(app, web.session.DiskStore('/site/gbif/sessions'))
+session = web.session.Session(app, web.session.DiskStore('sessions'))
 web.config.session_parameters['timeout'] = 2592000 # 30 * 24 * 60 * 60
 web.config.session_parameters['cookie_domain'] = "data.gbif.no"
 web.config.session_parameters['cookie_path'] = "/"

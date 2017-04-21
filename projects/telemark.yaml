@@ -1,28 +1,28 @@
-title: Vascular plants from Telemark
+title: Vascular plants from Telemark - transcription
+help:
+  introduction: "Transkriberingen skal i størst mulig grad gjøres verbatimt. Det betyr at dere følger slavisk innholdet på etiketten, men de må likevel plasseres i de aktuelle feltene. Vi har likevel av historiske og datatekniske årsaker noen tilpasninger som blir beskrevet nedenfor."
 source:
   database: projects.db
   table: telemark
 key: "occurrenceID"
 annotate:
-  order: [ general, taxonomy, geography, comment ]
+  order: [ event, taxonomy, geography, comment ]
 filter: filter
 forms:
-  general:
+  event:
     - { name: 'occurrenceID', type: hidden }
-    - { name: 'recordedBy', type: text }
-    - { name: "eventDate", type: date }
+    - { name: 'recordedBy', type: text, help: "help-recordedBy" }
+    - { name: "eventDate", type: date, help: "help-eventDate" }
   geography:
     - { name: "country", type: text }
     - { name: "stateProvince", type: text }
-    - { name: "county", type: text }
-    - { name: "locality", type: text }
-    - { name: "decimalLatitude", type: text }
-    - { name: "decimalLongitude", type: text }
-    - { name: "coordinateUncertaintyInMeters", type: text }
-    - { name: "footprintWKT", type: textfield }
+    - { name: "county", type: text, help: "help-county" }
+    - { name: "locality", type: text, help: "help-locality" }
+    - { name: "verbatimCoordinates", type: text, help: "help-coordinates" }
   taxonomy:
     - { name: "scientificName", type: text }
   comment:
+    - { name: "multipleIdentifications", type: checkbox, help: "help-identifications" }
     - { name: "annotationRemarks", type: textfield }
   filter:
     - { name: 'genus', type: select, sql: 'SELECT DISTINCT "genus" from telemark ORDER BY "genus"', default: [ '', '~ Genus ~' ] }

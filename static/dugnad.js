@@ -174,29 +174,26 @@ document.addEventListener("DOMContentLoaded", function(e) {
   });
 
   T.toggle('toggle-help', 'help');
-  T.toggle('toggle-map', 'map', function() {
-    T.map.invalidateSize(false);
-  });
 
-  var form = document.getElementById('transcription');
-  if(form) {
-    for(var i=0; i < form.length; i++) {
-      form.elements[i].addEventListener('keypress', T.next, false);
-      form.elements[i].addEventListener('change', T.validate, false);
-      form.elements[i].addEventListener('focus', T.help, false);
-    }
-    var save = document.getElementsByName('save')[0];
-    if(save) {
-      save.onclick = function(e) {
-        var nodate = document.getElementsByName('nodate')[0];
-        if(nodate.checked)
-          return true;
-        var year = document.getElementsByName('year')[0];
-        if(year && !year.value || year.value == "")
-          return false;
-      }
-    }
-  }
+//  var form = document.getElementById('transcription');
+//  if(form) {
+//    for(var i=0; i < form.length; i++) {
+//      form.elements[i].addEventListener('keypress', T.next, false);
+//      form.elements[i].addEventListener('change', T.validate, false);
+//      form.elements[i].addEventListener('focus', T.help, false);
+//    }
+//    var save = document.getElementsByName('save')[0];
+//    if(save) {
+//      save.onclick = function(e) {
+//        var nodate = document.getElementsByName('nodate')[0];
+//        if(nodate.checked)
+//          return true;
+//        var year = document.getElementsByName('year')[0];
+//        if(year && !year.value || year.value == "")
+//          return false;
+//      }
+//    }
+//  }
 
   var latitude = document.getElementsByName('latitude')[0];
   var longitude = document.getElementsByName('longitude')[0];
@@ -211,24 +208,38 @@ document.addEventListener("DOMContentLoaded", function(e) {
     chatln.onclick = function(e) {
       var chat = document.getElementById('chat-overlay');
       if(chat) chat.style.display = "block";
+      return false;
     }
   }
 
   var showMap = document.getElementById('show-map');
   if(showMap) {
+    var replacement = showMap.getAttribute('data-replace');
+    var current = showMap.textContent;
     showMap.onclick = function(e) {
       var overlay = document.getElementById('map-overlay');
       if(!overlay) return;
       if(overlay.style.visibility === "visible") {
-        e.target.textContent = "Show map";
+        e.target.textContent = current;
         overlay.style.visibility = "hidden";
       } else {
-        e.target.textContent = "Show image";
+        e.target.textContent = replacement;
         overlay.style.visibility = "visible";
       }
     }
   }
 
+  var helpln = document.getElementsByClassName('help');
+  for(var i = 0; i < helpln.length; i++) {
+    helpln[i].setAttribute('data-title', helpln[i].getAttribute('title'));
+    helpln[i].removeAttribute('title');
+    helpln[i].onclick = function(e) {
+      var help = document.getElementById('helptext');
+      var text = e.target.parentNode.getAttribute('data-title');
+      help.innerHTML = text.replace("\n\n", "<p>").replace("\n", "<br>");
+      return false;
+    }
+  }
 //  var ring = document.getElementById('ring');
 //  if(ring) {
 //    ring.onclick = function(e) {

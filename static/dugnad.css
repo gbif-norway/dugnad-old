@@ -19,16 +19,18 @@ main { display: flex; justify-content: flex-end; align-items: stretch; }
 a { color: #067940; text-decoration: none; }
 a:hover { color: #063940; }
 
-#tr { background: rgba(238,238,238,0.9); padding: 0; height: 100%; position: relative; }
+#tr { background: rgba(238,238,238,0.9); padding: 0; height: 100%; position: relative; width: 40%; }
 #tr form { overflow: auto; height: 100%; padding: 0 1em; }
 #tr h2 { font-size: small; text-align: center; }
 #tr fieldset { border: none; border-top: 3px solid #aaa; border-right: 3px solid #aaa; margin-top: 1em; }
 #tr legend { font-weight: bold; color: #666; }
-#tr table { width: 100%; padding-right: 1em; }
-#tr input { width: 14em; max-width: 90%; }
+#tr table { width: 100%; }
+#tr input { width: 14em; max-width: 80%; }
 #tr textarea { width: 14em; max-width: 100%; height: 4em; }
 #tr label { display: inline-block; width: 9em; text-align: right; padding-right: 4px; color: #444; font-weight: bold; }
 #tr input[type=submit] { float: right; width: auto; margin-right: 1em; }
+#tr td { text-align: left; }
+#tr input[type=checkbox] { width: 1em; }
 
 #dz { text-align: center; overflow: hidden; position: relative; }
 #dz { height: 100%; width: 100%; }
@@ -55,9 +57,17 @@ a:hover { color: #063940; }
 .info table { width: 100%; }
 .info table th, .info table td { text-align: left; }
 
+#help { clear: both; padding-top: 0.5em; }
+.help img { width: 16px; vertical-align: middle; margin-left: 4px; }
+
+#helptext { color: #700; }
+
+#help h3 { font-size: medium; }
+
+.help:hover { cursor: pointer; cursor: -moz-pointer; cursor: -webkit-pointer; }
+
 /*
 #ring { display: block; width: 50px; height: 50px; background: red; margin: 1px auto; background: url(/static/images/ring.png); background-size: contain; position: absolute; top: 0; z-index: 0; left: 0; right: 0; }
-#ring:hover { cursor: grab; cursor: -moz-grab; cursor: -webkit-grab; }
 
 #map-overlay { animation: pulldown 1s paused ease-in-out forwards; }
 @keyframes pulldown {

@@ -16,20 +16,22 @@ $def with (key, record, forms, zoom, uid, config, showfilters, nick)
     $if config.get('filter') and showfilters:
       <form method=get>
         <p>
-          <b>Filter by area of interest:</b>
+          <b>$_('filter-by-interest')</b>
           $for input in helper.showfilter(config).inputs:
             $:input.render()
           <input type=submit value="$_('filter')">
       </form>
   $else:
-    <p>Not signed in. <a href='/user/'>Log in or register</a> to have your annotations attributed to you.</small>
+    <p>$_('not-signed-in') <a href='/user/'>$_('link-login')</a> $_("attribution")</small>
   </section>
   <section id=actions>
     <p>
       $if uid:
-        <a href='/dugnad/unfinished'>Unfinished transcriptions</a>
+        <a href='/dugnad/unfinished'>$_('link-unfinished')</a>
         ·
-      <a id='open-chat' href='#'>Chat</a>
+      <a id='open-chat' target='chat' href='#'>$_('chat')</a>
+      ·
+      <a id='open-help' target='help' href='#'>$_('help')</a>
   </section>
 </header>
 
@@ -41,7 +43,8 @@ $def with (key, record, forms, zoom, uid, config, showfilters, nick)
   $if record:
     <section id="dz">
     <p class=modes>
-      <a id=show-map href='#'>Show map</a>
+      $if config.get('georeference'):
+        <a id=show-map data-replace="$_('link-image')" href='#'>$_('link-map')</a>
     $if zoom:
       <section id='dzi'></section>
       <script>
@@ -78,10 +81,14 @@ $def with (key, record, forms, zoom, uid, config, showfilters, nick)
             <input name=skip type=submit value="$_('skip')">
           $if uid:
             <input name=later type=submit value="$_('finish-later')">
+        <div id=help>
+          <h3>$_('help')</h3>
+          <p id=helptext>Transkriberingen skal i størst mulig grad gjøres verbatimt. Det betyr at dere følger slavisk innholdet på etiketten, men de må likevel plasseres i de aktuelle feltene. Vi har likevel av historiske og datatekniske årsaker noen tilpasninger som blir beskrevet nedenfor.
+        </div>
       </form>
     </section>
   $else:
-    <section id=error><p>No records matching your area of interest!</section>
+    <section id=error><p>$_('no-matching-records')</section>
 </main>
 
 <aside id=chat-overlay class=overlay>
