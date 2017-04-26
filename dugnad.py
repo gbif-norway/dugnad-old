@@ -144,6 +144,14 @@ class index:
     def GET(self):
         return render.index()
 
+class help:
+    def GET(self, key=None):
+        project = config
+        if key:
+            project = yaml.load(open('projects/' + key + '.yaml'))
+        forms = OrderedDict((form, project['forms'][form]) for form in project['annotate']['order'])
+        return render.help(project, forms)
+
 class unfinished:
     def GET(self, id):
         uid = session.get('id')
@@ -165,7 +173,7 @@ class unfinished:
                 zoom = zoomify(orig['associatedMedia'])
             forms = OrderedDict((form, buildform(form, project)) for form in project['annotate']['order'])
             for _, form in forms.iteritems(): form.validates(anno)
-            return render.transcribe("unfinished/" + record['id'], anno, forms, zoom, uid, project, False, nick)
+            return render.transcribe("unfinished/" + record['id'], anno, forms, zoom, project, False, nick)
         except ValueError as e:
             raise web.seeother('/dugnad/unfinished')
 
@@ -201,7 +209,6 @@ class project:
             where = "completed < 2"
         else:
             where = web.db.sqlwhere(filters)
-        print(filters)
         recs = pdb.select(project['source']['table'], where=where,
             limit=1, order="RANDOM()")
         zoom = False
@@ -217,7 +224,9 @@ class project:
           record = None
         forms = OrderedDict((form, buildform(form, project)) for form in project['annotate']['order'])
         for _, form in forms.iteritems(): form.validates(record)
-        return render.transcribe("project/" + key, record, forms, zoom, uid, project, True, nick)
+        return render.transcribe("project/" + key, record, forms, zoom, project, True, nick)
+      except IOError as e:
+        raise web.seeother('/dugnad/')
       except ValueError as e:
         raise web.seeother('/dugnad/')
 
@@ -271,7 +280,7 @@ class annotate:
             record['year'], record['month'], record['day'] = date.split("-")
           forms = OrderedDict((form, buildform(form, config)) for form in config['annotate']['order'])
           for _, form in forms.iteritems(): form.validates(record)
-          return render.transcribe(key, record, forms, zoom, uid, config, True, nick)
+          return render.transcribe(key, record, forms, zoom, config, True, nick)
         except Exception as e:
           message = "%s not found (%s)" % (key, e)
           return render.error(message)
@@ -298,8 +307,10 @@ class annotate:
 urls = (
     '/dugnad', 'index',
     '/dugnad/', 'index',
+    '/dugnad/help', 'help',
     '/dugnad/unfinished', 'listunfinished',
     '/dugnad/unfinished/(.+)', 'unfinished',
+    '/dugnad/project/(.+)/help', 'help',
     '/dugnad/project/(.+)', 'project',
     '/dugnad/annotation/(.+)', 'showannotation',
     '/dugnad/annotations/(.+)', 'showannotations',
@@ -311,16 +322,18 @@ gettext.install('messages', 'lang', unicode=True)
 for lang in languages:
     gettext.translation('messages', 'lang', languages = [lang]).install(True)
 
+app = web.application(urls, locals())
+session = web.session.Session(app, web.session.DiskStore('sessions'))
+
 render = template.render('templates', base='layout', globals= {
     '_': _,
+    'uid': session.get('uid'),
     'json': json,
     'helper': helpers(),
     'web': web,
     'config': config
 })
 
-app = web.application(urls, locals())
-session = web.session.Session(app, web.session.DiskStore('sessions'))
 web.config.session_parameters['timeout'] = 2592000 # 30 * 24 * 60 * 60
 web.config.session_parameters['cookie_domain'] = "data.gbif.no"
 web.config.session_parameters['cookie_path'] = "/"

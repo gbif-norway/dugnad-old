@@ -1,10 +1,21 @@
 <div class=info>
-  <h1><b>dugnad</b>: annotations & transcriptions</h1>
-  <p>Help annotate and transcribe herbarium sheets from Norwegian museums.
+  <aside>
+    <p>
+      $if not uid:
+        <a target=user href='/user/'>Register or sign in</a>
+  </aside>
 
-  <h2>Current transcription projects</h2>
-  <div class=project>
-    <h3><a href='/dugnad/project/telemark'>Vascular plants from Telemark</a></h3>
+  <h1><b>dugnad</b> annotations & transcriptions</h1>
+  <p>$:_('introduction')
+  <p>$:_('introduction-user')
+
+  <div class=projects>
+    <div class=project>
+      <a href='/dugnad/project/telemark'>
+        <img src='/static/telemark.jpg' width='240'>
+        <h3>Transcribe vascular plants from Telemark</h3>
+      </a>
+    </div>
   </div>
 </div>
 

@@ -1,6 +1,6 @@
 title: Vascular plants from Telemark - transcription
 help:
-  introduction: "Transkriberingen skal i størst mulig grad gjøres verbatimt. Det betyr at dere følger slavisk innholdet på etiketten, men de må likevel plasseres i de aktuelle feltene. Vi har likevel av historiske og datatekniske årsaker noen tilpasninger som blir beskrevet nedenfor."
+  introduction: Transkriberingen skal i størst mulig grad gjøres verbatimt. Det betyr at dere følger slavisk innholdet på etiketten, men de må likevel plasseres i de aktuelle feltene. Vi har likevel av historiske og datatekniske årsaker noen tilpasninger som blir beskrevet nedenfor.
 source:
   database: projects.db
   table: telemark
@@ -20,7 +20,7 @@ forms:
     - { name: "locality", type: text, help: "help-locality" }
     - { name: "verbatimCoordinates", type: text, help: "help-coordinates" }
   taxonomy:
-    - { name: "scientificName", type: text }
+    - { name: "scientificName", type: text, help: 'help-scientificName' }
   comment:
     - { name: "multipleIdentifications", type: checkbox, help: "help-identifications" }
     - { name: "annotationRemarks", type: textfield }

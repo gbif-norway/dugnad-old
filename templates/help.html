@@ -1,0 +1,25 @@
+$def with(config, forms)
+
+<div class=info>
+  <aside>
+    <p>
+      $if not uid:
+        <a target=user href='/user/'>Register or sign in</a>
+  </aside>
+
+  <h1>$_('help')</h1>
+
+  <p>$_(config.get('help', {}).get('introduction'))
+
+  <h2>$_('terms')</h2>
+
+  $for form, terms in forms.iteritems():
+    <h3>$_(form)</h3>
+    <dl>
+    $for term in terms:
+      $if term.get('help'):
+        <dt><b>$_(term['name'])</b></dt>
+        <dd>$_(term['help'])</dd>
+    </dl>
+</div>
+

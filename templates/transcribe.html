@@ -1,4 +1,4 @@
-$def with (key, record, forms, zoom, uid, config, showfilters, nick)
+$def with (key, record, forms, zoom, config, showfilters, nick)
 
 <script src='/static/openseadragon.js'></script>
 <script src='/static/leaflet.js'></script>
@@ -9,7 +9,7 @@ $def with (key, record, forms, zoom, uid, config, showfilters, nick)
 
 <header>
   <section id=title>
-    <h1>dugnad</h1>
+    <h1><a href='/dugnad'>dugnad</a></h1>
   </section>
   <section id=account>
   $if uid:
@@ -22,7 +22,7 @@ $def with (key, record, forms, zoom, uid, config, showfilters, nick)
           <input type=submit value="$_('filter')">
       </form>
   $else:
-    <p>$_('not-signed-in') <a href='/user/'>$_('link-login')</a> $_("attribution")</small>
+    <p>$_('not-signed-in') <a target=user href='/user/'>$_('link-login')</a> $_("attribution")</small>
   </section>
   <section id=actions>
     <p>
@@ -31,7 +31,7 @@ $def with (key, record, forms, zoom, uid, config, showfilters, nick)
         ·
       <a id='open-chat' target='chat' href='#'>$_('chat')</a>
       ·
-      <a id='open-help' target='help' href='#'>$_('help')</a>
+      <a id='open-help' target='help' href='/dugnad/$key/help'>$_('help')</a>
   </section>
 </header>
 
@@ -83,7 +83,7 @@ $def with (key, record, forms, zoom, uid, config, showfilters, nick)
             <input name=later type=submit value="$_('finish-later')">
         <div id=help>
           <h3>$_('help')</h3>
-          <p id=helptext>Transkriberingen skal i størst mulig grad gjøres verbatimt. Det betyr at dere følger slavisk innholdet på etiketten, men de må likevel plasseres i de aktuelle feltene. Vi har likevel av historiske og datatekniske årsaker noen tilpasninger som blir beskrevet nedenfor.
+          <p id=helptext>$_(config.get('help', {}).get('introduction'))
         </div>
       </form>
     </section>
