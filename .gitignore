@@ -4,3 +4,4 @@ messages.mo
 sessions/
 *.db
 static/tmp
+config.yaml

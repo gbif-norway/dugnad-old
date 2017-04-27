@@ -5,7 +5,7 @@ label, input, select, textarea { font: inherit; }
 
 header, nav, main, section, aside { display: block; }
 
-header, main { position: fixed; width: 100%; overflow: auto; }
+header, main { position: fixed; width: 100%; overflow: auto; font-size: smaller; }
 header { height: 3.5em; z-index: 10; }
 main { height: calc(100% - 3.5em); top: 3.5em; }
 
@@ -59,6 +59,8 @@ a:hover { color: #063940; }
 .info table { width: 100%; }
 .info table th, .info table td { text-align: left; }
 
+.info h2, .info h3 { font-size: large; }
+
 .info aside { float: right; margin: 0 1em; }
 .info aside a { font-weight: bold; }
 
@@ -87,4 +89,12 @@ a:hover { color: #063940; }
   100% { top: -10%; }
 }
 */
+
+
+@media print {
+  body { background: #fff; color: #000; height: auto; }
+  .info { margin: 0; padding: 0; width: 100%; }
+  .info h1 { font-size: x-large; font-weight: bold; }
+  .info dd { font-size: 14px; }
+}
 

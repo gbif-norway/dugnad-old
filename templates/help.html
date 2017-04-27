@@ -3,15 +3,15 @@ $def with(config, forms)
 <div class=info>
   <aside>
     <p>
-      $if not uid:
+      $if not helper.uid():
         <a target=user href='/user/'>Register or sign in</a>
+        ·
+      <a href='/static/help.pdf'>Last ned som PDF</a>
   </aside>
 
-  <h1>$_('help')</h1>
+  <h1>$_('Transkribering: Karplanter fra Telemark')</h1>
 
   <p>$_(config.get('help', {}).get('introduction'))
-
-  <h2>$_('terms')</h2>
 
   $for form, terms in forms.iteritems():
     <h3>$_(form)</h3>

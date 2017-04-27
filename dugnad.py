@@ -13,6 +13,7 @@ import uuid
 import yaml
 import hashlib
 import logging
+import pdfkit
 import urllib
 import urllib2
 import gettext
@@ -44,6 +45,9 @@ class HelpBox(object):
         return text
 
 class helpers:
+  def uid(self):
+    return session.get('id')
+
   def showfilter(self, config):
     form = buildform('filter', config)
     form.validates(web.input())
@@ -150,6 +154,9 @@ class help:
         if key:
             project = yaml.load(open('projects/' + key + '.yaml'))
         forms = OrderedDict((form, project['forms'][form]) for form in project['annotate']['order'])
+        if 'pdf' in web.input():
+          pdfkit.from_string(render.help(project, forms), 'static/help.pdf')
+          return web.seeother('/dugnad/static/help.pdf')
         return render.help(project, forms)
 
 class unfinished:
@@ -322,21 +329,22 @@ gettext.install('messages', 'lang', unicode=True)
 for lang in languages:
     gettext.translation('messages', 'lang', languages = [lang]).install(True)
 
+
+web.config.session_parameters['timeout'] = 2592000 # 30 * 24 * 60 * 60
+web.config.session_parameters['cookie_domain'] = "data.gbif.no"
+web.config.session_parameters['cookie_path'] = "/"
+
 app = web.application(urls, locals())
-session = web.session.Session(app, web.session.DiskStore('sessions'))
+session = web.session.Session(app, web.session.DiskStore('/site/gbif/sessions'))
 
 render = template.render('templates', base='layout', globals= {
     '_': _,
-    'uid': session.get('uid'),
     'json': json,
     'helper': helpers(),
     'web': web,
     'config': config
 })
 
-web.config.session_parameters['timeout'] = 2592000 # 30 * 24 * 60 * 60
-web.config.session_parameters['cookie_domain'] = "data.gbif.no"
-web.config.session_parameters['cookie_path'] = "/"
 web.config.debug = True
 
 if __name__ == "__main__":

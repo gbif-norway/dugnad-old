@@ -1,4 +1,4 @@
-title: Vascular plants from Telemark - transcription
+title: "Transkribering: Karplanter fra Telemark"
 help:
   introduction: Transkriberingen skal i størst mulig grad gjøres verbatimt. Det betyr at dere følger slavisk innholdet på etiketten, men de må likevel plasseres i de aktuelle feltene. Vi har likevel av historiske og datatekniske årsaker noen tilpasninger som blir beskrevet nedenfor.
 source:
@@ -25,7 +25,7 @@ forms:
     - { name: "multipleIdentifications", type: checkbox, help: "help-identifications" }
     - { name: "annotationRemarks", type: textfield }
   filter:
-    - { name: 'genus', type: select, sql: 'SELECT DISTINCT "genus" from telemark ORDER BY "genus"', default: [ '', '~ Genus ~' ] }
-    - { name: '_labelType', type: select, sql: 'SELECT DISTINCT "_labelType" from telemark ORDER BY "_labelType"', default: [ '', '~ Label Type ~' ] }
-    - { name: 'recordedBy', type: select, sql: 'SELECT DISTINCT "recordedBy" from telemark ORDER BY "recordedBy"', default: [ '', '~ Collector ~' ] }
+    - { name: 'genus', type: select, sql: 'SELECT DISTINCT "genus" from telemark ORDER BY "genus"', default: [ '', '~ Slekt ~' ] }
+    - { name: '_labelType', type: select, sql: 'SELECT DISTINCT "_labelType" from telemark ORDER BY "_labelType"', default: [ '', '~ Etikett ~' ] }
+    - { name: 'recordedBy', type: select, sql: 'SELECT DISTINCT "recordedBy" from telemark ORDER BY "recordedBy"', default: [ '', '~ Innsamler ~' ] }
 submit: transcribe

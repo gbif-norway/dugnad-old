@@ -12,7 +12,7 @@ $def with (key, record, forms, zoom, config, showfilters, nick)
     <h1><a href='/dugnad'>dugnad</a></h1>
   </section>
   <section id=account>
-  $if uid:
+  $if helper.uid():
     $if config.get('filter') and showfilters:
       <form method=get>
         <p>
@@ -26,7 +26,7 @@ $def with (key, record, forms, zoom, config, showfilters, nick)
   </section>
   <section id=actions>
     <p>
-      $if uid:
+      $if helper.uid():
         <a href='/dugnad/unfinished'>$_('link-unfinished')</a>
         ·
       <a id='open-chat' target='chat' href='#'>$_('chat')</a>
@@ -67,9 +67,9 @@ $def with (key, record, forms, zoom, config, showfilters, nick)
     <section id=tr>
       <form id='transcription' method='post' action="/dugnad/$key">
         $if record.get('occurrenceID'):
-          <h2>$record['occurrenceID']</h2>
+          <h2 style='display:none;'>$record['occurrenceID']</h2>
         $else:
-          <h2>$key</h2>
+          <h2 style='display: none;'>$key</h2>
         $for name, form in forms.iteritems():
     			<fieldset>
     				<legend>$_(name)</legend>
@@ -79,7 +79,7 @@ $def with (key, record, forms, zoom, config, showfilters, nick)
           <input name=save type=submit value="$_('submit')">
           $if showfilters:
             <input name=skip type=submit value="$_('skip')">
-          $if uid:
+          $if helper.uid():
             <input name=later type=submit value="$_('finish-later')">
         <div id=help>
           <h3>$_('help')</h3>
