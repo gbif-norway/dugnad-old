@@ -13,7 +13,6 @@ import uuid
 import yaml
 import hashlib
 import logging
-import pdfkit
 import urllib
 import urllib2
 import gettext
@@ -155,7 +154,7 @@ class help:
             project = yaml.load(open('projects/' + key + '.yaml'))
         forms = OrderedDict((form, project['forms'][form]) for form in project['annotate']['order'])
         if 'pdf' in web.input():
-          pdfkit.from_string(render.help(project, forms), 'static/help.pdf')
+          # pdfkit.from_string(render.help(project, forms), 'static/help.pdf')
           return web.seeother('/dugnad/static/help.pdf')
         return render.help(project, forms)
 
@@ -335,7 +334,7 @@ web.config.session_parameters['cookie_domain'] = "data.gbif.no"
 web.config.session_parameters['cookie_path'] = "/"
 
 app = web.application(urls, locals())
-session = web.session.Session(app, web.session.DiskStore('/site/gbif/sessions'))
+session = web.session.Session(app, web.session.DiskStore(config.get('sessions', 'sessions')))
 
 render = template.render('templates', base='layout', globals= {
     '_': _,

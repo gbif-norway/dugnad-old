@@ -11,6 +11,9 @@ $def with(config, forms)
 
   <h1>$_('Transkribering: Karplanter fra Telemark')</h1>
 
+  <p>$:_('howto')
+
+  <h2>$_('terms')</h2>
   <p>$_(config.get('help', {}).get('introduction'))
 
   $for form, terms in forms.iteritems():

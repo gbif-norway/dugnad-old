@@ -59,7 +59,8 @@ a:hover { color: #063940; }
 .info table { width: 100%; }
 .info table th, .info table td { text-align: left; }
 
-.info h2, .info h3 { font-size: large; }
+.info h2 { font-size: x-large; }
+.info h3 { font-size: large; }
 
 .info aside { float: right; margin: 0 1em; }
 .info aside a { font-weight: bold; }
@@ -76,6 +77,9 @@ a:hover { color: #063940; }
 #helptext { color: #700; }
 
 #help h3 { font-size: medium; }
+
+.info ul { margin: 0; padding: 0; list-style: inside square; }
+.info li { margin-bottom: 1em; margin-left: 0; }
 
 .help:hover { cursor: pointer; cursor: -moz-pointer; cursor: -webkit-pointer; }
 
@@ -96,5 +100,7 @@ a:hover { color: #063940; }
   .info { margin: 0; padding: 0; width: 100%; }
   .info h1 { font-size: x-large; font-weight: bold; }
   .info dd { font-size: 14px; }
+  .info aside { display: none; }
+  .info h2 { page-break-before: always; }
 }
 
