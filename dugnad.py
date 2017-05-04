@@ -88,7 +88,7 @@ def buildform(key, config):
                 options = [''] + [d['label'] for d in sorted(source)]
                 inputs.append(form.Dropdown(k, options, description = _(k)))
         elif i['type'] == 'textfield':
-          inputs.append(form.Textarea(k, description = _(k)))
+          inputs.append(form.Textarea(k, description = _(k), post = helplink(i.get('help'))))
         elif i['type'] == 'date':
           inputs.append(form.Textbox("year", description = _('year'), post = helplink('help-year')))
           inputs.append(form.Textbox("month", description = _('month'), post = helplink('help-month')))
@@ -128,7 +128,7 @@ def savetranscription(uid, pkey, data):
 
     finished = True
     if data.pop('skip', False):
-        raise Exception("Skipped")
+        raise web.seeother("/dugnad/project/telemark")
     if data.pop('later', False):
         finished = False
     now = str(datetime.date.today())
@@ -198,7 +198,7 @@ class listunfinished:
         return render.list(recs)
 
 class project:
-    def GET(self, key):
+    def GET(self, key, oid=None):
       uid = session.get('id')
       nick = session.get("name", "Anonymous")
       try:
@@ -207,16 +207,21 @@ class project:
         pdb = web.database(dbn='sqlite', db=project['source']['database'])
         filters = {}
         data = web.input()
-        if project['forms'].get('filter'):
-          for f in project['forms']['filter']:
-            if data.get(f['name']) and data[f['name']] != "None":
-              filters[f['name']] = data[f['name']]
-        if len(filters) < 1:
-            where = "completed < 2"
+        if oid:
+          q = { 'key': oid }
+          recs = pdb.select(project['source']['table'], q, where="occurrenceID = $key",
+              limit=1)
         else:
-            where = web.db.sqlwhere(filters)
-        recs = pdb.select(project['source']['table'], where=where,
-            limit=1, order="RANDOM()")
+          if project['forms'].get('filter'):
+            for f in project['forms']['filter']:
+              if data.get(f['name']) and data[f['name']] != "None":
+                filters[f['name']] = data[f['name']]
+          if len(filters) < 1:
+              where = "completed < 2"
+          else:
+              where = web.db.sqlwhere(filters)
+          recs = pdb.select(project['source']['table'], where=where,
+              limit=1, order="RANDOM()")
         zoom = False
         try:
           record = recs[0]
@@ -317,6 +322,7 @@ urls = (
     '/dugnad/unfinished', 'listunfinished',
     '/dugnad/unfinished/(.+)', 'unfinished',
     '/dugnad/project/(.+)/help', 'help',
+    '/dugnad/project/(.+)/(.+)', 'project',
     '/dugnad/project/(.+)', 'project',
     '/dugnad/annotation/(.+)', 'showannotation',
     '/dugnad/annotations/(.+)', 'showannotations',

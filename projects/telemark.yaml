@@ -1,6 +1,6 @@
 title: "Transkribering: Karplanter fra Telemark"
 help:
-  introduction: Transkriberingen skal i størst mulig grad gjøres verbatimt. Det betyr at dere følger slavisk innholdet på etiketten, men de må likevel plasseres i de aktuelle feltene. Vi har likevel av historiske og datatekniske årsaker noen tilpasninger som blir beskrevet nedenfor.
+  introduction: Transkriberingen skal i størst mulig grad gjøres verbatimt. Det betyr at dere følger slavisk innholdet på etiketten, men de må likevel plasseres i de aktuelle feltene.
 source:
   database: projects.db
   table: telemark
@@ -13,12 +13,14 @@ forms:
     - { name: 'occurrenceID', type: hidden }
     - { name: 'recordedBy', type: text, help: "help-recordedBy" }
     - { name: "eventDate", type: date, help: "help-eventDate" }
+    - { name: "recordNumber", type: text }
   geography:
     - { name: "country", type: text }
     - { name: "stateProvince", type: text }
     - { name: "county", type: text, help: "help-county" }
-    - { name: "locality", type: text, help: "help-locality" }
+    - { name: "locality", type: textfield, help: "help-locality" }
     - { name: "verbatimCoordinates", type: text, help: "help-coordinates" }
+    - { name: "verbatimElevation", type: text }
   taxonomy:
     - { name: "scientificName", type: text, help: 'help-scientificName' }
   comment:

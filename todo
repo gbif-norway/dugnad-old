@@ -1,5 +1,7 @@
-* stor hjelpeside + pdf
 * sette eget brukernavn / avkrysninger
+* redirect til "uferdige transkripsjoner" når man logger inn og har noen
+* skjul "uferdige transkripsjoner" hvis det ikke finnes noen
+* hopp over -> liten liste velg hvorfor
 
 * fullføre norsk oversettelse
 

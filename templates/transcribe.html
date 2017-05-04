@@ -31,7 +31,7 @@ $def with (key, record, forms, zoom, config, showfilters, nick)
         ·
       <a id='open-chat' target='chat' href='#'>$_('chat')</a>
       ·
-      <a id='open-help' target='help' href='/dugnad/$key/help'>$_('help')</a>
+      <a id='open-help' target='help' href='/dugnad/project/telemark/help'>$_('help')</a>
   </section>
 </header>
 
@@ -92,6 +92,9 @@ $def with (key, record, forms, zoom, config, showfilters, nick)
 </main>
 
 <aside id=chat-overlay class=overlay>
-  <iframe src='https://data.gbif.no/chat/chat.cgi/dugnad?name=$nick'>
+  $if record.get('occurrenceID') and key:
+    <iframe src='https://data.gbif.no/chat/chat.cgi/dugnad?name=$nick&url=https://data.gbif.no/dugnad/$key/$record.get('occurrenceID')'>
+  $else:
+    <iframe src='https://data.gbif.no/chat/chat.cgi/dugnad?name=$nick'>
 </aside>
 

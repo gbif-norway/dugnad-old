@@ -53,8 +53,8 @@ a:hover { color: #063940; }
 
 .modes { position: absolute; bottom: 0; left: 0; right: 0; margin: 0 auto; background: rgba(255,255,255,0.8); z-index: 10; padding: 1em; font-weight: bold; width: 12em; text-align: center; }
 
-.info { background: #fff; margin: 2em auto; padding: 1em; width: 70%; }
-.info h1 { color: #333; font-weight: normal; }
+.info { background: #fff; margin: 0em auto; padding: 1em; width: 70%; }
+.info h1 { color: #333; font-weight: normal; margin-top: 0; }
 .info h1 b { color: #000; }
 .info table { width: 100%; }
 .info table th, .info table td { text-align: left; }
@@ -72,6 +72,7 @@ a:hover { color: #063940; }
 .project a { color: #eee; }
 
 #help { clear: both; padding-top: 0.5em; }
+
 .help img { width: 16px; vertical-align: middle; margin-left: 4px; }
 
 #helptext { color: #700; }
@@ -95,6 +96,8 @@ a:hover { color: #063940; }
 */
 
 
+footer { display: block; }
+
 @media print {
   body { background: #fff; color: #000; height: auto; }
   .info { margin: 0; padding: 0; width: 100%; }
@@ -102,5 +105,7 @@ a:hover { color: #063940; }
   .info dd { font-size: 14px; }
   .info aside { display: none; }
   .info h2 { page-break-before: always; }
+
+  footer { position: fixed; bottom: 0; width: 100%; text-align: center; color: #444; }
 }
 
