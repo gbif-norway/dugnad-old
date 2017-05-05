@@ -1,0 +1,65 @@
+$def with(key, project, charts)
+
+<link rel='stylesheet' href='$config['base']/chartist.css'>
+<script src='$config['base']/chartist.js'></script>
+
+<div class=info>
+  <aside class=login>
+    <p>
+      $if not helper.uid():
+        <a target=user href='/user/'>$_('link-login')</a> ·
+      <a href='/dugnad/project/$key/help'>Hjelp</a>
+  </aside>
+
+  <h1><b><a href='/dugnad/'>dugnad</a></b> annotering &amp; transkribering</h1>
+  <h2>$_(project['title'])</h2>
+  <p>$:_(project['description'])
+
+  <p id=start-transcribing>
+    <a href='/dugnad/project/$key'>$_('start-project')</a>
+
+  <section class=stats>
+  $for chart in charts:
+    <div>
+      <div id='chart-$chart['id']' class='ct-chart ct-perfect-fifth'></div>
+      <p>$chart['description']
+    </div>
+  </section>
+
+  <hr>
+  <p>
+    <a href='mailto:gbif-drift@nhm.uio.no'><img width='151' src='http://www.gbif.no/vrtx/decorating/resources/images/logo.png'></a>
+</div>
+
+<script>
+$for chart in charts:
+  var data = {
+    labels: $:json.dumps(chart.get('labels')),
+    series: $:json.dumps(chart.get('series'))
+  }
+  $if chart['type'] == "pie":
+    new Chartist.Pie('#chart-$chart['id']', data);
+  $elif chart['type'] == "bar":
+    new Chartist.Bar('#chart-$chart['id']', data);
+  $elif chart['type'] == "area":
+    new Chartist.Line('#chart-$chart['id']', data, {
+      fullWidth: true, chartPadding: { right: 40 },
+      low: 0, showArea: true,
+      axisY: { showGrid: false, onlyInteger: true }
+    });
+  $elif chart['type'] == "line":
+    new Chartist.Line('#chart-$chart['id']', data);
+
+var data = {
+  'labels': ['Anonym #1', 'Anonym #2', 'Anonym #3', "Anonym #4", "Anonym #5"],
+  'series': [
+    [ 100, 60, 30, 10, 5]
+  ]
+};
+// onlyInteger: true
+new Chartist.Bar("#test3", data, {
+  axisX: { showGrid: false },
+  axisY: { showGrid: false, onlyInteger: true }
+});
+</script>
+

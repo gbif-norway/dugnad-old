@@ -1,4 +1,5 @@
 title: "Transkribering: Karplanter fra Telemark"
+description: tekst om massedigitaliseringen, forklaring på hva dette prosjektet går ut på
 help:
   introduction: Transkriberingen skal i størst mulig grad gjøres verbatimt. Det betyr at dere følger slavisk innholdet på etiketten, men de må likevel plasseres i de aktuelle feltene.
 source:
@@ -31,3 +32,23 @@ forms:
     - { name: '_labelType', type: select, sql: 'SELECT DISTINCT "_labelType" from telemark ORDER BY "_labelType"', default: [ '', '~ Etikett ~' ] }
     - { name: 'recordedBy', type: select, sql: 'SELECT DISTINCT "recordedBy" from telemark ORDER BY "recordedBy"', default: [ '', '~ Innsamler ~' ] }
 submit: transcribe
+stats:
+  - name: progress
+    description: progress-description
+    type: pie
+    data:
+      - { label: 'remaining', type: sql, sql: 'SELECT count(*) * 2 as result from telemark', database: 'projects.db' }
+      - { label: 'completed', type: sql, sql: 'SELECT count(*) as result from transcriptions where project = "telemark"', database: 'dugnad.db'  }
+
+  - name: growth
+    description: growth-description
+    type: area
+    data:
+      - { type: total, sql: "SELECT date as label, count(*) as count from transcriptions group by date order by date asc", database: 'dugnad.db' }
+  - name: top5
+    description: top5-description
+    type: bar
+    label: getusername
+    data:
+      - { type: count, sql: "SELECT user as label, count(*) as count from transcriptions group by user order by count desc limit 5", database: "dugnad.db" }
+

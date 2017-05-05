@@ -4,7 +4,7 @@ $def with(config, forms)
   <aside>
     <p>
       $if not helper.uid():
-        <a target=user href='/user/'>Register or sign in</a>
+        <a target=user href='/user/'>$_('link-login')</a>
         ·
       <a href='/static/help.pdf'>Last ned som PDF</a>
   </aside>

@@ -54,6 +54,16 @@ class helpers:
     form.validates(web.input())
     return form
 
+def getusername(label):
+    if not label: return _("anonymous")
+    try:
+        where = dict(uid=label)
+        udb = web.database(dbn='sqlite', db="/site/gbif/loans/user.db")
+        udb.select("users", where=where)[0]['nick']
+    except Exception:
+        pass
+    return _("unknown")
+
 def helplink(text):
     if not text: return ""
     return "<a class=help title='%s'><img src='/static/help.png'></a>" % _(text)
@@ -98,6 +108,50 @@ def buildform(key, config):
         else: raise Exception("Unknown type %s" % i['type'])
 
     return form.Form(*inputs)
+
+def chart(raw):
+    chart = {}
+    chart['id'] = raw['name']
+    chart['name'] = _(raw['name'])
+    chart['description'] = _(raw['description'])
+    chart['type'] = raw['type']
+    chart['labels'] = []
+    chart['series'] = []
+    for item in raw.get('data', []):
+        if item['type'] == 'sql':
+            chart['labels'].append(item.get('label'))
+            db = web.database(dbn='sqlite', db=item['database'])
+            key = item.get('key', 'result')
+            chart['series'].append(db.query(item['sql'])[0][key])
+        if item['type'] == 'count':
+            db = web.database(dbn='sqlite', db=item['database'])
+            results = db.query(item['sql'])
+            chart['series'].append([])
+            for result in results:
+                chart['labels'].append(result.get('label'))
+                chart['series'][0].append(result.get('count'))
+        if item['type'] == 'total':
+            db = web.database(dbn='sqlite', db=item['database'])
+            results = db.query(item['sql'])
+            totals = []
+            total = 0
+            for result in results:
+                total += result.get('count')
+                totals.append({
+                    'label': result.get('label'),
+                    'count': result.get('count'),
+                    'total': total
+                })
+            chart['series'].append([])
+            for item in totals:
+                chart['labels'].append(item.get('label'))
+                chart['series'][0].append(item.get('total'))
+    if raw.get('label'):
+        chart['labels'] = [globals()[raw['label']](label) for label in chart['labels']]
+    if raw.get('name') == "progress":
+        chart['series'][0] -= chart['series'][1]
+    print(chart['series'])
+    return chart
 
 def zoomify(raw):
     try:
@@ -170,7 +224,7 @@ class help:
 class unfinished:
     def GET(self, id):
         uid = session.get('id')
-        nick = session.get('name', "Anonymous")
+        nick = session.get('name', "Anonym")
         data = web.input()
         try:
             where = dict(id = id)
@@ -206,10 +260,20 @@ class listunfinished:
         recs = db.select('transcriptions', order="updated DESC", where=web.db.sqlwhere(reqs))
         return render.list(recs)
 
+class projectinfo:
+    def GET(self, key):
+        uid = session.get('id')
+        nick = session.get('name', "Anonym")
+        project = yaml.load(open('projects/' + key + '.yaml'))
+        charts = []
+        for item in project.get('stats', []):
+            charts.append(chart(item))
+        return render.projectinfo(key, project, charts)
+
 class project:
     def GET(self, key, oid=None):
       uid = session.get('id')
-      nick = session.get("name", "Anonymous")
+      nick = session.get("name", "Anonym")
       try:
         project = yaml.load(open('projects/' + key + '.yaml'))
         url = "%s%s.json" % (RESOLVER, key)
@@ -286,7 +350,7 @@ class showannotations:
 class annotate:
     def GET(self, key):
         uid = session.get('id')
-        nick = session.get("name", "Anonymous")
+        nick = session.get("name", "Anonym")
         key = key.replace("urn:catalog:", "")
         url = "%s%s.json" % (RESOLVER, key)
         try:
@@ -330,6 +394,7 @@ urls = (
     '/dugnad/help', 'help',
     '/dugnad/unfinished', 'listunfinished',
     '/dugnad/unfinished/(.+)', 'unfinished',
+    '/dugnad/project/(.+)/info', 'projectinfo',
     '/dugnad/project/(.+)/help', 'help',
     '/dugnad/project/(.+)/(.+)', 'project',
     '/dugnad/project/(.+)', 'project',
