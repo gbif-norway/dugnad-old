@@ -7,8 +7,16 @@ $def with(key, project, charts)
   <aside class=login>
     <p>
       $if not helper.uid():
-        <a target=user href='/user/'>$_('link-login')</a> ·
-      <a href='/dugnad/project/$key/help'>Hjelp</a>
+        <a target=user href='/user/'>$_('link-login')</a>
+      $else:
+        <a target=user href='/user/'>
+        $if helper.name():
+          $_('signed-in-as')
+          $helper.name()
+        $else:
+          $_('signed-in')
+        </a>
+      · <a href='/dugnad/project/$key/help'>Hjelp</a>
   </aside>
 
   <h1><b><a href='/dugnad/'>dugnad</a></b> annotering &amp; transkribering</h1>

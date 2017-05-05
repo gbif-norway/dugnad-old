@@ -46,6 +46,9 @@ class HelpBox(object):
         return text
 
 class helpers:
+  def name(self):
+    return session.get('name')
+
   def uid(self):
     return session.get('id')
 

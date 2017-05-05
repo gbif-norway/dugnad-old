@@ -6,13 +6,12 @@ label, input, select, textarea { font: inherit; }
 header, nav, main, section, aside { display: block; }
 
 header, main { position: fixed; width: 100%; overflow: auto; font-size: smaller; }
-header { height: 3.5em; z-index: 10; }
-main { height: calc(100% - 3.5em); top: 3.5em; }
+header { height: 4em; z-index: 10; }
+main { height: calc(100% - 4em); top: 4em; }
 
-header { background: #fff; flex: 0 0 auto; border-bottom: 2px solid #000; display: flex; justify-content: space-between; align-items: flex-end; z-index: 3; }
+header { background: #fff; flex: 0 0 auto; border-bottom: 2px solid #000; display: flex; justify-content: space-between; align-items: center; z-index: 3; }
 #title, #account, #actions{ margin: 0 1em; }
-header h1 { font-size: large; }
-header * { vertical-align: middle; }
+header h1 { font-size: medium; }
 
 main { display: flex; justify-content: flex-end; align-items: stretch; }
 

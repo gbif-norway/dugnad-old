@@ -5,6 +5,14 @@ $def with(changes)
     <p>
       $if not helper.uid():
         <a target=user href='/user/'>$_('link-login')</a>
+      $else:
+        <a target=user href='/user/'>
+        $if helper.name():
+          $_('signed-in-as')
+          $helper.name()
+        $else:
+          $_('signed-in')
+        </a>
   </aside>
 
   <h1><b>dugnad</b> annotering &amp; transkribering</h1>

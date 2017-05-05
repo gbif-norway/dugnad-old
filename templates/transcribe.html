@@ -27,6 +27,8 @@ $def with (key, record, forms, zoom, config, showfilters, nick)
   <section id=actions>
     <p>
       $if helper.uid():
+        <a href='/user/'>$_('greeting') $helper.name()</a>
+        ·
         <a href='/dugnad/unfinished'>$_('link-unfinished')</a>
         ·
       <a id='open-chat' target='chat' href='#'>$_('chat')</a>
