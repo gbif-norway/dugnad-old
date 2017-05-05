@@ -57,12 +57,12 @@ class helpers:
 def getusername(label):
     if not label: return _("anonymous")
     try:
-        where = dict(uid=label)
-        udb = web.database(dbn='sqlite', db="/site/gbif/loans/user.db")
-        udb.select("users", where=where)[0]['nick']
+      where = dict(uid=label)
+      udb = web.database(dbn='sqlite', db="/site/gbif/loans/users.db")
+      rec = udb.select("users", where=where)[0]
+      return rec.get('nick') or rec.get('name', _('unknown'))
     except Exception:
-        pass
-    return _("unknown")
+      return _("unknown")
 
 def helplink(text):
     if not text: return ""
@@ -119,7 +119,7 @@ def chart(raw):
     chart['series'] = []
     for item in raw.get('data', []):
         if item['type'] == 'sql':
-            chart['labels'].append(item.get('label'))
+            chart['labels'].append(_(item.get('label')))
             db = web.database(dbn='sqlite', db=item['database'])
             key = item.get('key', 'result')
             chart['series'].append(db.query(item['sql'])[0][key])
