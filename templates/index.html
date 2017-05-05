@@ -1,11 +1,26 @@
+$def with(changes)
+
 <div class=info>
-  <aside>
+  <aside class=login>
     <p>
       $if not helper.uid():
         <a target=user href='/user/'>$_('link-login')</a>
   </aside>
 
-  <h1><b>dugnad</b> annotering & transkribering</h1>
+  <h1><b>dugnad</b> annotering &amp; transkribering</h1>
+
+  <aside class=changelog>
+    <h2>$_('recent-changes')</h2>
+    <dl>
+    $ date = None
+    $for change in changes:
+      $if not date == change['date']:
+        <dt><time>$change['date']</time></dt>
+        $ date = change['date']
+      <dd>$change['text']</dd>
+    </dl>
+  </aside>
+
   <p>$:_('introduction')
   <p>$:_('introduction-user')
 

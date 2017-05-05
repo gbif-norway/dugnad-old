@@ -5,6 +5,7 @@
 # - frie termer
 
 import os
+import re
 import sys
 import web
 import time
@@ -20,6 +21,7 @@ import datetime
 
 import cStringIO as StringIO
 
+from itertools import islice
 from collections import OrderedDict
 from web import form, template
 from tokyo import cabinet
@@ -145,7 +147,14 @@ def savetranscription(uid, pkey, data):
 
 class index:
     def GET(self):
-        return render.index()
+        changelog = []
+        with open('changelog') as log:
+            changes = list(islice(log, 50))
+        for change in changes:
+            m = re.match(r"(?P<date>.+):\s*(?P<text>.*)\s*\((?P<project>.*)\)",
+                    change)
+            if m: changelog.append(m.groupdict())
+        return render.index(changelog)
 
 class help:
     def GET(self, key=None):
