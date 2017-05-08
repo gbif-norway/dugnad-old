@@ -46,7 +46,9 @@ a:hover { color: #063940; }
 #chat-overlay { display: none; }
 
 #map-overlay { height: 100%; width: 100%; top: 0; z-index: 5; visibility: hidden; position: absolute; }
-#map { height: 100%; width: 100%; position: absolute; bottom: 0; }
+#map-overlay #map { height: 100%; width: 100%; position: absolute; bottom: 0; }
+
+#simple-map { height: 75vh; width: 100%; border: 1px solid #000; border-radius: 1em; }
 
 #error { padding: 2em; background: #fff; margin: 0 auto; height: 5em; margin-top: 8em; }
 
@@ -109,6 +111,10 @@ aside.changelog time { font-weight: bold; color: #222; }
 
 
 footer { display: block; }
+
+.subprojects { display: flex; flex-wrap: wrap; justify-content: space-between; }
+.subproject { display: block; flex: 0 0 auto; border: 1px solid #aaa; text-align: center; box-sizing: border-box; width: 18em; margin-bottom: 1em; padding: 1em; background: #efe; }
+.subprojects a:hover .subproject { background: #dfd; }
 
 @media print {
   body { background: #fff; color: #000; height: auto; }

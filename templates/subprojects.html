@@ -1,0 +1,31 @@
+$def with(key, project, subprojects)
+
+<div class=info>
+  <aside class=login>
+    <p>
+      $if not helper.uid():
+        <a target=user href='/user/'>$_('link-login')</a>
+      $else:
+        <a target=user href='/user/'>
+        $if helper.name():
+          $_('signed-in-as')
+          $helper.name()
+        $else:
+          $_('signed-in')
+        </a>
+  </aside>
+
+  <h1><b><a href='/dugnad/'>dugnad</a></b> annotering &amp; transkribering</h1>
+  <h2><a href='/dugnad/project/$key'>$project['title']</a></h2>
+  <p>$_('subprojects-help')
+
+  <section class=subprojects>
+  $for subproject in subprojects:
+    <a href='/dugnad/project/$key/sub-$subproject['eventID']'>
+    <article class=subproject>
+      <h2>$subproject['eventDate']</h2>
+    $subproject['country'] / $subproject['recordedBy']
+    </article>
+    </a>
+  </section>
+</div>

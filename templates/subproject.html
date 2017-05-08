@@ -1,0 +1,66 @@
+$def with(key, subkey, project, records)
+
+<div class=info>
+  <aside class=login>
+    <p>
+      $if not helper.uid():
+        <a target=user href='/user/'>$_('link-login')</a>
+      $else:
+        <a target=user href='/user/'>
+        $if helper.name():
+          $_('signed-in-as')
+          $helper.name()
+        $else:
+          $_('signed-in')
+        </a>
+  </aside>
+
+  <h1><b><a href='/dugnad/'>dugnad</a></b> annotering &amp; transkribering</h1>
+  <h2><a href='/dugnad/project/$key'>$project['title']</a></h2>
+
+  <script src='/static/leaflet.js'></script>
+  <script src='/static/leaflet.draw.js'></script>
+  <script src='/static/wicket.js'></script>
+  <script src='/static/wicket-leaflet.js'></script>
+  <script src='/static/dugnad.js'></script>
+
+  <section class=subproject-occurrences>
+    <div id=simple-map></div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function(e) {
+      var url = "https://cartocdn_{s}.global.ssl.fastly.net/base-eco/{z}/{x}/{y}@2x.png";
+      var att = '<a href="https://www.mapzen.com/rights">Attribution.</a>. Data &copy;<a href="https://openstreetmap.org/copyright">OSM</a> contributors.';
+      var osm = new L.TileLayer(url, { minZoom: 1, maxZoom: 16, attribution: att });
+      T.map = L.map('simple-map').setView([0, 0], 8);
+      T.map.addLayer(osm);
+      var bounds;
+      var markers = [];
+      $for record in records:
+        var lat = $record['decimalLatitude'];
+        var lon = $record['decimalLongitude'];
+        var rad = "$record['coordinateUncertaintyInMeters']";
+        $if record['footprintWKT']:
+          var wkt = new Wkt.Wkt();
+          wkt.read("$record['footprintWKT']");
+          var marker = wkt.toObject();
+        $else:
+          var marker = L.circle([lat, lon], rad);
+        if(!bounds) {
+          bounds = L.latLngBounds(marker.getBounds());
+        } else {
+          bounds.extend(marker.getBounds());
+        }
+        marker.bindPopup("<p><b>$record['scientificName']</b><table><tr><th>Country</th><td>$record['country']</td></tr><tr><th>State/province</th><td>$record['stateProvince']</td></tr><tr><th>Locality</th><td>$record['locality']</td><tr><th>Verbatim coordinates</th><td>$record['verbatimCoordinates']</td></tr><tr><th>Coordinates</th><td>$record['latitude'],$record['longitude']</td></tr><tr><th>Coordinate uncertainty (m)</th><td>$record['coordinateUncertaintyInMeters']</td></tr></table><p><a href='/dugnad/project/$key/sub-$subkey/$record['occurrenceID']'>Improve record</a>");
+        marker.addTo(T.map);
+        T.map.fitWorld();
+        T.map.fitBounds(bounds, { maxZoom: 10 });
+    });
+    </script>
+  </section>
+
+  <hr>
+  <p>
+    <a href='mailto:gbif-drift@nhm.uio.no'><img width='151' src='https://www.gbif.no/vrtx/decorating/resources/images/logo.png'></a>
+
+</div>
+

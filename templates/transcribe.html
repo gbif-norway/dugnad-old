@@ -94,7 +94,7 @@ $def with (key, record, forms, zoom, config, showfilters, nick)
 </main>
 
 <aside id=chat-overlay class=overlay>
-  $if record.get('occurrenceID') and key:
+  $if record and record.get('occurrenceID') and key:
     <iframe src='https://data.gbif.no/chat/chat.cgi/dugnad?name=$nick&url=https://data.gbif.no/dugnad/$key/$record.get('occurrenceID')'>
   $else:
     <iframe src='https://data.gbif.no/chat/chat.cgi/dugnad?name=$nick'>

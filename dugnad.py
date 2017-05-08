@@ -160,6 +160,8 @@ def zoomify(raw):
     try:
         source = urllib.unquote(raw.strip())
         imagekey = hashlib.sha256(source).hexdigest()
+        source = "http://www.unimus.no/whatever"
+        imagekey = "fe5cf4d2690ee95a506caae696e00e5535ba584a837a336da3c49233b0ffff9c"
         if deepzoom and source.find("http://www.unimus.no/") == 0:
           name = "static/tmp/" + imagekey
           if not os.path.exists(name + "_files"):
@@ -273,20 +275,82 @@ class projectinfo:
             charts.append(chart(item))
         return render.projectinfo(key, project, charts)
 
+class suboccurrence:
+    def GET(self, key, subkey, oid):
+      uid = session.get('id')
+      nick = session.get("name", "Anonym")
+      data = web.input()
+      try:
+        project = yaml.load(open('projects/' + key + '.yaml'))
+        pdb = web.database(dbn='sqlite', db=project['source']['database'])
+        filters = {}
+        if oid:
+          q = { 'key': oid }
+          recs = pdb.select(project['source']['table'], q, where="occurrenceID = $key", limit=1)
+        else:
+          if project['forms'].get('filter'):
+            for f in project['forms']['filter']:
+              if data.get(f['name']) and data[f['name']] != "None":
+                filters[f['name']] = data[f['name']]
+          if len(filters) < 1:
+              where = "completed < 2"
+          else:
+              where = web.db.sqlwhere(filters)
+          recs = pdb.select(project['source']['table'], where=where,
+              limit=1, order="RANDOM()")
+        zoom = False
+        try:
+          record = recs[0]
+          if record.get('genus'):
+            record['scientificName'] = "%s %s" % (
+                record.get('genus'), record.get('species')
+            )
+          if record.get("associatedMedia"):
+            zoom = zoomify(record['associatedMedia'])
+        except IndexError as e:
+          record = None
+        forms = OrderedDict((form, buildform(form, project)) for form in project['annotate']['order'])
+        for _, form in forms.iteritems(): form.validates(record)
+        return render.transcribe("project/" + key, record, forms, zoom, project, True, nick)
+      except IOError as e:
+        raise web.seeother('/dugnad/')
+      except ValueError as e:
+        raise web.seeother('/dugnad/')
+
+class subproject:
+    def GET(self, key, subkey):
+        uid = session.get('id')
+        nick = session.get('name', "Anonym")
+        project = yaml.load(open('projects/' + key + '.yaml'))
+        pdb = web.database(dbn='sqlite', db=project['source']['database'])
+        raws = pdb.select(project['source']['table'], { 'eventID': subkey },
+            where='eventID = $eventID')
+        records = []
+        for record in raws:
+            record['latitude'] = "%.5f" % float(record['decimalLatitude'])
+            record['longitude'] = "%.5f" % float(record['decimalLongitude'])
+            records.append(record)
+        return render.subproject(key, subkey, project, records)
+
 class project:
+    def subprojects(self, key, uid, nick, data, project):
+      pdb = web.database(dbn='sqlite', db=project['source']['database'])
+      subprojects = pdb.query("SELECT eventid, eventDate, recordedBy, country, count(*) as count from georef group by eventid order by eventdate desc")
+      return render.subprojects(key, project, subprojects)
+
     def GET(self, key, oid=None):
       uid = session.get('id')
       nick = session.get("name", "Anonym")
+      data = web.input()
       try:
         project = yaml.load(open('projects/' + key + '.yaml'))
-        url = "%s%s.json" % (RESOLVER, key)
+        if project.get('subprojects'):
+            return self.subprojects(key, uid, nick, data, project)
         pdb = web.database(dbn='sqlite', db=project['source']['database'])
         filters = {}
-        data = web.input()
         if oid:
           q = { 'key': oid }
-          recs = pdb.select(project['source']['table'], q, where="occurrenceID = $key",
-              limit=1)
+          recs = pdb.select(project['source']['table'], q, where="occurrenceID = $key", limit=1)
         else:
           if project['forms'].get('filter'):
             for f in project['forms']['filter']:
@@ -397,6 +461,8 @@ urls = (
     '/dugnad/help', 'help',
     '/dugnad/unfinished', 'listunfinished',
     '/dugnad/unfinished/(.+)', 'unfinished',
+    '/dugnad/project/(.+)/sub-(.+)/(.+)', 'suboccurrence',
+    '/dugnad/project/(.+)/sub-(.+)', 'subproject',
     '/dugnad/project/(.+)/info', 'projectinfo',
     '/dugnad/project/(.+)/help', 'help',
     '/dugnad/project/(.+)/(.+)', 'project',
