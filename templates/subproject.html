@@ -15,8 +15,8 @@ $def with(key, subkey, project, records)
         </a>
   </aside>
 
-  <h1><b><a href='/dugnad/'>dugnad</a></b> annotering &amp; transkribering</h1>
-  <h2><a href='/dugnad/project/$key'>$project['title']</a></h2>
+  <h1><b><a href='$prefix'>dugnad</a></b> annotering &amp; transkribering</h1>
+  <h2><a href='$prefix/project/$key'>$project['title']</a></h2>
 
   <script src='/static/leaflet.js'></script>
   <script src='/static/leaflet.draw.js'></script>
@@ -50,7 +50,7 @@ $def with(key, subkey, project, records)
         } else {
           bounds.extend(marker.getBounds());
         }
-        marker.bindPopup("<p><b>$record['scientificName']</b><table><tr><th>Country</th><td>$record['country']</td></tr><tr><th>State/province</th><td>$record['stateProvince']</td></tr><tr><th>Locality</th><td>$record['locality']</td><tr><th>Verbatim coordinates</th><td>$record['verbatimCoordinates']</td></tr><tr><th>Coordinates</th><td>$record['latitude'],$record['longitude']</td></tr><tr><th>Coordinate uncertainty (m)</th><td>$record['coordinateUncertaintyInMeters']</td></tr></table><p><a href='/dugnad/project/$key/sub-$subkey/$record['occurrenceID']'>Improve record</a>");
+        marker.bindPopup("<p><b>$record['scientificName']</b><table><tr><th>Country</th><td>$record['country']</td></tr><tr><th>State/province</th><td>$record['stateProvince']</td></tr><tr><th>Locality</th><td>$record['locality']</td><tr><th>Verbatim coordinates</th><td>$record['verbatimCoordinates']</td></tr><tr><th>Coordinates</th><td>$record['latitude'],$record['longitude']</td></tr><tr><th>Coordinate uncertainty (m)</th><td>$record['coordinateUncertaintyInMeters']</td></tr></table><p><a href='$prefix/project/$key/sub-$subkey/$record['occurrenceID']'>Improve record</a>");
         marker.addTo(T.map);
         T.map.fitWorld();
         T.map.fitBounds(bounds, { maxZoom: 10 });

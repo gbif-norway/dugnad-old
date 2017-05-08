@@ -15,13 +15,13 @@ $def with(key, project, subprojects)
         </a>
   </aside>
 
-  <h1><b><a href='/dugnad/'>dugnad</a></b> annotering &amp; transkribering</h1>
-  <h2><a href='/dugnad/project/$key'>$project['title']</a></h2>
+  <h1><b><a href='$prefix'>dugnad</a></b> annotering &amp; transkribering</h1>
+  <h2><a href='$prefix/project/$key'>$project['title']</a></h2>
   <p>$_('subprojects-help')
 
   <section class=subprojects>
   $for subproject in subprojects:
-    <a href='/dugnad/project/$key/sub-$subproject['eventID']'>
+    <a href='$prefix/project/$key/sub-$subproject['eventID']'>
     <article class=subproject>
       <h2>$subproject['eventDate']</h2>
     $subproject['country'] / $subproject['recordedBy']

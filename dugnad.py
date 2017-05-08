@@ -29,6 +29,9 @@ from tokyo import cabinet
 RESOLVER = "https://data.gbif.no/resolver/"
 
 config = yaml.load(file('config.yaml'))
+prefix = re.search(r"http?s:\/\/[^\/]+(.*)", config['prefix']).groups()[0]
+
+conf = config
 
 deepzoom = True
 try:
@@ -189,7 +192,7 @@ def savetranscription(uid, pkey, data):
 
     finished = True
     if data.pop('skip', False):
-        raise web.seeother("/dugnad/project/telemark")
+        raise web.seeother("%s/project/telemark" % config['prefix'])
     if data.pop('later', False):
         finished = False
     now = str(datetime.date.today())
@@ -223,7 +226,7 @@ class help:
         forms = OrderedDict((form, project['forms'][form]) for form in project['annotate']['order'])
         if 'pdf' in web.input():
           # pdfkit.from_string(render.help(project, forms), 'static/help.pdf')
-          return web.seeother('/dugnad/static/help.pdf')
+          return web.seeother('%s/static/help.pdf' % prefix)
         return render.help(project, forms)
 
 class unfinished:
@@ -249,18 +252,18 @@ class unfinished:
             for _, form in forms.iteritems(): form.validates(anno)
             return render.transcribe("unfinished/" + record['id'], anno, forms, zoom, project, False, nick)
         except ValueError as e:
-            raise web.seeother('/dugnad/unfinished')
+            raise web.seeother('%s/unfinished' % prefix)
 
     def POST(self, id):
         uid = session.get('id')
         updatetranscription(id, web.input())
-        raise web.seeother("/dugnad/unfinished")
+        raise web.seeother("%s/unfinished" % prefix)
 
 
 class listunfinished:
     def GET(self):
         uid = session.get('id')
-        if not uid: raise web.seeother('/dugnad')
+        if not uid: raise web.seeother('%s' % prefix)
         reqs = { 'user': uid, 'finished': False }
         recs = db.select('transcriptions', order="updated DESC", where=web.db.sqlwhere(reqs))
         return render.list(recs)
@@ -313,9 +316,9 @@ class suboccurrence:
         for _, form in forms.iteritems(): form.validates(record)
         return render.transcribe("project/" + key, record, forms, zoom, project, True, nick)
       except IOError as e:
-        raise web.seeother('/dugnad/')
+        raise web.seeother('%s' % prefix)
       except ValueError as e:
-        raise web.seeother('/dugnad/')
+        raise web.seeother('%s' % prefix)
 
 class subproject:
     def GET(self, key, subkey):
@@ -377,14 +380,14 @@ class project:
         for _, form in forms.iteritems(): form.validates(record)
         return render.transcribe("project/" + key, record, forms, zoom, project, True, nick)
       except IOError as e:
-        raise web.seeother('/dugnad/')
+        raise web.seeother('%s' % prefix)
       except ValueError as e:
-        raise web.seeother('/dugnad/')
+        raise web.seeother('%s' % prefix)
 
     def POST(self, pkey):
         uid = session.get('id')
         savetranscription(uid, pkey, web.input())
-        referer = web.ctx.env.get('HTTP_REFERER', '/dugnad/')
+        referer = web.ctx.env.get('HTTP_REFERER', '%s' % prefix)
         raise web.seeother(referer)
 
 class showannotation:
@@ -453,23 +456,24 @@ class annotate:
         web.sendmail('noreply@nhmbif.uio.no',
             'gbif-drift@nhm.uio.no', '[dugnad] ny annotering',
             "https://nhmbif.uio.no/dugnad/annotation/%s / https://nhmbif.uio.no/dugnad/annotations/%s" % (id, key))
-        raise web.seeother('/dugnad/annotation/%s' % id)
+        raise web.seeother('%s/annotation/%s' % id)
 
 urls = (
-    '/dugnad', 'index',
-    '/dugnad/', 'index',
-    '/dugnad/help', 'help',
-    '/dugnad/unfinished', 'listunfinished',
-    '/dugnad/unfinished/(.+)', 'unfinished',
-    '/dugnad/project/(.+)/sub-(.+)/(.+)', 'suboccurrence',
-    '/dugnad/project/(.+)/sub-(.+)', 'subproject',
-    '/dugnad/project/(.+)/info', 'projectinfo',
-    '/dugnad/project/(.+)/help', 'help',
-    '/dugnad/project/(.+)/(.+)', 'project',
-    '/dugnad/project/(.+)', 'project',
-    '/dugnad/annotation/(.+)', 'showannotation',
-    '/dugnad/annotations/(.+)', 'showannotations',
-    '/dugnad/(.+)', 'annotate',
+    '%s' % prefix, 'index',
+    '%s/' % prefix, 'index',
+    '%s/help' % prefix, 'help',
+    '%s/unfinished' % prefix, 'listunfinished',
+    '%s/unfinished/(.+)' % prefix, 'unfinished',
+    '%s/project/(.+)/sub-(.+)/(.+)' % prefix, 'suboccurrence',
+    '%s/project/(.+)/sub-(.+)' % prefix, 'subproject',
+    '%s/project/(.+)/info' % prefix, 'projectinfo',
+    '%s/project/(.+)/help' % prefix, 'help',
+    '%s/project/(.+)/(.+)' % prefix, 'project',
+    '%s/project/(.+)/' % prefix, 'project',
+    '%s/project/(.+)' % prefix, 'project',
+    '%s/annotation/(.+)' % prefix, 'showannotation',
+    '%s/annotations/(.+)' % prefix, 'showannotations',
+    '%s/(.+)' % prefix, 'annotate',
 )
 
 languages = ['en_US', "nb_NO"]
@@ -487,9 +491,11 @@ session = web.session.Session(app, web.session.DiskStore(config.get('sessions', 
 
 render = template.render('templates', base='layout', globals= {
     '_': _,
+    'prefix': prefix,
     'json': json,
     'helper': helpers(),
     'web': web,
+    'conf': conf,
     'config': config
 })
 
