@@ -149,11 +149,12 @@ def chart(raw):
             for item in totals:
                 chart['labels'].append(item.get('label'))
                 chart['series'][0].append(item.get('total'))
+            chart['labels'] = chart['labels'][-5:]
+            chart['series'][0] = chart['series'][0][-5:]
     if raw.get('label'):
         chart['labels'] = [globals()[raw['label']](label) for label in chart['labels']]
     if raw.get('name') == "progress":
         chart['series'][0] -= chart['series'][1]
-    print(chart['series'])
     return chart
 
 def zoomify(raw):
@@ -359,7 +360,7 @@ class annotate:
         try:
           raw = json.loads(urllib2.urlopen(url).read())
           record = {}
-          for k,v in record.iteritems():
+          for k,v in raw.iteritems():
             record[k.replace("dwc:", "")] = v
           date = record.get('eventDate')
           zoom = zoomify(record['associatedMedia'])
