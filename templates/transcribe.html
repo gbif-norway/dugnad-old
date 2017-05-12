@@ -1,15 +1,15 @@
 $def with (key, record, forms, zoom, config, showfilters, nick)
 
-<script src='/static/openseadragon.js'></script>
-<script src='/static/leaflet.js'></script>
-<script src='/static/leaflet.draw.js'></script>
-<script src='/static/wicket.js'></script>
-<script src='/static/wicket-leaflet.js'></script>
-<script src='/static/dugnad.js'></script>
+<script src='$conf['base']/openseadragon.js'></script>
+<script src='$conf['base']/leaflet.js'></script>
+<script src='$conf['base']/leaflet.draw.js'></script>
+<script src='$conf['base']/wicket.js'></script>
+<script src='$conf['base']/wicket-leaflet.js'></script>
+<script src='$conf['base']/dugnad.js'></script>
 
 <header>
   <section id=title>
-    <h1><a href='/dugnad'>dugnad</a></h1>
+    <h1><a href='$prefix'>dugnad</a></h1>
   </section>
   <section id=account>
   $if helper.uid():
@@ -29,11 +29,11 @@ $def with (key, record, forms, zoom, config, showfilters, nick)
       $if helper.uid():
         <a href='/user/'>$_('greeting') $helper.name()</a>
         ·
-        <a href='/dugnad/unfinished'>$_('link-unfinished')</a>
+        <a href='$prefix/unfinished'>$_('link-unfinished')</a>
         ·
       <a id='open-chat' target='chat' href='#'>$_('chat')</a>
       ·
-      <a id='open-help' target='help' href='/dugnad/project/telemark/help'>$_('help')</a>
+      <a id='open-help' target='help' href='$prefix/project/telemark/help'>$_('help')</a>
   </section>
 </header>
 
@@ -67,7 +67,7 @@ $def with (key, record, forms, zoom, config, showfilters, nick)
       <img class='nozoom' src='$record.get('associatedMedia')'>
     </section>
     <section id=tr>
-      <form id='transcription' method='post' action="/dugnad/$key">
+      <form id='transcription' method='post' action="$prefix/$key">
         $if record.get('occurrenceID'):
           <h2 style='display:none;'>$record['occurrenceID']</h2>
         $else:
@@ -94,7 +94,7 @@ $def with (key, record, forms, zoom, config, showfilters, nick)
 </main>
 
 <aside id=chat-overlay class=overlay>
-  $if record.get('occurrenceID') and key:
+  $if record and record.get('occurrenceID') and key:
     <iframe src='https://data.gbif.no/chat/chat.cgi/dugnad?name=$nick&url=https://data.gbif.no/dugnad/$key/$record.get('occurrenceID')'>
   $else:
     <iframe src='https://data.gbif.no/chat/chat.cgi/dugnad?name=$nick'>

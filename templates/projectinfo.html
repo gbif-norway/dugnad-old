@@ -16,15 +16,15 @@ $def with(key, project, charts)
         $else:
           $_('signed-in')
         </a>
-      · <a href='/dugnad/project/$key/help'>Hjelp</a>
+      · <a href='$prefix/project/$key/help'>Hjelp</a>
   </aside>
 
-  <h1><b><a href='/dugnad/'>dugnad</a></b> annotering &amp; transkribering</h1>
+  <h1><b><a href='$prefix'>dugnad</a></b> annotering &amp; transkribering</h1>
   <h2>$_(project['title'])</h2>
   <p>$:_(project['description'])
 
   <p id=start-transcribing>
-    <a href='/dugnad/project/$key'>$_('start-project')</a>
+    <a href='$prefix/project/$key'>$_('start-project')</a>
 
   <section class=stats>
   $for chart in charts:

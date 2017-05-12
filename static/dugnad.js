@@ -20,8 +20,9 @@ T.georeference = function(layer) {
 }
 
 T.checkcoordinates = function(e) {
-  var latitude = document.getElementsByName('latitude')[0];
-  var longitude = document.getElementsByName('longitude')[0];
+  return;
+  var latitude = document.getElementsByName('decimalLatitude')[0];
+  var longitude = document.getElementsByName('decimalLongitude')[0];
   latitude.className = ''; longitude.className = '';
   T.map.removeLayer(T.marker);
 
@@ -88,7 +89,7 @@ T.next = function(e) {
 
 T.validate = function(e) {
   var el = e.target;
-  if(el.name == 'latitude' || el.name == 'longitude') return;
+  if(el.name == 'decimalLatitude' || el.name == 'decimalLongitude') return;
   el.className = '';
   if(!el.value || el.value == '')
     return;
@@ -148,59 +149,51 @@ document.addEventListener("DOMContentLoaded", function(e) {
   var att = '<a href="https://www.mapzen.com/rights">Attribution.</a>. Data &copy;<a href="https://openstreetmap.org/copyright">OSM</a> contributors.';
   var osm = new L.TileLayer(url, { minZoom: 1, maxZoom: 16, attribution: att });
 
-  T.map = L.map('map').setView([59, 9], 8);
-  T.map.addLayer(osm);
 
-  var georef = new L.FeatureGroup();
-  T.map.addLayer(georef);
-
-  var control = new L.Control.Draw({
-    position: 'bottomleft',
-    edit: { featureGroup: georef }
-  });
-  T.map.addControl(control);
-	
-	T.map.on('draw:created', function(e) {
-    georef.clearLayers();
-    T.georeference(e.layer);
-    georef.addLayer(e.layer);
-	});
-	T.map.on('draw:edited', function(e) {
-    e.layers.eachLayer(function(layer) {
-      georef.clearLayers();
-      T.georeference(layer);
-      georef.addLayer(layer);
+  if(document.getElementById('map')) {
+    T.map = L.map('map').setView([59, 9], 8);
+    T.map.addLayer(osm);
+  
+    var georef = new L.FeatureGroup();
+    T.map.addLayer(georef);
+  
+    var control = new L.Control.Draw({
+      position: 'bottomleft',
+      edit: { featureGroup: georef }
     });
-  });
+    T.map.addControl(control);
+  	
+  	T.map.on('draw:created', function(e) {
+      georef.clearLayers();
+      T.georeference(e.layer);
+      georef.addLayer(e.layer);
+  	});
+  	T.map.on('draw:edited', function(e) {
+      e.layers.eachLayer(function(layer) {
+        georef.clearLayers();
+        T.georeference(layer);
+        georef.addLayer(layer);
+      });
+    });
+  }
 
   T.toggle('toggle-help', 'help');
 
-//  var form = document.getElementById('transcription');
-//  if(form) {
-//    for(var i=0; i < form.length; i++) {
-//      form.elements[i].addEventListener('keypress', T.next, false);
-//      form.elements[i].addEventListener('change', T.validate, false);
-//      form.elements[i].addEventListener('focus', T.help, false);
-//    }
-//    var save = document.getElementsByName('save')[0];
-//    if(save) {
-//      save.onclick = function(e) {
-//        var nodate = document.getElementsByName('nodate')[0];
-//        if(nodate.checked)
-//          return true;
-//        var year = document.getElementsByName('year')[0];
-//        if(year && !year.value || year.value == "")
-//          return false;
-//      }
-//    }
-//  }
-
-  var latitude = document.getElementsByName('latitude')[0];
-  var longitude = document.getElementsByName('longitude')[0];
+  var latitude = document.getElementsByName('decimalLatitude')[0];
+  var longitude = document.getElementsByName('decimalLongitude')[0];
+  var uncertainty = document.getElementById('coordinateUncertaintyInMeters');
   if(latitude && longitude) {
-    T.marker = L.circle([0, 0], 1000);
+    var lat = parseFloat(latitude.value);
+    var lon = parseFloat(longitude.value);
+    var radius = (uncertainty && uncertainty.value) ? uncertainty.value : 10;
+    T.marker = L.circle([lat, lon], radius);
+    console.log(T.marker);
+    console.log(T.map);
+    T.map.addLayer(T.marker);
+    T.marker.addTo(T.map);
     latitude.onkeyup = T.checkcoordinates;
     longitude.onkeyup = T.checkcoordinates;
+    T.map.panTo(T.marker.getLatLng());
   }
 
   var chatln = document.getElementById('open-chat');
@@ -227,6 +220,7 @@ document.addEventListener("DOMContentLoaded", function(e) {
         overlay.style.visibility = "visible";
       }
     }
+    showMap.click();
   }
 
   var helpln = document.getElementsByClassName('help');
@@ -240,20 +234,5 @@ document.addEventListener("DOMContentLoaded", function(e) {
       return false;
     }
   }
-//  var ring = document.getElementById('ring');
-//  if(ring) {
-//    ring.onclick = function(e) {
-//      var overlay = document.getElementById('map-overlay');
-//      if(!overlay) return;
-//      if(!T.pulledDown) {
-//        T.pulledDown = 1;
-//      } else {
-//        console.log("eh");
-//        overlay.style.animationPlayState = "paused";
-//        overlay.style.top = '50px';
-//        T.pulledDown = 0;
-//      }
-//    }
-//  }
 });
 
