@@ -164,8 +164,8 @@ def zoomify(raw):
     try:
         source = urllib.unquote(raw.strip())
         imagekey = hashlib.sha256(source).hexdigest()
-        source = "http://www.unimus.no/whatever"
-        imagekey = "fe5cf4d2690ee95a506caae696e00e5535ba584a837a336da3c49233b0ffff9c"
+        #source = "http://www.unimus.no/whatever"
+        #imagekey = "fe5cf4d2690ee95a506caae696e00e5535ba584a837a336da3c49233b0ffff9c"
         if deepzoom and source.find("http://www.unimus.no/") == 0:
           name = "static/tmp/" + imagekey
           if not os.path.exists(name + "_files"):
