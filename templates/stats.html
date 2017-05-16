@@ -1,19 +1,35 @@
-$def with(key, project, charts)
+$def with(key, project, stats, charts)
 
 $ crumbs().append(['', 'dugnad'])
-$ crumbs().append([None, _(project['title'])])
+$ crumbs().append(['project/' + key + '/info', _(project['title'])])
+$ crumbs().append([None, _('bakrom')])
 
 <link rel='stylesheet' href='$config['base']/css/chartist.css'>
 <script src='$config['base']/js/chartist.js'></script>
 
 <section class=info>
   <section>
-    <h1>$_(project['title'])</h1>
-    <p>$:_(project['description'])
-  
-    <p id=start-transcribing>
-      <a class=btn href='$prefix/project/$key'>$_('start-project') »</a>
+    <h1>Bakrommet</h1>
+    <p>Her får du en oversikt over dette prosjektet – hvem som har bidratt, hvor mye, og hvor ofte.
   </section>
+</section>
+
+<section class=stats>
+  $ mid= (len(stats) + 1) / 2
+  <table>
+    $for stat in stats[:mid]:
+      <tr>
+        <th>$_(stat[0]):</th>
+        <td>$stat[1]</td>
+      </tr>
+  </table>
+  <table>
+    $for stat in stats[mid:]:
+      <tr>
+        <th>$_(stat[0]):</th>
+        <td>$stat[1]</td>
+      </tr>
+  </table>
 </section>
 
 <section class=stats>
@@ -23,12 +39,6 @@ $ crumbs().append([None, _(project['title'])])
       <p>$chart['description']
     </article>
 </section>
-
-<!--
-<nav>
-  <a href='$prefix/project/$key/log'>Transkripsjonslogg</a>
-</nav>
--->
 
 <script>
 $for chart in charts:

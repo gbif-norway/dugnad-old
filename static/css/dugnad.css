@@ -13,7 +13,7 @@ header .crumbs p { margin: 0 0 1em 0; font-size: small; }
 main {}
 section {}
 
-section.info { background: #f6f6f6; display: flex; padding: 1em 0; border-bottom: 1px dashed #333; box-shadow: 0px 5px 5px #999; }
+section.info { background: #f6f6f6; padding: 1em 0; border-bottom: 1px dashed #333; box-shadow: 0px 5px 5px #999; }
 section.info h1 { font-size: 240%; font-weight: normal; margin: 0; }
 section.info > section { width: 970px; max-width: 100%; margin: 0 auto; padding: 0 1em; }
 section.info aside { float: right; min-width: 200px; max-width: 20%; font-size: small; border: 1px solid #000; padding: 1em; border-radius: 2em; background: #fff; margin: 1em; }
@@ -34,10 +34,12 @@ section.projects article a:hover { text-decoration: underline; }
 
 footer { width: 970px; max-width: 100%; margin: 2em auto; }
 
-section.charts { display: flex; margin: 2em auto 0 auto; width: 970px; max-width: 100%; flex-wrap: wrap; justify-content: space-around; }
-section.charts { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; }
-section.charts article { flex: 1 1 auto; min-width: 300px; }
-section.charts p { text-align: center; font-size: small; }
+section.stats { display: flex; margin: 2em auto 0 auto; width: 970px; max-width: 100%; flex-wrap: wrap; justify-content: space-around; }
+section.stats { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; }
+section.stats article { flex: 1 1 auto; min-width: 300px; }
+section.stats p { text-align: center; font-size: small; }
+
+section.stats table { text-align: right; }
 
 section.help { width: 970px; max-width: 100%; padding: 0 1em; margin: 0 auto; }
 
@@ -52,7 +54,7 @@ a.btn:hover { background: #286090; border-color: #204d74; }
 main > nav,
 section.info > section,
 section.help,
-section.charts,
+section.stats,
 header nav,
 section.projects,
 footer { width: 1170px; }

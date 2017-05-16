@@ -64,6 +64,20 @@ class helpers:
     form.validates(web.input())
     return form
 
+def getstats(key, project):
+    stats = []
+    res = db.query("select count(distinct(user)) as count from transcriptions where project = '%s'" % key)
+    stats.append(("users-total", res[0]['count']))
+    res = db.query("select count(distinct(user)) as count from transcriptions where project = '%s' and date = date()" % key)
+    stats.append(("users-today", res[0]['count']))
+
+    res = db.query("select count(*) as count from transcriptions where project = '%s'" % key)
+    stats.append(("transcriptions-total", res[0]['count']))
+    res = db.query("select count(*) as count from transcriptions where project = '%s' and date = date()" % key)
+    stats.append(("transcriptions-today", res[0]['count']))
+
+    return stats
+
 def getusername(label):
     if not label: return _("anonymous")
     try:
@@ -271,6 +285,17 @@ class listunfinished:
         recs = db.select('transcriptions', order="updated DESC", where=web.db.sqlwhere(reqs))
         return render.list(recs)
 
+class projectstats:
+    def GET(self, key):
+        uid = session.get('id')
+        nick = session.get('name', "Anonym")
+        project = yaml.load(open('projects/' + key + '.yaml'))
+        stats = getstats(key, project)
+        charts = []
+        for item in project.get('stats', []):
+            charts.append(chart(item))
+        return render.stats(key, project, stats, charts)
+
 class projectinfo:
     def GET(self, key):
         uid = session.get('id')
@@ -470,6 +495,8 @@ urls = (
     '%s/project/(.+)/sub-(.+)/(.+)' % prefix, 'suboccurrence',
     '%s/project/(.+)/sub-(.+)' % prefix, 'subproject',
     '%s/project/(.+)/info' % prefix, 'projectinfo',
+    '%s/project/(.+)/log' % prefix, 'projectlog',
+    '%s/project/(.+)/stats' % prefix, 'projectstats',
     '%s/project/(.+)/help' % prefix, 'help',
     '%s/project/(.+)/(.+)' % prefix, 'project',
     '%s/project/(.+)/' % prefix, 'project',
