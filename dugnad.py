@@ -33,6 +33,10 @@ prefix = re.search(r"http?s:\/\/[^\/]+(.*)", config['prefix']).groups()[0]
 
 conf = config
 
+def crumbs():
+    if not 'crumbs' in web.ctx: web.ctx['crumbs'] = []
+    return web.ctx['crumbs']
+
 deepzoom = True
 try:
     from gi.repository import Vips
@@ -504,7 +508,8 @@ render = template.render('templates', base='layout', globals= {
     'helper': helpers(),
     'web': web,
     'conf': conf,
-    'config': config
+    'config': config,
+    'crumbs': crumbs
 })
 
 web.config.debug = True

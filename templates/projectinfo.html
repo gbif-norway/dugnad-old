@@ -1,5 +1,8 @@
 $def with(key, project, charts)
 
+$ crumbs().append(['', 'dugnad'])
+$ crumbs().append([None, _(project['title'])])
+
 <link rel='stylesheet' href='$config['base']/css/chartist.css'>
 <script src='$config['base']/js/chartist.js'></script>
 
@@ -9,7 +12,7 @@ $def with(key, project, charts)
     <p>$:_(project['description'])
   
     <p id=start-transcribing>
-      <a href='$prefix/project/$key'>$_('start-project')</a>
+      <a class=btn href='$prefix/project/$key'>$_('start-project') »</a>
   </section>
 </section>
 
@@ -21,11 +24,13 @@ $def with(key, project, charts)
     </article>
 </section>
 
+<!--
 <nav>
   <a href='$prefix/project/$key/stats'>Mer statistikk</a>
   ·
   <a href='$prefix/project/$key/log'>Transkripsjonslogg</a>
 </nav>
+-->
 
 <script>
 $for chart in charts:

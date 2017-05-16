@@ -1,22 +1,7 @@
 $def with(config, forms)
 
-<div class=info>
-  <aside class=login>
-    <p>
-      $if not helper.uid():
-        <a target=user href='/user/'>$_('link-login')</a>
-      $else:
-        <a target=user href='/user/'>
-        $if helper.name():
-          $_('signed-in-as')
-          $helper.name()
-        $else:
-          $_('signed-in')
-        </a>
-      · <a href='/static/help.pdf'>Last ned som PDF</a>
-  </aside>
-
-  <h1>$_('Transkribering: Karplanter fra Telemark')</h1>
+<section class=help>
+  <h2>$_('Transkribering: Karplanter fra Telemark')</h2>
 
   <p>$:_('howto')
 
@@ -34,5 +19,5 @@ $def with(config, forms)
   <footer>
     <p><small>Sist oppdatert 2017-05-03</small>
   </footer>
-</div>
+</section>
 

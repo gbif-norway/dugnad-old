@@ -21,12 +21,15 @@ $def with (content)
           $_('signed-in')
     </a>
   </nav>
-  <nav class=crumbs>
-    <p>
-      <a>bread</a> 
-      <a>crumbs</a>
-      <a>here</a>
-  </nav>
+  $if crumbs:
+    <nav class=crumbs>
+      <p>
+      $for crumb in crumbs():
+        $if crumb[0] is not None:
+          <a href="$prefix/$crumb[0]">$crumb[1]</a> /
+        $else:
+          <a>$crumb[1]</a> 
+    </nav>
 </header>
 
 <main>

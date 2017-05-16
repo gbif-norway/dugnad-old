@@ -1,22 +1,22 @@
 body { font: 24px/1.2 "Helvetica Neue", Helvetica, Arial, sans-serif; margin: 0; }
 header, main, section, nav, aside, article { display: block; }
 
-header { background: #000; color: #fff; }
+header { background: #333; color: #fff; border-bottom: 2px solid #000; padding: 0 1em; }
 header h1 { font-size: medium; color: #ccc; font-weight: normal; margin: 0.75em 0; }
 
-header nav { display: flex; width: 970px; max-width: 100%; margin: 0 auto; padding: 0 1em; justify-content: space-between; }
+header nav { display: flex; width: 970px; max-width: 100%; margin: 0 auto; justify-content: space-between; box-sizing: border-box; }
 header .register-login { font-size: medium; font-weight: normal; margin: 0.75em 0; }
 header a { color: #7FDBFF;}
-header .crumbs { font-size: small; }
-header .crumbs p { margin: 0 0 1em 0; }
+header a:visited { color: #eee; }
+header .crumbs p { margin: 0 0 1em 0; font-size: small; }
 
 main {}
 section {}
 
-section.info { background: #f6f6f6; display: flex; padding: 1em 0; }
-section.info h1 { font-size: 64px; font-weight: normal; margin: 0; }
+section.info { background: #f6f6f6; display: flex; padding: 1em 0; border-bottom: 1px dashed #333; box-shadow: 0px 5px 5px #999; }
+section.info h1 { font-size: 240%; font-weight: normal; margin: 0; }
 section.info > section { width: 970px; max-width: 100%; margin: 0 auto; padding: 0 1em; }
-section.info aside { float: right; min-width: 200px; max-width: 25%; font-size: small; border: 1px solid #000; padding: 1em; border-radius: 2em; background: #fff; margin: 1em; }
+section.info aside { float: right; min-width: 200px; max-width: 20%; font-size: small; border: 1px solid #000; padding: 1em; border-radius: 2em; background: #fff; margin: 1em; }
 section.info aside h2 { font-weight: bold; margin: 0; font-size: medium; box-sizing: border-box; text-align: center; }
 section.info aside dt { font-weight: bold; }
 section.info aside dd { margin: 0 0 0 1em; }
@@ -30,6 +30,7 @@ section.projects article { text-align: center; max-width: 20%; min-width: 260px;
 section.projects article img { max-width: 100%; border-radius: 50%; border: dotted 2px #444; }
 section.projects article h3 { font-size: large; }
 section.projects article a:hover img { border: solid 2px #000; }
+section.projects article a:hover { text-decoration: underline; }
 
 footer { width: 970px; max-width: 100%; margin: 2em auto; }
 
@@ -38,121 +39,25 @@ section.charts { display: flex; justify-content: space-between; align-items: fle
 section.charts article { flex: 1 1 auto; min-width: 300px; }
 section.charts p { text-align: center; font-size: small; }
 
+section.help { width: 970px; max-width: 100%; padding: 0 1em; margin: 0 auto; }
+
 footer { text-align: center; }
 
+main > nav { width: 970px; max-width: 100%; }
 main > nav { margin: 1em auto; text-align: center; }
+
+a.btn { display: inline-block; padding: 10px 16px; font-size: 18px; border-radius: 6px; color: #fff; background: #337ab7; border: 1px solid #2e6da4; vertical-align: middle; text-align: center; font-weight: normal; }
+a.btn:hover { background: #286090; border-color: #204d74; }
 
 main > nav,
 section.info > section,
+section.help,
 section.charts,
 header nav,
 section.projects,
 footer { width: 1170px; }
 
 /* 
-
-body { font: 16px/1.2 sans-serif; background: #363636; }
-label, input, select, textarea { font: inherit; }
-
-header, nav, main, section, aside { display: block; }
-
-header, main { position: fixed; width: 100%; overflow: auto; font-size: smaller; }
-header { height: 4em; z-index: 10; }
-main { height: calc(100% - 4em); top: 4em; }
-
-header { background: #fff; flex: 0 0 auto; border-bottom: 2px solid #000; display: flex; justify-content: space-between; align-items: center; z-index: 3; }
-#title, #account, #actions{ margin: 0 1em; }
-header h1 { font-size: medium; }
-
-main { display: flex; justify-content: flex-end; align-items: stretch; }
-
-a { color: #067940; text-decoration: none; }
-a:hover { color: #063940; }
-
-#tr { background: rgba(255,255,255,0.95); padding: 0; height: 100%; position: relative; width: 40%; }
-#tr form { overflow: auto; height: 100%; padding: 0 1em; }
-#tr h2 { font-size: small; text-align: center; }
-#tr fieldset { border: none; border-top: 3px solid #aaa; border-right: 3px solid #aaa; margin-top: 1em; }
-#tr legend { font-weight: bold; color: #666; }
-#tr table { width: 100%; }
-#tr input { max-width: 80%; }
-#tr textarea { width: 14em; max-width: 80%; height: 4em; }
-#tr label { display: inline-block; width: 9em; text-align: right; padding-right: 4px; color: #444; font-weight: bold; }
-#tr input[type=submit] { float: right; width: auto; margin-right: 1em; }
-#tr th { max-width: 9em; position: relative;  }
-#tr td { text-align: left; width: 16em; position: relative; }
-#tr input[type=checkbox] { width: 1em; }
-
-#dz { text-align: center; overflow: hidden; position: relative; }
-#dz { height: 100%; width: 100%; }
-#dz img { max-width: 100%; max-height: 100%; }
-#dzi { height: 100%; width: 100%; }
-
-#tr { box-shadow: 2px 2px 0.5em #191919; z-index: 10; }
-
-#actions a { font-weight: bold; text-transform: uppercase; }
-
-#chat-overlay { display: block; position: fixed; height: 100%; width: 100%; z-index: 5; background: #fff; z-index: 100; }
-#chat-overlay iframe { width: 100%; height: 100%; }
-#chat-overlay { display: none; }
-
-#map-overlay { height: 100%; width: 100%; top: 0; z-index: 5; visibility: hidden; position: absolute; }
-#map-overlay #map { height: 100%; width: 100%; position: absolute; bottom: 0; }
-
-#simple-map { height: 75vh; width: 100%; border: 1px solid #000; border-radius: 1em; }
-
-#error { padding: 2em; background: #fff; margin: 0 auto; height: 5em; margin-top: 8em; }
-
-.modes { position: absolute; bottom: 0; left: 0; right: 0; margin: 0 auto; background: rgba(255,255,255,0.8); z-index: 10; padding: 1em; font-weight: bold; width: 12em; text-align: center; }
-
-.info { background: #fff; margin: 0em auto; padding: 1em; width: 80%; font-size: }
-.info p { font-size: 18px; color: #333; }
-.info h1 { color: #333; font-weight: normal; margin-top: 0; }
-.info h1 b { color: #000; }
-.info table { width: 100%; }
-.info table th, .info table td { text-align: left; }
-
-.info h2, .info h3 { font-size: large; }
-
-.info aside { float: right; margin: 0 1em; }
-.info aside a { font-weight: bold; }
-
-.projects { display: flex; flex: 0 0 auto; clear: both; }
-
-#help { clear: both; padding-top: 0.5em; }
-
-.help img { width: 16px; vertical-align: middle; margin-left: 4px; }
-
-#helptext { color: #700; }
-
-#help h3 { font-size: medium; }
-
-.info ul { margin: 0; padding: 0; list-style: inside square; }
-.info li { margin-bottom: 1em; margin-left: 0; }
-
-.help:hover { cursor: pointer; cursor: -moz-pointer; cursor: -webkit-pointer; }
-
-
-
-#start-transcribing { text-align: center; margin: 2em; }
-#start-transcribing a { padding: 1em; background: #7FDBFF; text-transform: uppercase; border: 1px solid #aaa; border-radius: 10px; color: #000; font-weight: bold; }
-#start-transcribing a:hover { background: #4e4; }
-
-/*
-#ring { display: block; width: 50px; height: 50px; background: red; margin: 1px auto; background: url(/static/images/ring.png); background-size: contain; position: absolute; top: 0; z-index: 0; left: 0; right: 0; }
-
-#map-overlay { animation: pulldown 1s paused ease-in-out forwards; }
-@keyframes pulldown {
-  0% { top: calc(-100% + 50px); }
-  90% { top: 0%; }
-  100% { top: -10%; }
-}
-*/
-
-.info nav { margin-top: 1em; text-align: center; }
-
-footer { display: block; }
-
 .subprojects { display: flex; flex-wrap: wrap; justify-content: space-between; }
 .subproject { display: block; flex: 0 0 auto; border: 1px solid #aaa; text-align: center; box-sizing: border-box; width: 18em; margin-bottom: 1em; padding: 1em; background: #efe; }
 .subprojects a:hover .subproject { background: #dfd; }
