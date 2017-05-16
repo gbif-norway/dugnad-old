@@ -1,48 +1,45 @@
 $def with(changes)
 
-<div class=info>
-  <aside class=login>
-    <p>
-      $if not helper.uid():
-        <a target=user href='/user/'>$_('link-login')</a>
-      $else:
-        <a target=user href='/user/'>
-        $if helper.name():
-          $_('signed-in-as')
-          $helper.name()
-        $else:
-          $_('signed-in')
-        </a>
-  </aside>
+<section class=info>
+  <section>
+    <h1>$_('welcome')</h1>
+    <aside class=changelog>
+      <h2>$_('recent-changes')</h2>
+      <dl>
+      $ date = None
+      $for change in changes:
+        $if not date == change['date']:
+          <dt><time>$change['date']</time></dt>
+          $ date = change['date']
+        <dd>$change['text']</dd>
+      </dl>
+    </aside>
 
-  <h1><b>dugnad</b> annotering &amp; transkribering</h1>
+    <p>$:_('introduction')
+    <p>$:_('introduction-user')
+  </section>
+</section>
 
-  <aside class=changelog>
-    <h2>$_('recent-changes')</h2>
-    <dl>
-    $ date = None
-    $for change in changes:
-      $if not date == change['date']:
-        <dt><time>$change['date']</time></dt>
-        $ date = change['date']
-      <dd>$change['text']</dd>
-    </dl>
-  </aside>
+<section class=projects>
+  <article>
+    <a href='/dugnad/project/telemark/info'>
+      <img src='/static/images/telemark.jpg'>
+      <h3>Transkribering: Karplanter fra Telemark</h3>
+    </a>
+  </article>
 
-  <p>$:_('introduction')
-  <p>$:_('introduction-user')
+  <article>
+    <a href='/dugnad/project/telemark/info'>
+      <img src='/static/images/telemark.jpg'>
+      <h3>Transkribering: Karplanter fra Telemark</h3>
+    </a>
+  </article>
 
-  <div class=projects>
-    <div class=project>
-      <a href='/dugnad/project/telemark/info'>
-        <img src='/static/telemark.jpg' width='240'>
-        <h3>Transkribering: Karplanter fra Telemark</h3>
-      </a>
-    </div>
-  </div>
-
-  <hr>
-  <p>
-    <a href='mailto:gbif-drift@nhm.uio.no'><img width='151' src='https://www.gbif.no/vrtx/decorating/resources/images/logo.png'></a>
-</div>
+  <article>
+    <a href='/dugnad/project/telemark/info'>
+      <img src='/static/images/telemark.jpg'>
+      <h3>Transkribering: Karplanter fra Telemark</h3>
+    </a>
+  </article>
+</section>
 

@@ -1,43 +1,31 @@
 $def with(key, project, charts)
 
-<link rel='stylesheet' href='$config['base']/chartist.css'>
-<script src='$config['base']/chartist.js'></script>
+<link rel='stylesheet' href='$config['base']/css/chartist.css'>
+<script src='$config['base']/js/chartist.js'></script>
 
-<div class=info>
-  <aside class=login>
-    <p>
-      $if not helper.uid():
-        <a target=user href='/user/'>$_('link-login')</a>
-      $else:
-        <a target=user href='/user/'>
-        $if helper.name():
-          $_('signed-in-as')
-          $helper.name()
-        $else:
-          $_('signed-in')
-        </a>
-      · <a href='$prefix/project/$key/help'>Hjelp</a>
-  </aside>
+<section class=info>
+  <section>
+    <h1>$_(project['title'])</h1>
+    <p>$:_(project['description'])
+  
+    <p id=start-transcribing>
+      <a href='$prefix/project/$key'>$_('start-project')</a>
+  </section>
+</section>
 
-  <h1><b><a href='$prefix'>dugnad</a></b> annotering &amp; transkribering</h1>
-  <h2>$_(project['title'])</h2>
-  <p>$:_(project['description'])
-
-  <p id=start-transcribing>
-    <a href='$prefix/project/$key'>$_('start-project')</a>
-
-  <section class=stats>
+<section class=charts>
   $for chart in charts:
-    <div>
+    <article>
       <div id='chart-$chart['id']' class='ct-chart ct-perfect-fifth'></div>
       <p>$chart['description']
-    </div>
-  </section>
+    </article>
+</section>
 
-  <hr>
-  <p>
-    <a href='mailto:gbif-drift@nhm.uio.no'><img width='151' src='https://www.gbif.no/vrtx/decorating/resources/images/logo.png'></a>
-</div>
+<nav>
+  <a href='$prefix/project/$key/stats'>Mer statistikk</a>
+  ·
+  <a href='$prefix/project/$key/log'>Transkripsjonslogg</a>
+</nav>
 
 <script>
 $for chart in charts:

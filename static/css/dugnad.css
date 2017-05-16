@@ -1,4 +1,55 @@
-html, body { height: 100%; width: 100%; margin: 0; padding: 0; position: relative; }
+body { font: 24px/1.2 "Helvetica Neue", Helvetica, Arial, sans-serif; margin: 0; }
+header, main, section, nav, aside, article { display: block; }
+
+header { background: #000; color: #fff; }
+header h1 { font-size: medium; color: #ccc; font-weight: normal; margin: 0.75em 0; }
+
+header nav { display: flex; width: 970px; max-width: 100%; margin: 0 auto; padding: 0 1em; justify-content: space-between; }
+header .register-login { font-size: medium; font-weight: normal; margin: 0.75em 0; }
+header a { color: #7FDBFF;}
+header .crumbs { font-size: small; }
+header .crumbs p { margin: 0 0 1em 0; }
+
+main {}
+section {}
+
+section.info { background: #f6f6f6; display: flex; padding: 1em 0; }
+section.info h1 { font-size: 64px; font-weight: normal; margin: 0; }
+section.info > section { width: 970px; max-width: 100%; margin: 0 auto; padding: 0 1em; }
+section.info aside { float: right; min-width: 200px; max-width: 25%; font-size: small; border: 1px solid #000; padding: 1em; border-radius: 2em; background: #fff; margin: 1em; }
+section.info aside h2 { font-weight: bold; margin: 0; font-size: medium; box-sizing: border-box; text-align: center; }
+section.info aside dt { font-weight: bold; }
+section.info aside dd { margin: 0 0 0 1em; }
+
+p { font-weight: 200; }
+a { text-decoration: none; color: #0074D9; }
+a:visited { color: #001f3f; }
+
+section.projects { display: flex; margin: 2em auto; width: 970px; max-width: 100%; flex-wrap: wrap; justify-content: space-around; }
+section.projects article { text-align: center; max-width: 20%; min-width: 260px; margin: 0 1em; }
+section.projects article img { max-width: 100%; border-radius: 50%; border: dotted 2px #444; }
+section.projects article h3 { font-size: large; }
+section.projects article a:hover img { border: solid 2px #000; }
+
+footer { width: 970px; max-width: 100%; margin: 2em auto; }
+
+section.charts { display: flex; margin: 2em auto 0 auto; width: 970px; max-width: 100%; flex-wrap: wrap; justify-content: space-around; }
+section.charts { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; }
+section.charts article { flex: 1 1 auto; min-width: 300px; }
+section.charts p { text-align: center; font-size: small; }
+
+footer { text-align: center; }
+
+main > nav { margin: 1em auto; text-align: center; }
+
+main > nav,
+section.info > section,
+section.charts,
+header nav,
+section.projects,
+footer { width: 1170px; }
+
+/* 
 
 body { font: 16px/1.2 sans-serif; background: #363636; }
 label, input, select, textarea { font: inherit; }
@@ -67,10 +118,6 @@ a:hover { color: #063940; }
 .info aside a { font-weight: bold; }
 
 .projects { display: flex; flex: 0 0 auto; clear: both; }
-.project { width: 240px; background: #000; padding: 10px; margin: 1em 2em 1em 0; }
-.project:hover { background: #050; }
-.project h3 { margin: 0; text-align: center; font-weight: normal; }
-.project a { color: #eee; }
 
 #help { clear: both; padding-top: 0.5em; }
 
@@ -85,15 +132,7 @@ a:hover { color: #063940; }
 
 .help:hover { cursor: pointer; cursor: -moz-pointer; cursor: -webkit-pointer; }
 
-aside.changelog { width: 18em; padding: 1em; background: #f6f6f6; border: 1px solid #aaa; border-radius: 5px; }
-aside.changelog h2 { margin-top: 0; font-size: medium; }
-aside.changelog dl { list-style: none; margin: 0; }
-aside.changelog dd, aside.changelog dt { font-size: small; margin: 0; }
-aside.changelog time { font-weight: bold; color: #222; }
 
-.stats { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; }
-.stats div { flex: 1 1 auto; min-width: 300px; }
-.stats p { text-align: center; font-size: small; }
 
 #start-transcribing { text-align: center; margin: 2em; }
 #start-transcribing a { padding: 1em; background: #7FDBFF; text-transform: uppercase; border: 1px solid #aaa; border-radius: 10px; color: #000; font-weight: bold; }
@@ -110,6 +149,7 @@ aside.changelog time { font-weight: bold; color: #222; }
 }
 */
 
+.info nav { margin-top: 1em; text-align: center; }
 
 footer { display: block; }
 
@@ -127,4 +167,4 @@ footer { display: block; }
 
   footer { position: fixed; bottom: 0; width: 100%; text-align: center; color: #444; }
 }
-
+*/

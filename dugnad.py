@@ -72,7 +72,7 @@ def getusername(label):
 
 def helplink(text):
     if not text: return ""
-    return "<a class=help title='%s'><img src='/static/help.png'></a>" % _(text)
+    return "<a class=help title='%s'><img src='/static/images/help.png'></a>" % _(text)
 
 def buildform(key, config):
     if not key in config['forms']: raise Exception("Form not found")
@@ -164,8 +164,6 @@ def zoomify(raw):
     try:
         source = urllib.unquote(raw.strip())
         imagekey = hashlib.sha256(source).hexdigest()
-        #source = "http://www.unimus.no/whatever"
-        #imagekey = "fe5cf4d2690ee95a506caae696e00e5535ba584a837a336da3c49233b0ffff9c"
         if deepzoom and source.find("http://www.unimus.no/") == 0:
           name = "static/tmp/" + imagekey
           if not os.path.exists(name + "_files"):
@@ -251,7 +249,7 @@ class unfinished:
                 zoom = zoomify(orig['associatedMedia'])
             forms = OrderedDict((form, buildform(form, project)) for form in project['annotate']['order'])
             for _, form in forms.iteritems(): form.validates(anno)
-            return render.transcribe("unfinished/" + record['id'], anno, forms, zoom, project, False, nick)
+            return simplerender.transcribe("unfinished/" + record['id'], anno, forms, zoom, project, False, nick)
         except ValueError as e:
             raise web.seeother('%s/unfinished' % prefix)
 
@@ -315,7 +313,7 @@ class suboccurrence:
           record = None
         forms = OrderedDict((form, buildform(form, project)) for form in project['annotate']['order'])
         for _, form in forms.iteritems(): form.validates(record)
-        return render.transcribe("project/" + key, record, forms, zoom, project, True, nick)
+        return simplerender.transcribe("project/" + key, record, forms, zoom, project, True, nick)
       except IOError as e:
         raise web.seeother('%s' % prefix)
       except ValueError as e:
@@ -379,7 +377,7 @@ class project:
           record = None
         forms = OrderedDict((form, buildform(form, project)) for form in project['annotate']['order'])
         for _, form in forms.iteritems(): form.validates(record)
-        return render.transcribe("project/" + key, record, forms, zoom, project, True, nick)
+        return simplerender.transcribe("project/" + key, record, forms, zoom, project, True, nick)
       except IOError as e:
         raise web.seeother('%s' % prefix)
       except ValueError as e:
@@ -435,7 +433,7 @@ class annotate:
             record['year'], record['month'], record['day'] = date.split("-")
           forms = OrderedDict((form, buildform(form, config)) for form in config['annotate']['order'])
           for _, form in forms.iteritems(): form.validates(record)
-          return render.transcribe(key, record, forms, zoom, config, True, nick)
+          return simplerender.transcribe(key, record, forms, zoom, config, True, nick)
         except Exception as e:
           message = "%s not found (%s)" % (key, e)
           return render.error(message)
@@ -482,13 +480,22 @@ gettext.install('messages', 'lang', unicode=True)
 for lang in languages:
     gettext.translation('messages', 'lang', languages = [lang]).install(True)
 
-
-web.config.session_parameters['timeout'] = 2592000 # 30 * 24 * 60 * 60
+web.config.session_parameters['timeout'] = 2592000
 web.config.session_parameters['cookie_domain'] = "data.gbif.no"
 web.config.session_parameters['cookie_path'] = "/"
 
 app = web.application(urls, locals())
 session = web.session.Session(app, web.session.DiskStore(config.get('sessions', 'sessions')))
+
+simplerender = template.render('templates', globals= {
+    '_': _,
+    'prefix': prefix,
+    'json': json,
+    'helper': helpers(),
+    'web': web,
+    'conf': conf,
+    'config': config
+})
 
 render = template.render('templates', base='layout', globals= {
     '_': _,

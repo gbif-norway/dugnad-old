@@ -1,9 +1,44 @@
 $def with (content)
 <!doctype html>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dugnad</title>
-<link rel='stylesheet' href='$config['base']/dugnad.css'>
-<link rel='stylesheet' href='$config['base']/leaflet.css'>
-<link rel='stylesheet' href='$config['base']/leaflet.draw.css'>
+<link rel='stylesheet' href='$config['base']/css/dugnad.css'>
 
-$:content
+<header>
+  <nav>
+    <a href='$prefix'>
+      <h1><b>dugnad</b> annotering &amp; transkribering</h1>
+    </a>
+  
+    <a class='register-login' target=user href='/user/'>
+      $if not helper.uid():
+        $_('link-login')
+      $else:
+        $if helper.name():
+          $_('signed-in-as')
+          $helper.name()
+        $else:
+          $_('signed-in')
+    </a>
+  </nav>
+  <nav class=crumbs>
+    <p>
+      <a>bread</a> 
+      <a>crumbs</a>
+      <a>here</a>
+  </nav>
+</header>
+
+<main>
+  $:content
+</main>
+
+<hr>
+
+<footer>
+  <p>
+    <a href='mailto:gbif-drift@nhm.uio.no'>
+      <img width='151' src='https://www.gbif.no/vrtx/decorating/resources/images/logo.png'>
+    </a>
+</footer>
 

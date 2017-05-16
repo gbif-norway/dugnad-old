@@ -1,3 +1,5 @@
+msgid "welcome"
+msgstr "Velkommen til dugnad!"
 msgid "greeting"
 msgstr "Hei, "
 msgid "unknown"
