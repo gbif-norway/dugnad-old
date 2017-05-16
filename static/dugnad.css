@@ -54,7 +54,8 @@ a:hover { color: #063940; }
 
 .modes { position: absolute; bottom: 0; left: 0; right: 0; margin: 0 auto; background: rgba(255,255,255,0.8); z-index: 10; padding: 1em; font-weight: bold; width: 12em; text-align: center; }
 
-.info { background: #fff; margin: 0em auto; padding: 1em; width: 70%; }
+.info { background: #fff; margin: 0em auto; padding: 1em; width: 80%; font-size: }
+.info p { font-size: 18px; color: #333; }
 .info h1 { color: #333; font-weight: normal; margin-top: 0; }
 .info h1 b { color: #000; }
 .info table { width: 100%; }
@@ -90,12 +91,12 @@ aside.changelog dl { list-style: none; margin: 0; }
 aside.changelog dd, aside.changelog dt { font-size: small; margin: 0; }
 aside.changelog time { font-weight: bold; color: #222; }
 
-.stats { display: flex; justify-content: space-between; align-items: flex-end; }
-.stats div { flex: 1 1 auto; }
+.stats { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; }
+.stats div { flex: 1 1 auto; min-width: 300px; }
 .stats p { text-align: center; font-size: small; }
 
 #start-transcribing { text-align: center; margin: 2em; }
-#start-transcribing a { padding: 1em; background: #4f4; text-transform: uppercase; }
+#start-transcribing a { padding: 1em; background: #7FDBFF; text-transform: uppercase; border: 1px solid #aaa; border-radius: 10px; color: #000; font-weight: bold; }
 #start-transcribing a:hover { background: #4e4; }
 
 /*
