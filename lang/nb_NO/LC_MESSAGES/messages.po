@@ -135,7 +135,7 @@ msgstr "Her ønskes all geografisk informasjon på «lavere» nivå enn fylke. D
 msgid "help-coordinates"
 msgstr "Noen eldre etiketter kan inneholde koordinater og da gjerne av typen MGRS. Ofte finner dere da to bokstaver og 4 siffer, f.eks. ML 48,60. MGRS-koordinatene er alltid i lokalt sonebelte og for Telemark blir det 32V som må legges til. En sjelden gang er kun tallene til MGRS-koordinatene ført. Da må dere tolke hvilke bokstaver (100 km-rute) som må tilføyes for at koordinaten skal ha mening."
 msgid "introduction"
-msgstr "Velkommen til dugnad! Her kan du hjelpe oss med å transkribere etiketter fra norske naturhistoriske museumssamlinger. I første omgang blir det fokus på et lite utvalg karplanter fra Telemark fra samlingene til Naturhistorisk Museum i Oslo."
+msgstr "Her kan du hjelpe oss med å transkribere etiketter fra norske naturhistoriske museumssamlinger. I første omgang blir det fokus på et lite utvalg karplanter fra Telemark fra samlingene til Naturhistorisk Museum i Oslo."
 msgid "introduction-user"
 msgstr "Du kan gjerne bruke dette verktøyet anonymt uten å registrere deg, men hvis du vil ha transkripsjoner og annoteringer attribuert til deg kan du <a target=user href='/user/'>opprette en brukerprofil her</a>."
 msgid "howto"
