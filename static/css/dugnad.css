@@ -33,6 +33,7 @@ section.projects article a:hover img { border: solid 2px #000; }
 section.projects article a:hover { text-decoration: underline; }
 
 article .difficulty, article .progress { font-size: medium; margin-top: 0; }
+article .difficulty { display: none; }
 
 footer { width: 970px; max-width: 100%; margin: 2em auto; }
 
