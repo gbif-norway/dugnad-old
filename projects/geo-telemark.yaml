@@ -3,7 +3,7 @@ description: kanskje forklare opplegget rundt inndeling til events? kanskje...
 georeference: true
 template: georeference
 subprojects:
-  query: "SELECT case when(county = '' or county is null) then 'unknown' else (county) end as key, count(*) as count, lower(county) as thumbnail from 'geotelemark' group by county order by key asc"
+  query: "SELECT case when(county = '' or county is null) then 'unknown' else (county) end as key, count(*) as count, lower(county) as thumbnail, abs(random() % 100) as progress from 'geotelemark' group by county order by key asc"
 help:
   introduction: georef georef
 source:
