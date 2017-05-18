@@ -1,26 +1,24 @@
 $def with(recs)
 
-<style>
-body { height: auto; }
-</style>
-
-<div class='info'>
-  <h1>Unfinished transcriptions</h1>
-  <table>
-    <tr>
-      <th>ID</th>
-      <th>Project</th>
-      <th>Last updated</th>
-      <th></th>
-    </tr>
-  
-    $for rec in recs:
+<section class=stats>
+  <section>
+    <h1>Unfinished transcriptions</h1>
+    <table>
       <tr>
-        <td>$rec['id']</td>
-        <td>$rec['project']</td>
-        <td>$rec['date']</td>
-        <td><a href='$prefix/unfinished/$rec['id']'>Continue</a></td>
+        <th>ID</th>
+        <th>Project</th>
+        <th>Last updated</th>
+        <th></th>
       </tr>
-  </table>
-</main>
+    
+      $for rec in recs:
+        <tr>
+          <td>$rec['id']</td>
+          <td>$rec['project']</td>
+          <td>$rec['date']</td>
+          <td><a href='$prefix/unfinished/$rec['id']'>Continue</a></td>
+        </tr>
+    </table>
+  </section>
+</section>
 

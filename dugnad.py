@@ -90,7 +90,7 @@ def getusername(label):
 
 def helplink(text):
     if not text: return ""
-    return "<a class=help title='%s'><img src='/static/images/help.png'></a>" % _(text)
+    return "<a class=help title='%s'><img src='/static-dugnad/images/help.png'></a>" % _(text)
 
 def buildform(key, config):
     if not key in config['forms']: raise Exception("Form not found")
