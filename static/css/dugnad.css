@@ -13,10 +13,10 @@ header .crumbs p { margin: 0 0 1em 0; font-size: small; }
 main {}
 section {}
 
-section.info { background: #f6f6f6; padding: 1em 0; border-bottom: 1px dashed #333; box-shadow: 0px 5px 5px #999; }
+section.info { background: #f6f6f6; padding: 1em; border-bottom: 1px dashed #333; box-shadow: 0px 5px 5px #999; }
 section.info h1 { font-size: 240%; font-weight: normal; margin: 0; }
-section.info > section { width: 970px; max-width: 100%; margin: 0 auto; padding: 0 1em; }
-section.info aside { float: right; min-width: 200px; max-width: 20%; font-size: small; border: 1px solid #000; padding: 1em; border-radius: 2em; background: #fff; margin: 1em; }
+section.info > section { width: 970px; max-width: 100%; margin: 0 auto; }
+section.info aside { float: right; min-width: 200px; max-width: 20%; font-size: small; border: 1px solid #000; padding: 1em; border-radius: 2em 1em 2em 1em; background: #fff; margin: 1em; }
 section.info aside h2 { font-weight: bold; margin: 0; font-size: medium; box-sizing: border-box; text-align: center; }
 section.info aside dt { font-weight: bold; }
 section.info aside dd { margin: 0 0 0 1em; }
@@ -28,9 +28,10 @@ a:visited { color: #001f3f; }
 section.projects { display: flex; margin: 2em auto; width: 970px; max-width: 100%; flex-wrap: wrap; justify-content: space-around; }
 section.projects article { text-align: center; max-width: 20%; min-width: 260px; margin: 0 1em; }
 section.projects article img { max-width: 100%; border-radius: 50%; border: dotted 2px #444; }
-section.projects article h3 { font-size: large; }
+section.projects article h3 { font-size: large; margin-bottom: 0.5em; }
 section.projects article a:hover img { border: solid 2px #000; }
 section.projects article a:hover { text-decoration: underline; }
+section.projects article .difficulty { font-size: medium; margin-top: 0; }
 
 footer { width: 970px; max-width: 100%; margin: 2em auto; }
 
@@ -59,11 +60,6 @@ header nav,
 section.projects,
 footer { width: 1170px; }
 
-/* 
-.subprojects { display: flex; flex-wrap: wrap; justify-content: space-between; }
-.subproject { display: block; flex: 0 0 auto; border: 1px solid #aaa; text-align: center; box-sizing: border-box; width: 18em; margin-bottom: 1em; padding: 1em; background: #efe; }
-.subprojects a:hover .subproject { background: #dfd; }
-
 @media print {
   body { background: #fff; color: #000; height: auto; }
   .info { margin: 0; padding: 0; width: 100%; }
@@ -74,4 +70,3 @@ footer { width: 1170px; }
 
   footer { position: fixed; bottom: 0; width: 100%; text-align: center; color: #444; }
 }
-*/

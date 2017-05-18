@@ -1,31 +1,26 @@
 $def with(key, project, subprojects)
 
-<div class=info>
-  <aside class=login>
-    <p>
-      $if not helper.uid():
-        <a target=user href='/user/'>$_('link-login')</a>
-      $else:
-        <a target=user href='/user/'>
-        $if helper.name():
-          $_('signed-in-as')
-          $helper.name()
-        $else:
-          $_('signed-in')
-        </a>
-  </aside>
+$ crumbs().append(['', 'dugnad'])
+$ crumbs().append(['project/' + key + '/info', _(project['title'])])
+$ crumbs().append([None, _('subprojects')])
 
-  <h1><b><a href='$prefix'>dugnad</a></b> annotering &amp; transkribering</h1>
-  <h2><a href='$prefix/project/$key'>$project['title']</a></h2>
-  <p>$_('subprojects-help')
+<section class=info>
+  <section>
+    <h1>$_(project['title'])</h1>
 
-  <section class=subprojects>
-  $for subproject in subprojects:
-    <a href='$prefix/project/$key/sub-$subproject['eventID']'>
-    <article class=subproject>
-      <h2>$subproject['eventDate']</h2>
-    $subproject['country'] / $subproject['recordedBy']
-    </article>
-    </a>
+    <p>$_('subprojects-help')
   </section>
-</div>
+</section>
+
+<section class='projects'>
+  $for subproject in subprojects:
+    <article class=project>
+      <a href='$prefix/project/$key/sub-$subproject['key']'>
+        $if subproject.get('thumbnail'):
+          <img src='$(conf['base'])/projects/$(subproject['thumbnail']).png'>
+        <h3>$_(subproject['key'])</h3>
+      </a>
+    </article>
+  </section>
+</section>
+

@@ -1,7 +1,11 @@
-$def with(config, forms)
+$def with(config, forms, key, project)
+
+$ crumbs().append(['', 'dugnad'])
+$ crumbs().append(['project/' + key + '/info', _(project['title'])])
+$ crumbs().append([None, _('help')])
 
 <section class=help>
-  <h2>$_('Transkribering: Karplanter fra Telemark')</h2>
+  <h1>$_(project['title'])</h1>
 
   <p>$:_('howto')
 

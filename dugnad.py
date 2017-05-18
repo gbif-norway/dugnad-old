@@ -244,7 +244,7 @@ class help:
         if 'pdf' in web.input():
           # pdfkit.from_string(render.help(project, forms), 'static/help.pdf')
           return web.seeother('%s/static/help.pdf' % prefix)
-        return render.help(project, forms)
+        return render.help(project, forms, key, project)
 
 class unfinished:
     def GET(self, id):
@@ -300,11 +300,14 @@ class projectinfo:
     def GET(self, key):
         uid = session.get('id')
         nick = session.get('name', "Anonym")
-        project = yaml.load(open('projects/' + key + '.yaml'))
-        charts = []
-        for item in project.get('stats', []):
-            charts.append(chart(item))
-        return render.projectinfo(key, project, charts)
+        try:
+            project = yaml.load(open('projects/' + key + '.yaml'))
+            charts = []
+            for item in project.get('stats', []):
+                charts.append(chart(item))
+            return render.projectinfo(key, project, charts)
+        except IOError as e:
+          raise web.seeother('%s' % prefix)
 
 class suboccurrence:
     def GET(self, key, subkey, oid):
@@ -366,7 +369,7 @@ class subproject:
 class project:
     def subprojects(self, key, uid, nick, data, project):
       pdb = web.database(dbn='sqlite', db=project['source']['database'])
-      subprojects = pdb.query("SELECT eventid, eventDate, recordedBy, country, count(*) as count from georef group by eventid order by eventdate desc")
+      subprojects = pdb.query(project['subprojects']['query'])
       return render.subprojects(key, project, subprojects)
 
     def GET(self, key, oid=None):
@@ -375,7 +378,7 @@ class project:
       data = web.input()
       try:
         project = yaml.load(open('projects/' + key + '.yaml'))
-        if project.get('subprojects'):
+        if 'subprojects' in project:
             return self.subprojects(key, uid, nick, data, project)
         pdb = web.database(dbn='sqlite', db=project['source']['database'])
         filters = {}

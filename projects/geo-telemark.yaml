@@ -1,0 +1,59 @@
+title: "Georeferering: Karplanter fra Telemark"
+description: kanskje forklare opplegget rundt inndeling til events? kanskje...
+georeference: true
+template: georeference
+subprojects:
+  query: "SELECT case when(county = '' or county is null) then 'unknown' else (county) end as key, count(*) as count, lower(county) as thumbnail from 'geotelemark' group by county order by key asc"
+help:
+  introduction: georef georef
+source:
+  database: projects.db
+  table: "geotelemark"
+key: "occurrenceID"
+annotate:
+  order: [ event, taxonomy, geography, comment ]
+filter: filter
+forms:
+  event:
+    - { name: 'catalogNumber', type: hidden }
+    - { name: 'recordedBy', type: text, help: "help-recordedBy" }
+    - { name: "eventDate", type: date, help: "help-eventDate" }
+  geography:
+    - { name: "country", type: text }
+    - { name: "stateProvince", type: text }
+    - { name: "county", type: text, help: "help-county" }
+    - { name: "locality", type: textfield, help: "help-locality" }
+    - { name: "decimalLatitude", type: text, help: "help-coordinates" }
+    - { name: "decimalLongitude", type: text, help: "help-coordinates" }
+    - { name: "coordinateUncertaintyInMeters", type: text, help: "help-uncertainty" }
+    - { name: "footprintWKT", type: text, help: "help-footprint" }
+    - { name: "verbatimCoordinates", type: text, help: "help-coordinates" }
+  taxonomy:
+    - { name: "scientificName", type: text, help: 'help-scientificName' }
+  comment:
+    - { name: "annotationRemarks", type: textfield }
+  filter:
+    - { name: 'genus', type: select, sql: 'SELECT DISTINCT "genus" from georef ORDER BY "genus"', default: [ '', '~ Slekt ~' ] }
+    - { name: '_labelType', type: select, sql: 'SELECT DISTINCT "_labelType" from georef ORDER BY "_labelType"', default: [ '', '~ Etikett ~' ] }
+    - { name: 'recordedBy', type: select, sql: 'SELECT DISTINCT "recordedBy" from georef ORDER BY "recordedBy"', default: [ '', '~ Innsamler ~' ] }
+submit: transcribe
+stats:
+  - name: progress
+    description: progress-description
+    type: pie
+    data:
+      - { label: 'remaining', type: sql, sql: 'SELECT count(*) * 2 as result from georef', database: 'projects.db' }
+      - { label: 'completed', type: sql, sql: 'SELECT count(*) as result from transcriptions where project = "georef"', database: 'dugnad.db'  }
+
+  - name: growth
+    description: growth-description
+    type: area
+    data:
+      - { type: total, sql: "SELECT date as label, count(*) as count from transcriptions where project = 'georef' group by date order by date asc", database: 'dugnad.db' }
+  - name: top5
+    description: top5-description
+    type: bar
+    label: getusername
+    data:
+      - { type: count, sql: "SELECT user as label, count(*) as count from transcriptions where project = 'georef' group by user order by count desc limit 5", database: "dugnad.db" }
+
