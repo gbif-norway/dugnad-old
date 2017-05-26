@@ -33,7 +33,6 @@ section.projects article a:hover img { border: solid 2px #000; }
 section.projects article a:hover { text-decoration: underline; }
 
 article .difficulty, article .progress { font-size: medium; margin-top: 0; }
-article .difficulty { display: none; }
 
 footer { width: 970px; max-width: 100%; margin: 2em auto; }
 
@@ -47,6 +46,10 @@ section.stats table { text-align: right; }
 section.help { width: 970px; max-width: 100%; padding: 0 1em; margin: 0 auto; }
 
 footer { text-align: center; }
+
+section.projects article a.disabled { color: #000; }
+section.projects article a.disabled:hover { text-decoration: none; }
+section.projects article a.disabled:hover img { border: 2px dotted #000; }
 
 main > nav { width: 970px; max-width: 100%; }
 main > nav { margin: 1em auto; text-align: center; }

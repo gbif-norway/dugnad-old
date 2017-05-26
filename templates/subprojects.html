@@ -8,7 +8,7 @@ $ crumbs().append([None, _('subprojects')])
   <section>
     <h1>$_(project['title'])</h1>
 
-    <p>$_('subprojects-help')
+    <p>$:_(project['help']['subprojects'])
   </section>
 </section>
 
@@ -17,7 +17,7 @@ $ crumbs().append([None, _('subprojects')])
     <article class=project>
       <a href='$prefix/project/$key/sub-$subproject['key']'>
         $if subproject.get('thumbnail'):
-          <img class='subproject-thumbnail' data-progress='$subproject['progress']' src='$(conf['base'])/projects/$(subproject['thumbnail']).png'>
+          <img class='subproject-thumbnail' data-progress='$subproject['progress']' src='$(config['base'])/projects/$(subproject['thumbnail']).png'>
         <h3>$_(subproject['key'])</h3>
         <p class=progress>$_('progress'): $subproject['progress']%
       </a>

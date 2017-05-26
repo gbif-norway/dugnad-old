@@ -30,6 +30,8 @@ $def with (content)
           <a href="$prefix/$crumb[0]">$crumb[1]</a> /
         $else:
           <a>$crumb[1]</a> 
+      $if helper.admin():
+        <p><a href='$prefix/$_('url-backroom')'>$_('backroom')</a>
     </nav>
 </header>
 

@@ -32,13 +32,13 @@ $ crumbs().append([None, _('bakrom')])
   </table>
 </section>
 
-<section class=stats>
-  $for chart in charts:
+$for chart in charts:
+  <section class=stats>
     <article>
-      <div id='chart-$chart['id']' class='ct-chart ct-perfect-fifth'></div>
+      <div id='chart-$chart['id']' class='ct-chart ct-major-twelfth'></div>
       <p>$chart['description']
     </article>
-</section>
+  </section>
 
 <script>
 $for chart in charts:

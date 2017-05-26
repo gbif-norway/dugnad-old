@@ -1,45 +1,56 @@
-$def with (key, record, forms, zoom, config, showfilters, nick)
+$def with (key, record, forms, zoom, project, showfilters, nick)
 <!doctype html>
 <title>Dugnad</title>
-<link rel='stylesheet' href='$conf['base']/css/transcribe.css'>
-<link rel='stylesheet' href='$conf['base']/css/leaflet.css'>
-<link rel='stylesheet' href='$conf['base']/css/leaflet.draw.css'>
+<link rel='stylesheet' href='$config['base']/css/transcribe.css'>
+<link rel='stylesheet' href='$config['base']/css/leaflet.css'>
+<link rel='stylesheet' href='$config['base']/css/leaflet.draw.css'>
 
-<script src='$conf['base']/js/openseadragon.js'></script>
-<script src='$conf['base']/js/leaflet.js'></script>
-<script src='$conf['base']/js/leaflet.draw.js'></script>
-<script src='$conf['base']/js/wicket.js'></script>
-<script src='$conf['base']/js/wicket-leaflet.js'></script>
-<script src='$conf['base']/js/dugnad.js'></script>
+<script src='$config['base']/js/openseadragon.js'></script>
+<script src='$config['base']/js/leaflet.js'></script>
+<script src='$config['base']/js/leaflet.draw.js'></script>
+<script src='$config['base']/js/wicket.js'></script>
+<script src='$config['base']/js/wicket-leaflet.js'></script>
+<script src='$config['base']/js/dugnad.js'></script>
 
 <header>
-  <section id=title>
-    <h1><a href='$prefix'>dugnad</a></h1>
-  </section>
-  <section id=account>
-  $if helper.uid():
-    $if config.get('filter') and showfilters:
-      <form method=get>
-        <p>
-          <b>$_('filter-by-interest')</b>
-          $for input in helper.showfilter(config).inputs:
-            $:input.render()
-          <input type=submit value="$_('filter')">
-      </form>
-  $else:
-    <p>$_('not-signed-in') <a target=user href='/user/'>$_('link-login')</a> $_("attribution")</small>
-  </section>
-  <section id=actions>
+  <nav>
+    <a href='$prefix'>
+      <h1><b>dugnad</b> annotering &amp; transkribering</h1>
+    </a>
+  
+    $if helper.uid():
+      $if project.get('filter') and showfilters:
+        <form method=get>
+          <p>
+            <b>$_('filter-by-interest')</b>
+            $for input in helper.showfilter(project).inputs:
+              $:input.render()
+            <input type=submit value="$_('filter')">
+        </form>
+
+    <a class='register-login' target=user href='/user/'>
+      $if not helper.uid():
+        $_('link-login')
+      $else:
+        $if helper.name():
+          $_('signed-in-as')
+          $helper.name()
+        $else:
+          $_('signed-in')
+    </a>
+  </nav>
+
+  <nav class=actions>
     <p>
       $if helper.uid():
         <a href='/user/'>$_('greeting') $helper.name()</a>
         ·
-        <a href='$prefix/unfinished'>$_('link-unfinished')</a>
+        <a href='$prefix/$_('url-unfinished')'>$_('link-unfinished')</a>
         ·
       <a id='open-chat' target='chat' href='#'>$_('chat')</a>
       ·
-      <a id='open-help' target='help' href='$prefix/project/telemark/help'>$_('help')</a>
-  </section>
+      <a id='open-help' target='help' href='$prefix/project/telemark/$_('url-help')'>$_('help')</a>
+  </nav>
 </header>
 
 <main>
@@ -50,7 +61,7 @@ $def with (key, record, forms, zoom, config, showfilters, nick)
   $if record:
     <section id="dz">
     <p class=modes>
-      $if config.get('georeference'):
+      $if project.get('georeference'):
         <a id=show-map data-replace="$_('link-image')" href='#'>$_('link-map')</a>
     $if zoom:
       <section id='dzi'></section>
@@ -90,7 +101,7 @@ $def with (key, record, forms, zoom, config, showfilters, nick)
             <input name=later type=submit value="$_('finish-later')">
         <div id=help>
           <h3>$_('help')</h3>
-          <p id=helptext>$_(config.get('help', {}).get('introduction'))
+          <p id=helptext>$_(project.get('help', {}).get('introduction'))
         </div>
       </form>
     </section>

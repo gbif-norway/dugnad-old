@@ -1,17 +1,18 @@
 #!/usr/bin/python
 # coding: utf-8
 
-# todo:
-# - frie termer
+import metnopy
 
 import os
 import re
 import sys
 import web
+import glob
 import time
 import json
 import uuid
 import yaml
+import string
 import hashlib
 import logging
 import urllib
@@ -26,12 +27,23 @@ from collections import OrderedDict
 from web import form, template
 from tokyo import cabinet
 
+from yapsy.PluginManager import PluginManager
+from yapsy.IPlugin import IPlugin
+from dugnadplugins import *
+
+manager = PluginManager()
+manager.setCategoriesFilter({
+    'Chart': IChartPlugin
+})
+manager.setPluginPlaces(["plugins"])
+manager.collectPlugins()
+
+logging.basicConfig(level=logging.INFO)
+
 RESOLVER = "https://data.gbif.no/resolver/"
 
 config = yaml.load(file('config.yaml'))
 prefix = re.search(r"http?s:\/\/[^\/]+(.*)", config['prefix']).groups()[0]
-
-conf = config
 
 def crumbs():
     if not 'crumbs' in web.ctx: web.ctx['crumbs'] = []
@@ -59,6 +71,9 @@ class helpers:
   def uid(self):
     return session.get('id')
 
+  def admin(self):
+    return session.get('admin')
+
   def showfilter(self, config):
     form = buildform('filter', config)
     form.validates(web.input())
@@ -75,7 +90,6 @@ def getstats(key, project):
     stats.append(("transcriptions-total", res[0]['count']))
     res = db.query("select count(*) as count from transcriptions where project = '%s' and date = date()" % key)
     stats.append(("transcriptions-today", res[0]['count']))
-
     return stats
 
 def getusername(label):
@@ -90,7 +104,7 @@ def getusername(label):
 
 def helplink(text):
     if not text: return ""
-    return "<a class=help title='%s'><img src='/static-dugnad/images/help.png'></a>" % _(text)
+    return "<a class=help title='%s'><img src='%s/images/help.png'></a>" % (_(text), config['base'])
 
 def buildform(key, config):
     if not key in config['forms']: raise Exception("Form not found")
@@ -141,7 +155,7 @@ def chart(raw):
     chart['type'] = raw['type']
     chart['labels'] = []
     chart['series'] = []
-    for item in raw.get('data', []):
+    for i, item in enumerate(raw.get('data', [])):
         if item['type'] == 'sql':
             chart['labels'].append(_(item.get('label')))
             db = web.database(dbn='sqlite', db=item['database'])
@@ -151,9 +165,15 @@ def chart(raw):
             db = web.database(dbn='sqlite', db=item['database'])
             results = db.query(item['sql'])
             chart['series'].append([])
-            for result in results:
-                chart['labels'].append(result.get('label'))
-                chart['series'][0].append(result.get('count'))
+            if 'plugin' in item:
+                plugin = manager.getPluginByName(item['plugin'], 'Chart')
+                if plugin:
+                    chart = plugin.plugin_object.chart(chart, results[0], i)
+            else:
+                for result in results:
+                    if i == 0:
+                        chart['labels'].append(result.get('label'))
+                    chart['series'][i].append(result.get('count'))
         if item['type'] == 'total':
             db = web.database(dbn='sqlite', db=item['database'])
             results = db.query(item['sql'])
@@ -167,11 +187,12 @@ def chart(raw):
                     'total': total
                 })
             chart['series'].append([])
-            for item in totals:
-                chart['labels'].append(item.get('label'))
-                chart['series'][0].append(item.get('total'))
-            chart['labels'] = chart['labels'][-5:]
-            chart['series'][0] = chart['series'][0][-5:]
+            for t in totals:
+                chart['labels'].append(t.get('label'))
+                chart['series'][i].append(t.get('total'))
+            if item.get('limit'):
+                chart['labels'] = chart['labels'][-item['limit']:]
+                chart['series'][i] = chart['series'][0][-item['limit']:]
     if raw.get('label'):
         chart['labels'] = [globals()[raw['label']](label) for label in chart['labels']]
     if raw.get('name') == "progress":
@@ -233,7 +254,16 @@ class index:
             m = re.match(r"(?P<date>.+):\s*(?P<text>.*)\s*\((?P<project>.*)\)",
                     change)
             if m: changelog.append(m.groupdict())
-        return render.index(changelog)
+        projects = []
+        for f in glob.glob("projects/*.yaml"):
+            if not os.path.basename(f) in config.get('hidden', []):
+                projects.append(yaml.load(open(f)))
+        return render.index(projects, changelog)
+
+class bakrom:
+    def GET(self, key=None):
+        if not session.get('admin'): return web.seeother("%s" % prefix)
+        return render.bakrom(key)
 
 class help:
     def GET(self, key=None):
@@ -292,7 +322,7 @@ class projectstats:
         project = yaml.load(open('projects/' + key + '.yaml'))
         stats = getstats(key, project)
         charts = []
-        for item in project.get('stats', []):
+        for item in project.get('bakrom', []):
             charts.append(chart(item))
         return render.stats(key, project, stats, charts)
 
@@ -357,14 +387,7 @@ class subproject:
         nick = session.get('name', "Anonym")
         project = yaml.load(open('projects/' + key + '.yaml'))
         pdb = web.database(dbn='sqlite', db=project['source']['database'])
-        raws = pdb.select(project['source']['table'], { 'eventID': subkey },
-            where='eventID = $eventID')
-        records = []
-        for record in raws:
-            record['latitude'] = "%.5f" % float(record['decimalLatitude'])
-            record['longitude'] = "%.5f" % float(record['decimalLongitude'])
-            records.append(record)
-        return render.subproject(key, subkey, project, records)
+        return simplerender.transcribe(key, record, forms, zoom, config, True, nick)
 
 class project:
     def subprojects(self, key, uid, nick, data, project):
@@ -492,20 +515,43 @@ class annotate:
 urls = (
     '%s' % prefix, 'index',
     '%s/' % prefix, 'index',
+
+    '%s/hjelp' % prefix, 'help',
     '%s/help' % prefix, 'help',
+
+    '%s/bakrom' % prefix, 'bakrom',
+    '%s/backroom' % prefix, 'bakrom',
+
+    '%s/uferdig' % prefix, 'listunfinished',
+    '%s/uferdig/(.+)' % prefix, 'unfinished',
+
     '%s/unfinished' % prefix, 'listunfinished',
     '%s/unfinished/(.+)' % prefix, 'unfinished',
+
+
+    '%s/prosjekt/(.+)/sub-(.+)/(.+)' % prefix, 'suboccurrence',
+    '%s/prosjekt/(.+)/sub-(.+)' % prefix, 'subproject',
+    '%s/prosjekt/(.+)/info' % prefix, 'projectinfo',
+    '%s/prosjekt/(.+)/log' % prefix, 'projectlog',
+    '%s/prosjekt/(.+)/bakrom' % prefix, 'projectstats',
+    '%s/prosjekt/(.+)/help' % prefix, 'help',
+    '%s/prosjekt/(.+)/(.+)' % prefix, 'project',
+    '%s/prosjekt/(.+)/' % prefix, 'project',
+    '%s/prosjekt/(.+)' % prefix, 'project',
+
     '%s/project/(.+)/sub-(.+)/(.+)' % prefix, 'suboccurrence',
     '%s/project/(.+)/sub-(.+)' % prefix, 'subproject',
     '%s/project/(.+)/info' % prefix, 'projectinfo',
     '%s/project/(.+)/log' % prefix, 'projectlog',
-    '%s/project/(.+)/stats' % prefix, 'projectstats',
+    '%s/project/(.+)/backroom' % prefix, 'projectstats',
     '%s/project/(.+)/help' % prefix, 'help',
     '%s/project/(.+)/(.+)' % prefix, 'project',
     '%s/project/(.+)/' % prefix, 'project',
     '%s/project/(.+)' % prefix, 'project',
+
     '%s/annotation/(.+)' % prefix, 'showannotation',
     '%s/annotations/(.+)' % prefix, 'showannotations',
+
     '%s/(.+)' % prefix, 'annotate',
 )
 
@@ -527,7 +573,6 @@ simplerender = template.render('templates', globals= {
     'json': json,
     'helper': helpers(),
     'web': web,
-    'conf': conf,
     'config': config
 })
 
@@ -537,7 +582,6 @@ render = template.render('templates', base='layout', globals= {
     'json': json,
     'helper': helpers(),
     'web': web,
-    'conf': conf,
     'config': config,
     'crumbs': crumbs
 })

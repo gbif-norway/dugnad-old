@@ -1,0 +1,42 @@
+$def with(key)
+
+$ crumbs().append(['', 'dugnad'])
+$ crumbs().append([None, _('bakrom')])
+
+<link rel='stylesheet' href='$config['base']/css/chartist.css'>
+<script src='$config['base']/js/chartist.js'></script>
+
+<section class=info>
+  <section>
+    <h1>Bakrommet</h1>
+    <p>Her får du en oversikt over prosjektene – hvem som har bidratt, hvor mye, og hvor ofte.
+  </section>
+</section>
+
+<section class=projects>
+  <article>
+    <a href='$prefix/$_('url-project')/telemark/$_('url-backroom')'>
+      <img src='$config['base']/images/telemark.jpg'>
+      <h3>Annotering</h3>
+    </a>
+    <p class=difficulty>$_('difficulty'): <b>-</b>
+  </article>
+
+  <article>
+    <a href='$prefix/$_('url-project')/telemark/$_('url-backroom')'>
+      <img src='$config['base']/images/telemark.jpg'>
+      <h3>Transkribering: Karplanter fra Telemark</h3>
+    </a>
+    <p class=difficulty>$_('difficulty'): <b>★☆☆</b>
+  </article>
+
+  <article>
+    <a href='$prefix/$_('url-project')/geo-telemark/$_('url-backroom')'>
+      <img src='$config['base']/images/telemark.jpg'>
+      <h3>Georeferering: Karplanter fra Telemark</h3>
+    </a>
+    <p class=difficulty>$_('difficulty'): <b>★★☆</b>
+  </article>
+
+</section>
+

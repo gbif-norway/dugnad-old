@@ -1,4 +1,5 @@
 title: "Transkribering: Karplanter fra Telemark"
+image: telemark.jpg
 description: Naturhistorisk museum i Oslo har gjennom sitt massedigitaliseringsprosjekt avfotografert alle herbarieark i de botaniske samlingene. Dette gir oss en fantastisk mulighet til å øke kvaliteten på informasjon som er knyttet til planteneinnsamlingene i våre databaser. Vi inviterer dere til å hjelpe oss med å skrive inn stedsinformasjon, og korrekturlese annen informasjon for materialet fra Telemark. Bli med på en reise igjennom tid og rom i Telemark og se om du klarer å tolke håndskriften på etikettene, og finne ut hvor de gamle botanikerne gjorde sine innsamlinger.
 help:
   introduction: Transkriberingen skal i størst mulig grad gjøres verbatimt. Det betyr at dere følger slavisk innholdet på etiketten, men de må likevel plasseres i de aktuelle feltene.
@@ -32,6 +33,19 @@ forms:
     - { name: '_labelType', type: select, sql: 'SELECT DISTINCT "_labelType" from telemark ORDER BY "_labelType"', default: [ '', '~ Etikett ~' ] }
     - { name: 'recordedBy', type: select, sql: 'SELECT DISTINCT "recordedBy" from telemark ORDER BY "recordedBy"', default: [ '', '~ Innsamler ~' ] }
 submit: transcribe
+bakrom:
+  - name: count
+    description: per-day-description
+    type: area
+    data:
+      - { type: count, sql: "SELECT date as label, count(*) as count from transcriptions group by date order by date asc", database: 'dugnad.db' }
+        # - { type: count, sql: "SELECT min(date) as _from, max(date) as _to from transcriptions order by date asc", plugin: regn, database: 'dugnad.db' }
+  - name: top
+    description: top-description
+    type: bar
+    label: getusername
+    data:
+      - { type: count, sql: "SELECT user as label, count(*) as count from transcriptions where project = 'telemark' group by user order by count desc", database: "dugnad.db" }
 stats:
   - name: progress
     description: progress-description
@@ -39,12 +53,11 @@ stats:
     data:
       - { label: 'remaining', type: sql, sql: 'SELECT count(*) * 2 as result from telemark', database: 'projects.db' }
       - { label: 'completed', type: sql, sql: 'SELECT count(*) as result from transcriptions where project = "telemark"', database: 'dugnad.db'  }
-
   - name: growth
     description: growth-description
     type: area
     data:
-      - { type: total, sql: "SELECT date as label, count(*) as count from transcriptions group by date order by date asc", database: 'dugnad.db' }
+      - { type: total, sql: "SELECT date as label, count(*) as count from transcriptions group by date order by date asc", database: 'dugnad.db', limit: 5 }
   - name: top5
     description: top5-description
     type: bar
