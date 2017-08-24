@@ -4,7 +4,6 @@ $ crumbs().append(['', 'dugnad'])
 $ crumbs().append([None, _(project['title'])])
 
 <link rel='stylesheet' href='$config['base']/css/chartist.css'>
-<script src='$config['base']/js/chartist.js'></script>
 
 <section class=info>
   <section>
@@ -30,6 +29,7 @@ $ crumbs().append([None, _(project['title'])])
 </nav>
 -->
 
+<script src='$config['base']/js/chartist.js'></script>
 <script>
 $for chart in charts:
   var data = {
@@ -42,8 +42,7 @@ $for chart in charts:
     new Chartist.Bar('#chart-$chart['id']', data);
   $elif chart['type'] == "area":
     new Chartist.Line('#chart-$chart['id']', data, {
-      fullWidth: true, chartPadding: { right: 40 },
-      low: 0, showArea: true,
+      fullWidth: true, chartPadding: { right: 40 }, showArea: true,
       axisY: { showGrid: false, onlyInteger: true }
     });
   $elif chart['type'] == "line":
