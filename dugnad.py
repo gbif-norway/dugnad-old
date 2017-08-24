@@ -564,6 +564,16 @@ web.config.session_parameters['timeout'] = 2592000
 web.config.session_parameters['cookie_domain'] = "data.gbif.no"
 web.config.session_parameters['cookie_path'] = "/"
 
+# Monkey patch for å få sessions til å vare
+def toughcookie(self):
+  if not self.get('_killed'):
+    self._setcookie(self.session_id, expires=31536000)
+    self.store[self.session_id] = dict(self._data)
+  else:
+    self._setcookie(self.session_id, expires=-1)
+web.session.Session._save = toughcookie
+
+
 app = web.application(urls, locals())
 session = web.session.Session(app, web.session.DiskStore(config.get('sessions', 'sessions')))
 
