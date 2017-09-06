@@ -12,14 +12,13 @@ $ crumbs().append([None, _('subprojects')])
   </section>
 </section>
 
-<section class='projects'>
+<section class='projects subprojects'>
   $for subproject in subprojects:
     <article class=project>
-      <a href='$prefix/project/$key/sub-$subproject['key']'>
+      <a href='$prefix/project/$key/?county=$subproject['key']'>
         $if subproject.get('thumbnail'):
-          <img class='subproject-thumbnail' data-progress='$subproject['progress']' src='$(config['base'])/projects/$(subproject['thumbnail']).png'>
+          <img class='subproject-thumbnail' src='$(config['base'])/kommuneskjold/$(subproject['thumbnail']).png'>
         <h3>$_(subproject['key'])</h3>
-        <p class=progress>$_('progress'): $subproject['progress']%
       </a>
     </article>
   </section>

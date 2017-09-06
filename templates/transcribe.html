@@ -1,4 +1,4 @@
-$def with (key, record, forms, zoom, project, showfilters, nick)
+$def with (key, record, forms, project, showfilters, nick)
 <!doctype html>
 <title>Dugnad</title>
 <link rel='stylesheet' href='$config['base']/css/transcribe.css'>
@@ -62,8 +62,11 @@ $def with (key, record, forms, zoom, project, showfilters, nick)
     <section id="dz">
     <p class=modes>
       $if project.get('georeference'):
-        <a id=show-map data-replace="$_('link-image')" href='#'>$_('link-map')</a>
-    $if zoom:
+        $if record["_zoom"]:
+          <a id=show-map data-replace="$_('link-image')" href='#'>$_('link-map')</a>
+        $else:
+          <a id=show-map>$_('no-image')</a>
+    $if record["_zoom"]:
       <section id='dzi'></section>
       <script>
       var viewer = OpenSeadragon({
@@ -76,7 +79,7 @@ $def with (key, record, forms, zoom, project, showfilters, nick)
         showHomeControl: false,
         zoomPerScroll: 1.1,
         prefixUrl: "/static/images/",
-        tileSources: "/static/tmp/$zoom"
+        tileSources: "/static/tmp/$record["zoom"]"
       });
       </script>
     $else:

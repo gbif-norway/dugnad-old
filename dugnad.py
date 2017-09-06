@@ -1,8 +1,6 @@
 #!/usr/bin/python
 # coding: utf-8
 
-import metnopy
-
 import os
 import re
 import sys
@@ -85,7 +83,6 @@ def getstats(key, project):
     stats.append(("users-total", res[0]['count']))
     res = db.query("select count(distinct(user)) as count from transcriptions where project = '%s' and date = date()" % key)
     stats.append(("users-today", res[0]['count']))
-
     res = db.query("select count(*) as count from transcriptions where project = '%s'" % key)
     stats.append(("transcriptions-total", res[0]['count']))
     res = db.query("select count(*) as count from transcriptions where project = '%s' and date = date()" % key)
@@ -106,6 +103,42 @@ def helplink(text):
     if not text: return ""
     return "<a class=help title='%s'><img src='%s/images/help.png'></a>" % (_(text), config['base'])
 
+def validaterecord(db, data, project, oid=None):
+    record = getrecord(db, data, project, oid)
+    forms = OrderedDict((form, buildform(form, project)) for form in project['annotate']['order'])
+    for _, form in forms.iteritems(): form.validates(record)
+    return (record, forms)
+
+def getrecord(db, data, project, oid=None):
+  filters = {}
+  if oid:
+    q = { 'key': oid }
+    recs = db.select(project['source']['table'], q, where="occurrenceID = $key", limit=1)
+  else:
+    if project['forms'].get('filter'):
+      for f in project['forms']['filter']:
+        if data.get(f['name']) and data[f['name']] != "None":
+          filters[f['name']] = data[f['name']]
+    if len(filters) < 1:
+        where = "completed < 2"
+    else:
+        where = web.db.sqlwhere(filters)
+    if 'postfilters' in project:
+        where = where + " and " + project['postfilters']
+    recs = db.select(project['source']['table'], where=where,
+        limit=1, order="RANDOM()")
+  try:
+    record = recs[0]
+    if record.get('genus'):
+      record['scientificName'] = "%s %s" % (
+          record.get('genus'), record.get('species')
+      )
+    record['_zoom'] = zoomify(record.get('associatedMedia'))
+  except IndexError as e:
+    record = None
+  return record
+
+
 def buildform(key, config):
     if not key in config['forms']: raise Exception("Form not found")
     inputs = []
@@ -115,7 +148,10 @@ def buildform(key, config):
         if not 'type' in i: raise Exception("Needs a type")
         k = i['name']
         if i['type'] == "text":
-            inputs.append(form.Textbox(k, description = _(k), post = helplink(i.get('help'))))
+            if 'disabled' in i:
+                inputs.append(form.Textbox(k, description = _(k), post = helplink(i.get('help')), disabled = True))
+            else:
+                inputs.append(form.Textbox(k, description = _(k), post = helplink(i.get('help'))))
         elif i['type'] == "hidden":
             inputs.append(form.Hidden(k, description = _(k)))
         elif i['type'] == "checkbox":
@@ -143,8 +179,15 @@ def buildform(key, config):
           inputs.append(form.Textbox("year", description = _('year'), post = helplink('help-year')))
           inputs.append(form.Textbox("month", description = _('month'), post = helplink('help-month')))
           inputs.append(form.Textbox("day", description = _('day'), post = helplink('help-day')))
+        elif i['type'] == 'location':
+          inputs.append(form.Textbox("county", description = _('county'), disabled = True))
+          inputs.append(form.Textarea("locality", description = _('locality'), disabled = True))
+          inputs.append(form.Textbox("verbatimCoordinates", description = _('verbatimCoordinates'), disabled = True))
+          inputs.append(form.Hidden("verbatimWKT", description = _('verbatimWKT'), disabled = True))
+          inputs.append(form.Hidden("verbatimLatitude", description = _('verbatimLatitude'), disabled = True))
+          inputs.append(form.Hidden("verbatimUncertaintyInMeters", description = _('verbatimUncertaintyInMeters'), disabled = True))
+          inputs.append(form.Hidden("verbatimLongitude", description = _('verbatimLongitude'), disabled = True))
         else: raise Exception("Unknown type %s" % i['type'])
-
     return form.Form(*inputs)
 
 def chart(raw):
@@ -211,7 +254,7 @@ def zoomify(raw):
             image.dzsave(name, layout="dz")
           return "%s.dzi" % imagekey
     except Exception as e:
-        raise e
+        return None
 
 def updatetranscription(id, data):
     finished = True
@@ -257,7 +300,9 @@ class index:
         projects = []
         for f in glob.glob("projects/*.yaml"):
             if not os.path.basename(f) in config.get('hidden', []):
-                projects.append(yaml.load(open(f)))
+                data = yaml.load(open(f))
+                data['slug'] = os.path.splitext(os.path.basename(f))[0]
+                projects.append(data)
         return render.index(projects, changelog)
 
 class bakrom:
@@ -292,12 +337,11 @@ class unfinished:
             origs = pdb.select(project['source']['table'],
                 where = web.db.sqlwhere(origid), limit=1)
             orig = origs[0]
-            zoom = False
             if orig.get("associatedMedia"):
-                zoom = zoomify(orig['associatedMedia'])
+                record['_zoom'] = zoomify(orig['associatedMedia'])
             forms = OrderedDict((form, buildform(form, project)) for form in project['annotate']['order'])
             for _, form in forms.iteritems(): form.validates(anno)
-            return simplerender.transcribe("unfinished/" + record['id'], anno, forms, zoom, project, False, nick)
+            return simplerender.transcribe("unfinished/" + record['id'], anno, forms, project, False, nick)
         except ValueError as e:
             raise web.seeother('%s/unfinished' % prefix)
 
@@ -339,61 +383,11 @@ class projectinfo:
         except IOError as e:
           raise web.seeother('%s' % prefix)
 
-class suboccurrence:
-    def GET(self, key, subkey, oid):
-      uid = session.get('id')
-      nick = session.get("name", "Anonym")
-      data = web.input()
-      try:
-        project = yaml.load(open('projects/' + key + '.yaml'))
-        pdb = web.database(dbn='sqlite', db=project['source']['database'])
-        filters = {}
-        if oid:
-          q = { 'key': oid }
-          recs = pdb.select(project['source']['table'], q, where="occurrenceID = $key", limit=1)
-        else:
-          if project['forms'].get('filter'):
-            for f in project['forms']['filter']:
-              if data.get(f['name']) and data[f['name']] != "None":
-                filters[f['name']] = data[f['name']]
-          if len(filters) < 1:
-              where = "completed < 2"
-          else:
-              where = web.db.sqlwhere(filters)
-          recs = pdb.select(project['source']['table'], where=where,
-              limit=1, order="RANDOM()")
-        zoom = False
-        try:
-          record = recs[0]
-          if record.get('genus'):
-            record['scientificName'] = "%s %s" % (
-                record.get('genus'), record.get('species')
-            )
-          if record.get("associatedMedia"):
-            zoom = zoomify(record['associatedMedia'])
-        except IndexError as e:
-          record = None
-        forms = OrderedDict((form, buildform(form, project)) for form in project['annotate']['order'])
-        for _, form in forms.iteritems(): form.validates(record)
-        return simplerender.transcribe("project/" + key, record, forms, zoom, project, True, nick)
-      except IOError as e:
-        raise web.seeother('%s' % prefix)
-      except ValueError as e:
-        raise web.seeother('%s' % prefix)
-
-class subproject:
-    def GET(self, key, subkey):
-        uid = session.get('id')
-        nick = session.get('name', "Anonym")
-        project = yaml.load(open('projects/' + key + '.yaml'))
-        pdb = web.database(dbn='sqlite', db=project['source']['database'])
-        return simplerender.transcribe(key, record, forms, zoom, config, True, nick)
-
 class project:
-    def subprojects(self, key, uid, nick, data, project):
+    def prefilter(self, prefilter, key, uid, nick, data, project):
       pdb = web.database(dbn='sqlite', db=project['source']['database'])
-      subprojects = pdb.query(project['subprojects']['query'])
-      return render.subprojects(key, project, subprojects)
+      options = pdb.query(prefilter['list'])
+      return render.prefilter(key, project, options)
 
     def GET(self, key, oid=None):
       uid = session.get('id')
@@ -401,38 +395,13 @@ class project:
       data = web.input()
       try:
         project = yaml.load(open('projects/' + key + '.yaml'))
-        if 'subprojects' in project:
-            return self.subprojects(key, uid, nick, data, project)
+        if 'prefilters' in project:
+            for prefilter in project['prefilters']:
+                if prefilter['name'] not in data:
+                    return self.prefilter(prefilter, key, uid, nick, data, project)
         pdb = web.database(dbn='sqlite', db=project['source']['database'])
-        filters = {}
-        if oid:
-          q = { 'key': oid }
-          recs = pdb.select(project['source']['table'], q, where="occurrenceID = $key", limit=1)
-        else:
-          if project['forms'].get('filter'):
-            for f in project['forms']['filter']:
-              if data.get(f['name']) and data[f['name']] != "None":
-                filters[f['name']] = data[f['name']]
-          if len(filters) < 1:
-              where = "completed < 2"
-          else:
-              where = web.db.sqlwhere(filters)
-          recs = pdb.select(project['source']['table'], where=where,
-              limit=1, order="RANDOM()")
-        zoom = False
-        try:
-          record = recs[0]
-          if record.get('genus'):
-            record['scientificName'] = "%s %s" % (
-                record.get('genus'), record.get('species')
-            )
-          if record.get("associatedMedia"):
-            zoom = zoomify(record['associatedMedia'])
-        except IndexError as e:
-          record = None
-        forms = OrderedDict((form, buildform(form, project)) for form in project['annotate']['order'])
-        for _, form in forms.iteritems(): form.validates(record)
-        return simplerender.transcribe("project/" + key, record, forms, zoom, project, True, nick)
+        record, forms = validaterecord(pdb, data, project, oid)
+        return simplerender.transcribe("project/" + key, record, forms, project, True, nick)
       except IOError as e:
         raise web.seeother('%s' % prefix)
       except ValueError as e:
@@ -483,12 +452,12 @@ class annotate:
           for k,v in raw.iteritems():
             record[k.replace("dwc:", "")] = v
           date = record.get('eventDate')
-          zoom = zoomify(record['associatedMedia'])
+          record['_zoom'] = zoomify(record['associatedMedia'])
           if date:
             record['year'], record['month'], record['day'] = date.split("-")
           forms = OrderedDict((form, buildform(form, config)) for form in config['annotate']['order'])
           for _, form in forms.iteritems(): form.validates(record)
-          return simplerender.transcribe(key, record, forms, zoom, config, True, nick)
+          return simplerender.transcribe(key, record, forms, config, True, nick)
         except Exception as e:
           message = "%s not found (%s)" % (key, e)
           return render.error(message)
@@ -528,9 +497,6 @@ urls = (
     '%s/unfinished' % prefix, 'listunfinished',
     '%s/unfinished/(.+)' % prefix, 'unfinished',
 
-
-    '%s/prosjekt/(.+)/sub-(.+)/(.+)' % prefix, 'suboccurrence',
-    '%s/prosjekt/(.+)/sub-(.+)' % prefix, 'subproject',
     '%s/prosjekt/(.+)/info' % prefix, 'projectinfo',
     '%s/prosjekt/(.+)/log' % prefix, 'projectlog',
     '%s/prosjekt/(.+)/bakrom' % prefix, 'projectstats',
@@ -539,8 +505,6 @@ urls = (
     '%s/prosjekt/(.+)/' % prefix, 'project',
     '%s/prosjekt/(.+)' % prefix, 'project',
 
-    '%s/project/(.+)/sub-(.+)/(.+)' % prefix, 'suboccurrence',
-    '%s/project/(.+)/sub-(.+)' % prefix, 'subproject',
     '%s/project/(.+)/info' % prefix, 'projectinfo',
     '%s/project/(.+)/log' % prefix, 'projectlog',
     '%s/project/(.+)/backroom' % prefix, 'projectstats',
@@ -548,6 +512,9 @@ urls = (
     '%s/project/(.+)/(.+)' % prefix, 'project',
     '%s/project/(.+)/' % prefix, 'project',
     '%s/project/(.+)' % prefix, 'project',
+
+    '%s/annotering/(.+)' % prefix, 'showannotation',
+    '%s/annoteringer/(.+)' % prefix, 'showannotations',
 
     '%s/annotation/(.+)' % prefix, 'showannotation',
     '%s/annotations/(.+)' % prefix, 'showannotations',

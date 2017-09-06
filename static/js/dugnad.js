@@ -149,17 +149,29 @@ document.addEventListener("DOMContentLoaded", function(e) {
   var att = '<a href="https://www.mapzen.com/rights">Attribution.</a>. Data &copy;<a href="https://openstreetmap.org/copyright">OSM</a> contributors.';
   var osm = new L.TileLayer(url, { minZoom: 1, maxZoom: 16, attribution: att });
 
+  var url = "http://opencache.statkart.no/gatekeeper/gk/gk.open";
+  var opts = {
+    layers: 'topo2',
+    format: 'image/png',
+    transparent: true,
+    attribution: "Kartverket"
+  };
+  var statkart = new L.TileLayer.WMS(url, opts);
 
   if(document.getElementById('map')) {
     T.map = L.map('map').setView([59, 9], 8);
-    T.map.addLayer(osm);
+
+    T.map.addLayer(statkart);
   
     var georef = new L.FeatureGroup();
     T.map.addLayer(georef);
   
     var control = new L.Control.Draw({
-      position: 'bottomleft',
-      edit: { featureGroup: georef }
+      edit: { featureGroup: georef },
+      draw: {
+        marker: false,
+        rectangle: false
+      }
     });
     T.map.addControl(control);
   	
@@ -179,21 +191,27 @@ document.addEventListener("DOMContentLoaded", function(e) {
 
   T.toggle('toggle-help', 'help');
 
-  var latitude = document.getElementsByName('decimalLatitude')[0];
-  var longitude = document.getElementsByName('decimalLongitude')[0];
-  var uncertainty = document.getElementById('coordinateUncertaintyInMeters');
-  if(latitude && longitude) {
+  var latitude = document.getElementsByName('verbatimLatitude')[0];
+  var longitude = document.getElementsByName('verbatimLongitude')[0];
+  var uncertainty = document.getElementById('verbatimUncertaintyInMeters');
+  if(latitude && longitude && latitude.value && longitude.value) {
     var lat = parseFloat(latitude.value);
     var lon = parseFloat(longitude.value);
     var radius = (uncertainty && uncertainty.value) ? uncertainty.value : 10;
-    T.marker = L.circle([lat, lon], radius);
-    console.log(T.marker);
-    console.log(T.map);
+    T.marker = L.circle([lat, lon], radius, {
+      weight: 2,
+      color: "black",
+      interactive: false
+    });
     T.map.addLayer(T.marker);
     T.marker.addTo(T.map);
     latitude.onkeyup = T.checkcoordinates;
     longitude.onkeyup = T.checkcoordinates;
     T.map.panTo(T.marker.getLatLng());
+    T.map.fitBounds(T.marker.getBounds(), {
+      paddingBottomRight: [300, 150],
+      paddingTopLeft: [0, 100]
+    });
   }
 
   var chatln = document.getElementById('open-chat');

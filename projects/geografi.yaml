@@ -1,0 +1,60 @@
+title: "Koordinatfesting: Karplanter fra Telemark"
+description: ""
+georeference: true
+template: georeference
+postfilters: "verbatimUncertaintyInMeters > 700 and completed < 2"
+prefilters:
+  - name: "county"
+    list: "SELECT case when(county = '' or county is null) then 'unknown' else (county) end as key, count(*) as count, lower(county) as thumbnail from 'geografi' group by county order by key asc"
+    total: "SELECT count(*) as total where county = ?"
+    complete: "SELECT count(*) as total where completed > 2 and county = ?"
+help:
+  introduction: Bruk informasjonen i lokalitetsfeltet for å forbedre kartfestingen av innsamlingen. Du kan kartfeste innsamlingen som en linje, et polygon eller en sirkel. Hvis det ser ut som det ikke er mulig å forbedre kartfestingen eller hvis lokalitetsbeskrivelsen er mindre nøyaktig enn koordinatene som er satt huker du av for å "Godta eksisterende kartfesting"
+  subprojects: telemark-subprojects
+source:
+  database: projects.db
+  table: "geografi"
+key: "catalogNumber"
+annotate:
+  order: [ taxonomy, event, locality, georeference, comment ]
+filter: filter
+forms:
+  event:
+    - { name: 'catalogNumber', type: hidden }
+    - { name: 'recordedBy', type: text, disabled: true }
+    - { name: "eventDate", type: text, disabled: true }
+  locality:
+    - { name: "verbatimGeography", type: location }
+  georeference:
+    - { name: "footprintWKT", type: text }
+    - { name: "decimalLatitude", type: text }
+    - { name: "decimalLongitude", type: text }
+    - { name: "coordinateUncertaintyInMeters", type: text }
+  taxonomy:
+    - { name: "scientificName", type: text, disabled: true }
+  comment:
+    - { name: "acceptGeoreference", type: checkbox }
+    - { name: "annotationRemarks", type: textfield }
+  filter:
+    - { name: 'county', type: select, sql: 'SELECT DISTINCT "county" from geografi ORDER BY "county"', default: [ '', '~ Kommune ~' ] }
+submit: transcribe
+stats:
+  - name: progress
+    description: progress-description
+    type: pie
+    data:
+      - { label: 'remaining', type: sql, sql: 'SELECT count(*) * 2 as result from geografi', database: 'projects.db' }
+      - { label: 'completed', type: sql, sql: 'SELECT count(*) as result from transcriptions where project = "geografi"', database: 'dugnad.db'  }
+
+  - name: growth
+    description: growth-description
+    type: area
+    data:
+      - { type: total, sql: "SELECT date as label, count(*) as count from transcriptions where project = 'geografi' group by date order by date asc", database: 'dugnad.db' }
+  - name: top5
+    description: top5-description
+    type: bar
+    label: getusername
+    data:
+      - { type: count, sql: "SELECT user as label, count(*) as count from transcriptions where project = 'geografi' group by user order by count desc limit 5", database: "dugnad.db" }
+
