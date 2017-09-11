@@ -34,18 +34,17 @@ forms:
     - { name: 'recordedBy', type: select, sql: 'SELECT DISTINCT "recordedBy" from telemark ORDER BY "recordedBy"', default: [ '', '~ Innsamler ~' ] }
 submit: transcribe
 bakrom:
-  - name: count
-    description: per-day-description
-    type: area
-    data:
-      - { type: count, sql: "SELECT date as label, count(*) as count from transcriptions group by date order by date asc", database: 'dugnad.db' }
-      - { type: count, sql: "SELECT min(date) as _from, max(date) as _to from transcriptions order by date asc", plugin: regn, database: 'dugnad.db' }
   - name: top
     description: top-description
     type: bar
     label: getusername
     data:
       - { type: count, sql: "SELECT user as label, count(*) as count from transcriptions where project = 'telemark' group by user order by count desc", database: "dugnad.db" }
+  - name: growth
+    description: growth-entire-period
+    type: long-period
+    data:
+      - { type: total, sql: "SELECT date as label, count(*) as count from transcriptions group by date order by date asc", database: 'dugnad.db' }
 stats:
   - name: progress
     description: progress-description

@@ -1,16 +1,16 @@
 $def with (key, record, forms, project, showfilters, nick)
 <!doctype html>
 <title>Dugnad</title>
-<link rel='stylesheet' href='$config['base']/css/transcribe.css'>
-<link rel='stylesheet' href='$config['base']/css/leaflet.css'>
-<link rel='stylesheet' href='$config['base']/css/leaflet.draw.css'>
+<link rel='stylesheet' href='$config['base']/css/transcribe.css?1'>
+<link rel='stylesheet' href='$config['base']/css/leaflet.css?1'>
+<link rel='stylesheet' href='$config['base']/css/leaflet.draw.css?1'>
 
-<script src='$config['base']/js/openseadragon.js'></script>
-<script src='$config['base']/js/leaflet.js'></script>
-<script src='$config['base']/js/leaflet.draw.js'></script>
-<script src='$config['base']/js/wicket.js'></script>
-<script src='$config['base']/js/wicket-leaflet.js'></script>
-<script src='$config['base']/js/dugnad.js'></script>
+<script src='$config['base']/js/openseadragon.js?1'></script>
+<script src='$config['base']/js/leaflet.js?1'></script>
+<script src='$config['base']/js/leaflet.draw.js?1'></script>
+<script src='$config['base']/js/wicket.js?1'></script>
+<script src='$config['base']/js/wicket-leaflet.js?1'></script>
+<script src='$config['base']/js/dugnad.js?1'></script>
 
 <header>
   <nav>
@@ -79,7 +79,7 @@ $def with (key, record, forms, project, showfilters, nick)
         showHomeControl: false,
         zoomPerScroll: 1.1,
         prefixUrl: "/static/images/",
-        tileSources: "/static/tmp/$record["zoom"]"
+        tileSources: "/static/tmp/$record["_zoom"]"
       });
       </script>
     $else:

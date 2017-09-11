@@ -8,10 +8,10 @@ T.georeference = function(layer) {
 
   if (layer instanceof L.Circle) {
     var latlng = layer.getLatLng();
-    document.getElementById('decimalLatitude').value = latlng.lat;
-    document.getElementById('decimalLongitude').value = latlng.lng;
+    document.getElementById('decimalLatitude').value = latlng.lat.toFixed(7);
+    document.getElementById('decimalLongitude').value = latlng.lng.toFixed(7);
     document.getElementById('coordinateUncertaintyInMeters').value =
-      layer.getRadius();
+      parseInt(layer.getRadius());
   } else {
     var wkt = new Wkt.Wkt();
     wkt.read(JSON.stringify(layer.toGeoJSON()));
@@ -149,7 +149,7 @@ document.addEventListener("DOMContentLoaded", function(e) {
   var att = '<a href="https://www.mapzen.com/rights">Attribution.</a>. Data &copy;<a href="https://openstreetmap.org/copyright">OSM</a> contributors.';
   var osm = new L.TileLayer(url, { minZoom: 1, maxZoom: 16, attribution: att });
 
-  var url = "http://opencache.statkart.no/gatekeeper/gk/gk.open";
+  var url = "https://opencache.statkart.no/gatekeeper/gk/gk.open";
   var opts = {
     layers: 'topo2',
     format: 'image/png',
@@ -170,7 +170,7 @@ document.addEventListener("DOMContentLoaded", function(e) {
       edit: { featureGroup: georef },
       draw: {
         marker: false,
-        rectangle: false
+        polyline: false
       }
     });
     T.map.addControl(control);
@@ -191,29 +191,42 @@ document.addEventListener("DOMContentLoaded", function(e) {
 
   T.toggle('toggle-help', 'help');
 
-  var latitude = document.getElementsByName('verbatimLatitude')[0];
-  var longitude = document.getElementsByName('verbatimLongitude')[0];
-  var uncertainty = document.getElementById('verbatimUncertaintyInMeters');
-  if(latitude && longitude && latitude.value && longitude.value) {
-    var lat = parseFloat(latitude.value);
-    var lon = parseFloat(longitude.value);
-    var radius = (uncertainty && uncertainty.value) ? uncertainty.value : 10;
-    T.marker = L.circle([lat, lon], radius, {
-      weight: 2,
-      color: "black",
-      interactive: false
-    });
-    T.map.addLayer(T.marker);
-    T.marker.addTo(T.map);
-    latitude.onkeyup = T.checkcoordinates;
-    longitude.onkeyup = T.checkcoordinates;
-    T.map.panTo(T.marker.getLatLng());
-    T.map.fitBounds(T.marker.getBounds(), {
+  var footprint = document.getElementsByName('verbatimWKT')[0];
+  if(footprint) {
+    console.log("WKT");
+    var wkt = new Wkt.Wkt();
+    wkt.read(footprint.value);
+    var obj = wkt.toObject(T.map.defaults);
+    obj.addTo(T.map);
+    console.log(obj);
+    T.map.fitBounds(obj.getBounds(), {
       paddingBottomRight: [300, 150],
       paddingTopLeft: [0, 100]
     });
+  } else {
+    var latitude = document.getElementsByName('verbatimLatitude')[0];
+    var longitude = document.getElementsByName('verbatimLongitude')[0];
+    var uncertainty = document.getElementById('verbatimUncertaintyInMeters');
+    if(latitude && longitude && latitude.value && longitude.value) {
+      var lat = parseFloat(latitude.value);
+      var lon = parseFloat(longitude.value);
+      var radius = (uncertainty && uncertainty.value) ? uncertainty.value : 10;
+      T.marker = L.circle([lat, lon], radius, {
+        weight: 2,
+        color: "black",
+        interactive: false
+      });
+      T.map.addLayer(T.marker);
+      T.marker.addTo(T.map);
+      latitude.onkeyup = T.checkcoordinates;
+      longitude.onkeyup = T.checkcoordinates;
+      T.map.panTo(T.marker.getLatLng());
+      T.map.fitBounds(T.marker.getBounds(), {
+        paddingBottomRight: [300, 150],
+        paddingTopLeft: [0, 100]
+      });
+    }
   }
-
   var chatln = document.getElementById('open-chat');
   if(chatln) {
     chatln.onclick = function(e) {

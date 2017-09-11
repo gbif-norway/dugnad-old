@@ -49,12 +49,26 @@ $for chart in charts:
   $if chart['type'] == "pie":
     new Chartist.Pie('#chart-$chart['id']', data);
   $elif chart['type'] == "bar":
-    new Chartist.Bar('#chart-$chart['id']', data);
+    new Chartist.Bar('#chart-$chart['id']', data, {
+      axisX: { onlyInteger: true },
+      axisY: { onlyInteger: true }
+    });
+  $elif chart['type'] == "long-period":
+    new Chartist.Line('#chart-$chart['id']', data, {
+      fullWidth: true, chartPadding: { right: 40 },
+      low: 0, showArea: true, showPoint: false,
+      axisY: { showGrid: false, onlyInteger: true },
+      axisX: { onlyInteger: true, labelInterpolationFnc: function skipLabels(value, index) {
+        return index % 10 === 0 ? value : null;
+        }
+      }
+    });
   $elif chart['type'] == "area":
     new Chartist.Line('#chart-$chart['id']', data, {
       fullWidth: true, chartPadding: { right: 40 },
       low: 0, showArea: true,
-      axisY: { showGrid: false, onlyInteger: true }
+      axisY: { showGrid: false, onlyInteger: true },
+      axisX: { onlyInteger: true }
     });
   $elif chart['type'] == "line":
     new Chartist.Line('#chart-$chart['id']', data);

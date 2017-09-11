@@ -113,7 +113,8 @@ def getrecord(db, data, project, oid=None):
   filters = {}
   if oid:
     q = { 'key': oid }
-    recs = db.select(project['source']['table'], q, where="occurrenceID = $key", limit=1)
+    where = "%s = $key" % project['key']
+    recs = db.select(project['source']['table'], q, where=where, limit=1)
   else:
     if project['forms'].get('filter'):
       for f in project['forms']['filter']:
@@ -124,9 +125,8 @@ def getrecord(db, data, project, oid=None):
     else:
         where = web.db.sqlwhere(filters)
     if 'postfilters' in project:
-        where = where + " and " + project['postfilters']
-    recs = db.select(project['source']['table'], where=where,
-        limit=1, order="RANDOM()")
+      where = where + " and " + project['postfilters']
+    recs = db.select(project['source']['table'], where=where, limit=1, order="RANDOM()")
   try:
     record = recs[0]
     if record.get('genus'):
@@ -273,7 +273,7 @@ def savetranscription(uid, pkey, data):
 
     finished = True
     if data.pop('skip', False):
-        raise web.seeother("%s/project/telemark" % config['prefix'])
+        raise web.seeother("%s/project/%s" % (config['prefix'], pkey))
     if data.pop('later', False):
         finished = False
     now = str(datetime.date.today())
@@ -292,7 +292,7 @@ class index:
     def GET(self):
         changelog = []
         with open('changelog') as log:
-            changes = list(islice(log, 50))
+            changes = list(islice(log, 4))
         for change in changes:
             m = re.match(r"(?P<date>.+):\s*(?P<text>.*)\s*\((?P<project>.*)\)",
                     change)
@@ -501,6 +501,7 @@ urls = (
     '%s/prosjekt/(.+)/log' % prefix, 'projectlog',
     '%s/prosjekt/(.+)/bakrom' % prefix, 'projectstats',
     '%s/prosjekt/(.+)/help' % prefix, 'help',
+    '%s/prosjekt/(.+)/hjelp' % prefix, 'help',
     '%s/prosjekt/(.+)/(.+)' % prefix, 'project',
     '%s/prosjekt/(.+)/' % prefix, 'project',
     '%s/prosjekt/(.+)' % prefix, 'project',
@@ -509,6 +510,7 @@ urls = (
     '%s/project/(.+)/log' % prefix, 'projectlog',
     '%s/project/(.+)/backroom' % prefix, 'projectstats',
     '%s/project/(.+)/help' % prefix, 'help',
+    '%s/project/(.+)/hjelp' % prefix, 'help',
     '%s/project/(.+)/(.+)' % prefix, 'project',
     '%s/project/(.+)/' % prefix, 'project',
     '%s/project/(.+)' % prefix, 'project',
