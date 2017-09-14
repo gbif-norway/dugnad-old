@@ -162,7 +162,6 @@ document.addEventListener("DOMContentLoaded", function(e) {
     T.map = L.map('map').setView([59, 9], 8);
 
     T.map.addLayer(statkart);
-  
     var georef = new L.FeatureGroup();
     T.map.addLayer(georef);
   
@@ -173,8 +172,20 @@ document.addEventListener("DOMContentLoaded", function(e) {
         polyline: false
       }
     });
+
+    var measure = new L.Control.LinearMeasurement({
+      unitSystem: 'metric',
+      color: '#000000'
+    });
+    T.map.addControl(measure);
+
     T.map.addControl(control);
-  	
+    L.control.scale({
+      position: 'topleft',
+      imperial: false,
+      maxWidth: 200
+    }).addTo(T.map);
+
   	T.map.on('draw:created', function(e) {
       georef.clearLayers();
       T.georeference(e.layer);
@@ -192,8 +203,7 @@ document.addEventListener("DOMContentLoaded", function(e) {
   T.toggle('toggle-help', 'help');
 
   var footprint = document.getElementsByName('verbatimWKT')[0];
-  if(footprint) {
-    console.log("WKT");
+  if(footprint && footprint.value) {
     var wkt = new Wkt.Wkt();
     wkt.read(footprint.value);
     var obj = wkt.toObject(T.map.defaults);

@@ -3,12 +3,11 @@ image: geografi.jpg
 description: ""
 georeference: true
 template: georeference
-postfilters: "verbatimUncertaintyInMeters > 700 and completed < 2"
+postfilters: "verbatimUncertaintyInMeters > 700 and completed < 1"
 prefilters:
   - name: "county"
-    list: "SELECT case when(county = '' or county is null) then 'unknown' else (county) end as key, count(*) as count, lower(county) as thumbnail from 'geografi' group by county order by key asc"
-    total: "SELECT count(*) as total where county = ?"
-    complete: "SELECT count(*) as total where completed > 2 and county = ?"
+    list: "SELECT case when(county = '' or county is null) then 'unknown' else (county) end as key, count(*) as total, lower(county) as thumbnail from 'geografi' group by county order by key asc"
+    complete: "SELECT count(*) as complete from 'geografi' where completed > 0 and county = $id"
 help:
   introduction: Bruk informasjonen i lokalitetsfeltet for å forbedre kartfestingen av innsamlingen. Du kan kartfeste innsamlingen som rektangel, som polygon eller som en sirkel (punkt med usikkerhet). Hvis det ser ut som det ikke er mulig å forbedre kartfestingen eller hvis lokalitetsbeskrivelsen er mindre nøyaktig enn koordinatene som er satt huker du av for å "Godta eksisterende kartfesting"
   subprojects: telemark-subprojects
@@ -31,13 +30,15 @@ forms:
     - { name: "decimalLatitude", type: text }
     - { name: "decimalLongitude", type: text }
     - { name: "coordinateUncertaintyInMeters", type: text }
+    - { name: "verbatimUncertaintyInMeters", type: text }
   taxonomy:
     - { name: "scientificName", type: text, disabled: true }
   comment:
     - { name: "acceptGeoreference", type: checkbox }
     - { name: "annotationRemarks", type: textfield }
   filter:
-    - { name: 'county', type: select, sql: 'SELECT DISTINCT "county" from geografi ORDER BY "county"', default: [ '', '~ Kommune ~' ] }
+    - { name: 'county', type: select, sql: 'SELECT DISTINCT "county" from geografi %s ORDER BY "county"', match: ['genus'], default: [ '', '~ Kommune ~' ] }
+    - { name: 'genus', type: select, sql: 'SELECT DISTINCT "genus" from geografi %s ORDER BY "genus"', match: ['county'], default: [ '', '~ Slekt ~' ] }
 submit: transcribe
 stats:
   - name: progress

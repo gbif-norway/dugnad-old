@@ -15,6 +15,7 @@ import hashlib
 import logging
 import urllib
 import urllib2
+import random
 import gettext
 import datetime
 
@@ -124,12 +125,16 @@ def getrecord(db, data, project, oid=None):
         where = "completed < 2"
     else:
         where = web.db.sqlwhere(filters)
-    if 'postfilters' in project:
-      where = where + " and " + project['postfilters']
-    recs = db.select(project['source']['table'], where=where, limit=1, order="RANDOM()")
+    #if 'postfilters' in project:
+    #  where = where + " and " + project['postfilters']
+    recs = db.select(project['source']['table'], where=where, limit=200, order="verbatimUncertaintyInMeters DESC")
   try:
-    record = recs[0]
-    if record.get('genus'):
+    #record = recs[0]
+    records = []
+    for rec in recs:
+        records.append(rec)
+    record = random.choice(records)
+    if record.get('genus') and record.get('species'):
       record['scientificName'] = "%s %s" % (
           record.get('genus'), record.get('species')
       )
@@ -163,7 +168,16 @@ def buildform(key, config):
                 inputs.append(form.Dropdown(k, options, description = _(k)))
             elif 'sql' in i:
               db = web.database(dbn='sqlite', db=config['source']['database'])
-              results = [v.values()[0] for v in db.query(i['sql'])]
+              data = web.input()
+              if 'match' in i:
+                wheres = []
+                for m in i['match']:
+                  if data.get(m):
+                    wheres.append("WHERE %s = %s" % (m, web.sqlquote(data[m])))
+                query = i['sql'] % (" AND ".join(wheres))
+              else:
+                query = i['sql'] % ""
+              results = [v.values()[0] for v in db.query(query)]
               results = filter(None, results)
               results = [(v, _(v)) for v in results]
               results.insert(0, default)
@@ -273,7 +287,8 @@ def savetranscription(uid, pkey, data):
 
     finished = True
     if data.pop('skip', False):
-        raise web.seeother("%s/project/%s" % (config['prefix'], pkey))
+        referer = web.ctx.env.get('HTTP_REFERER', '%s' % prefix)
+        raise web.seeother(referer)
     if data.pop('later', False):
         finished = False
     now = str(datetime.date.today())
@@ -283,7 +298,8 @@ def savetranscription(uid, pkey, data):
         id=id, project=pkey, key=key, user=uid, date=now, finished=finished,
         updated=now, annotation=json.dumps(data)
     )
-    where = dict(occurrenceID=key)
+    where = dict()
+    where[project['key']] = key
     if finished:
         pdb.update(project['source']['table'], where=web.db.sqlwhere(where),
                 completed = web.db.SQLLiteral("completed + 1"))
@@ -386,7 +402,11 @@ class projectinfo:
 class project:
     def prefilter(self, prefilter, key, uid, nick, data, project):
       pdb = web.database(dbn='sqlite', db=project['source']['database'])
-      options = pdb.query(prefilter['list'])
+      rows = pdb.query(prefilter['list'])
+      options = []
+      for row in rows:
+        row['complete'] = pdb.query(prefilter['complete'], vars={'id': row['key']})[0]['complete']
+        options.append(row)
       return render.prefilter(key, project, options)
 
     def GET(self, key, oid=None):

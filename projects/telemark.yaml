@@ -29,9 +29,9 @@ forms:
     - { name: "multipleIdentifications", type: checkbox, help: "help-identifications" }
     - { name: "annotationRemarks", type: textfield }
   filter:
-    - { name: 'genus', type: select, sql: 'SELECT DISTINCT "genus" from telemark ORDER BY "genus"', default: [ '', '~ Slekt ~' ] }
-    - { name: '_labelType', type: select, sql: 'SELECT DISTINCT "_labelType" from telemark ORDER BY "_labelType"', default: [ '', '~ Etikett ~' ] }
-    - { name: 'recordedBy', type: select, sql: 'SELECT DISTINCT "recordedBy" from telemark ORDER BY "recordedBy"', default: [ '', '~ Innsamler ~' ] }
+    - { name: 'genus', type: select, sql: 'SELECT DISTINCT "genus" from telemark %s ORDER BY "genus"', default: [ '', '~ Slekt ~' ] }
+    - { name: '_labelType', type: select, sql: 'SELECT DISTINCT "_labelType" from telemark %s ORDER BY "_labelType"', default: [ '', '~ Etikett ~' ] }
+    - { name: 'recordedBy', type: select, sql: 'SELECT DISTINCT "recordedBy" from telemark %s ORDER BY "recordedBy"', default: [ '', '~ Innsamler ~' ] }
 submit: transcribe
 bakrom:
   - name: top

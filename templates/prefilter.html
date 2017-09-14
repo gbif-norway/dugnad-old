@@ -20,6 +20,7 @@ $ crumbs().append([None, _('subprojects')])
           $if subproject.get('thumbnail'):
             <img class='subproject-thumbnail' src='$(config['base'])/kommuneskjold/$(subproject['thumbnail']).png'>
           <h3>$_(subproject['key'])</h3>
+          <p>$subproject['complete'] / $subproject['total']
         </a>
       </article>
   </section>
