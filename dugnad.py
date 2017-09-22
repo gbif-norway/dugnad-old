@@ -127,7 +127,7 @@ def getrecord(db, data, project, oid=None):
         where = web.db.sqlwhere(filters)
     #if 'postfilters' in project:
     #  where = where + " and " + project['postfilters']
-    recs = db.select(project['source']['table'], where=where, limit=200, order="verbatimUncertaintyInMeters DESC")
+    recs = db.select(project['source']['table'], where=where, limit=200) # , order="verbatimUncertaintyInMeters DESC")
   try:
     #record = recs[0]
     records = []
