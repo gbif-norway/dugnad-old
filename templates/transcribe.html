@@ -1,18 +1,20 @@
 $def with (key, record, forms, project, showfilters, nick)
 <!doctype html>
 <title>Dugnad</title>
-<link rel='stylesheet' href='$config['base']/css/transcribe.css?3'>
-<link rel='stylesheet' href='$config['base']/css/leaflet.css?3'>
-<link rel='stylesheet' href='$config['base']/css/leaflet.draw.css?3'>
-<link rel='stylesheet' href='$config['base']/css/leaflet.measure.css?3'>
+<link rel='stylesheet' href='$config['base']/css/transcribe.css?$version'>
+<link rel='stylesheet' href='$config['base']/css/leaflet.css?$version'>
+<link rel='stylesheet' href='$config['base']/css/leaflet.draw.css?$version'>
+<link rel='stylesheet' href='$config['base']/css/leaflet.measure.css?$version'>
+<link rel='stylesheet' href='$config['base']/css/auto-complete.css?$version'>
 
-<script src='$config['base']/js/openseadragon.js?3'></script>
-<script src='$config['base']/js/leaflet.js?3'></script>
-<script src='$config['base']/js/leaflet.draw.js?3'></script>
-<script src='$config['base']/js/leaflet.measure.js?3'></script>
-<script src='$config['base']/js/wicket.js?3'></script>
-<script src='$config['base']/js/wicket-leaflet.js?3'></script>
-<script src='$config['base']/js/dugnad.js?3'></script>
+<script src='$config['base']/js/openseadragon.js?$version'></script>
+<script src='$config['base']/js/leaflet.js?$version'></script>
+<script src='$config['base']/js/leaflet.draw.js?$version'></script>
+<script src='$config['base']/js/leaflet.measure.js?$version'></script>
+<script src='$config['base']/js/wicket.js?$version'></script>
+<script src='$config['base']/js/wicket-leaflet.js?$version'></script>
+<script src='$config['base']/js/auto-complete.js?$version'></script>
+<script src='$config['base']/js/dugnad.js?$version'></script>
 
 <header>
   <nav>
@@ -74,7 +76,7 @@ $def with (key, record, forms, project, showfilters, nick)
         id: "dzi",
         showRotationControl: true,
         minZoomImageRatio: 0.5,
-        maxZoomImageRatio: 1.0,
+        maxZoomImageRatio: 2.0,
         showFullPageControl: false,
         degrees: 0,
         showHomeControl: false,
@@ -83,15 +85,12 @@ $def with (key, record, forms, project, showfilters, nick)
         tileSources: "/static/tmp/$record["_zoom"]"
       });
       </script>
-    $else:
+    $elif 'associatedMedia' in record:
       <img class='nozoom' src='$record.get('associatedMedia')'>
     </section>
     <section id=tr>
       <form id='transcription' method='post' action="$prefix/$key">
-        $if record.get('occurrenceID'):
-          <h2 style='display:none;'>$record['occurrenceID']</h2>
-        $else:
-          <h2 style='display: none;'>$key</h2>
+        <h2 style='display: none;'>$record['_id']</h2>
         $for name, form in forms.iteritems():
     			<fieldset>
     				<legend>$_(name)</legend>
@@ -114,8 +113,8 @@ $def with (key, record, forms, project, showfilters, nick)
 </main>
 
 <aside id=chat-overlay class=overlay>
-  $if record and record.get('occurrenceID') and key:
-    <iframe src='https://data.gbif.no/chat/chat.cgi/dugnad?name=$nick&url=https://data.gbif.no/dugnad/$key/$record.get('occurrenceID')'>
+  $if record and record.get('_id') and key:
+    <iframe src='https://data.gbif.no/chat/chat.cgi/dugnad?name=$nick&url=https://data.gbif.no/dugnad/$key/$record.get('_id')'>
   $else:
     <iframe src='https://data.gbif.no/chat/chat.cgi/dugnad?name=$nick'>
 </aside>

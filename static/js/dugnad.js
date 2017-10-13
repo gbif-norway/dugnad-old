@@ -275,5 +275,30 @@ document.addEventListener("DOMContentLoaded", function(e) {
       return false;
     }
   }
+
+  var inputs = document.getElementsByTagName('input');
+  for(var i = 0; i < inputs.length; i++) {
+    if(inputs[i].getAttribute('data-pick')) {
+      (function(input) {
+        var choices = JSON.parse(input.getAttribute('data-pick'));
+        new autoComplete({
+          delay: 0,
+          selector: input,
+          minChars: 1,
+          cache: true,
+          source: function(term, suggest) {
+            term = term.toLowerCase();
+            var hits = [];
+            for(i = 0; i < choices.length; i++)
+              if(~choices[i].toLowerCase().indexOf(term)) hits.push(choices[i]);
+            suggest(hits);
+          },
+          onSelect: function(e, term, item) {
+            e.preventDefault();
+          }
+        });
+      })(inputs[i]);
+    }
+  }
 });
 

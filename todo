@@ -1,3 +1,11 @@
+fra møtet 2017/09/06
+
+* gjør annoteringer til en helt "vanlig" type...
+* logg over tidligere annoteringer/transkripsjoner, med mulighet til å gå
+  tilbake for å rette
+* nettbrett...
+
+* kan innloggede få samme objekt flere ganger? det skal ikke være mulig
 * frie termer (i alle fall for annotering)
 
 * aggregate & be quite specific - by user / by image (difficulty)
@@ -5,7 +13,6 @@
 * redirect til "uferdige transkripsjoner" når man logger inn og har noen
 * skjul "uferdige transkripsjoner" hvis det ikke finnes noen
 * hopp over -> liten liste velg hvorfor
-* behold query ved hopp over, fullfør senere og fullfør
 
 * fullføre norsk oversettelse
 
