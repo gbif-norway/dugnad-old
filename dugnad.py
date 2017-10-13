@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # coding: utf-8
 
+VERSION = "0.5.0"
+
 import os
 import re
 import sys
@@ -30,31 +32,27 @@ from yapsy.PluginManager import PluginManager
 from yapsy.IPlugin import IPlugin
 from dugnadplugins import *
 
+logging.basicConfig(level=logging.INFO)
+
 manager = PluginManager()
 manager.setCategoriesFilter({
     'Chart': IChartPlugin
 })
 manager.setPluginPlaces(["plugins"])
 manager.collectPlugins()
-
-logging.basicConfig(level=logging.INFO)
-
-RESOLVER = "https://data.gbif.no/resolver/"
-
 config = yaml.load(file('config.yaml'))
 prefix = re.search(r"http?s:\/\/[^\/]+(.*)", config['prefix']).groups()[0]
+db = web.database(dbn='sqlite', db='dugnad.db')
+
+try:
+    from gi.repository import Vips
+    config['zoom'] = True
+except ImportError:
+    config['zoom'] = False
 
 def crumbs():
     if not 'crumbs' in web.ctx: web.ctx['crumbs'] = []
     return web.ctx['crumbs']
-
-deepzoom = True
-try:
-    from gi.repository import Vips
-except ImportError:
-    deepzoom = False
-
-db = web.database(dbn='sqlite', db='dugnad.db')
 
 class HelpBox(object):
     def __init__(self, text):
@@ -74,10 +72,12 @@ class helpers:
     return session.get('admin')
 
   def showfilter(self, config):
-    form = buildform('filter', config)
-    form.validates(web.input())
-    return form
+    if 'filter' in config:
+        form = buildform('filter', config)
+        form.validates(web.input())
+        return form
 
+# flytt dette til config
 def getstats(key, project):
     stats = []
     res = db.query("select count(distinct(user)) as count from transcriptions where project = '%s'" % key)
@@ -102,7 +102,10 @@ def getusername(label):
 
 def helplink(text):
     if not text: return ""
-    return "<a class=help title='%s'><img src='%s/images/help.png'></a>" % (_(text), config['base'])
+    link = "<a class=help title='%s'>" % _(text)
+    link += "<img src='%s/images/help.png'>" % config['base']
+    link += "</a>"
+    return link
 
 def validaterecord(db, data, project, oid=None):
     record = getrecord(db, data, project, oid)
@@ -125,38 +128,40 @@ def getrecord(db, data, project, oid=None):
         where = "completed < 2"
     else:
         where = web.db.sqlwhere(filters)
-    #if 'postfilters' in project:
-    #  where = where + " and " + project['postfilters']
-    recs = db.select(project['source']['table'], where=where, limit=200) # , order="verbatimUncertaintyInMeters DESC")
+    recs = db.select(project['source']['table'],
+            where=where, limit=200, order="priority ASC")
   try:
-    #record = recs[0]
     records = []
-    for rec in recs:
-        records.append(rec)
+    for rec in recs: records.append(rec)
     record = random.choice(records)
+
+    # fjern dette asap
     if record.get('genus') and record.get('species'):
       record['scientificName'] = "%s %s" % (
           record.get('genus'), record.get('species')
       )
     record['_zoom'] = zoomify(record.get('associatedMedia'))
+    record['_id'] = record[project['key']]
+    return record
   except IndexError as e:
-    record = None
-  return record
-
+    return None
 
 def buildform(key, config):
     if not key in config['forms']: raise Exception("Form not found")
     inputs = []
-    recipe = config['forms'][key]
-    for i in recipe:
+    for i in config['forms'][key]:
         if not 'name' in i: raise Exception("Needs a name")
         if not 'type' in i: raise Exception("Needs a type")
         k = i['name']
         if i['type'] == "text":
+            opts = {}
+            opts['description'] = _(k)
+            opts['post'] = helplink(i.get('help'))
             if 'disabled' in i:
-                inputs.append(form.Textbox(k, description = _(k), post = helplink(i.get('help')), disabled = True))
-            else:
-                inputs.append(form.Textbox(k, description = _(k), post = helplink(i.get('help'))))
+                opts['disabled'] = True
+            if 'pick' in i:
+                opts['data-pick'] = i['pick'] = json.dumps(i['pick'])
+            inputs.append(form.Textbox(k, **opts))
         elif i['type'] == "hidden":
             inputs.append(form.Hidden(k, description = _(k)))
         elif i['type'] == "checkbox":
@@ -260,7 +265,7 @@ def zoomify(raw):
     try:
         source = urllib.unquote(raw.strip())
         imagekey = hashlib.sha256(source).hexdigest()
-        if deepzoom and source.find("http://www.unimus.no/") == 0:
+        if config['zoom']:
           name = "static/tmp/" + imagekey
           if not os.path.exists(name + "_files"):
             urllib.urlretrieve(source, "%s.jpg" % name)
@@ -333,8 +338,7 @@ class help:
             project = yaml.load(open('projects/' + key + '.yaml'))
         forms = OrderedDict((form, project['forms'][form]) for form in project['annotate']['order'])
         if 'pdf' in web.input():
-          # pdfkit.from_string(render.help(project, forms), 'static/help.pdf')
-          return web.seeother('%s/static/help.pdf' % prefix)
+            return web.seeother('%s/static/help.pdf' % prefix)
         return render.help(project, forms, key, project)
 
 class unfinished:
@@ -349,7 +353,7 @@ class unfinished:
             project = yaml.load(open('projects/' + record['project'] + '.yaml'))
             anno = json.loads(record['annotation'])
             pdb = web.database(dbn='sqlite', db=project['source']['database'])
-            origid = dict(occurrenceID = record['key'])
+            origid = { config['key']: record['key'] }
             origs = pdb.select(project['source']['table'],
                 where = web.db.sqlwhere(origid), limit=1)
             orig = origs[0]
@@ -415,10 +419,9 @@ class project:
       data = web.input()
       try:
         project = yaml.load(open('projects/' + key + '.yaml'))
-        if 'prefilters' in project:
-            for prefilter in project['prefilters']:
-                if prefilter['name'] not in data:
-                    return self.prefilter(prefilter, key, uid, nick, data, project)
+        for prefilter in project.get('prefilters', []):
+            if prefilter['name'] not in data:
+                return self.prefilter(prefilter, key, uid, nick, data, project)
         pdb = web.database(dbn='sqlite', db=project['source']['database'])
         record, forms = validaterecord(pdb, data, project, oid)
         return simplerender.transcribe("project/" + key, record, forms, project, True, nick)
@@ -553,7 +556,7 @@ web.config.session_parameters['timeout'] = 2592000
 web.config.session_parameters['cookie_domain'] = "data.gbif.no"
 web.config.session_parameters['cookie_path'] = "/"
 
-# Monkey patch for å få sessions til å vare
+# monkey patch for å få sessions til å vare
 def toughcookie(self):
   if not self.get('_killed'):
     self._setcookie(self.session_id, expires=31536000)
@@ -562,27 +565,28 @@ def toughcookie(self):
     self._setcookie(self.session_id, expires=-1)
 web.session.Session._save = toughcookie
 
-
 app = web.application(urls, locals())
 session = web.session.Session(app, web.session.DiskStore(config.get('sessions', 'sessions')))
 
-simplerender = template.render('templates', globals= {
-    '_': _,
-    'prefix': prefix,
-    'json': json,
-    'helper': helpers(),
-    'web': web,
-    'config': config
-})
-
-render = template.render('templates', base='layout', globals= {
+simplerender = template.render('templates', globals={
     '_': _,
     'prefix': prefix,
     'json': json,
     'helper': helpers(),
     'web': web,
     'config': config,
-    'crumbs': crumbs
+    'version': VERSION
+})
+
+render = template.render('templates', base='layout', globals={
+    '_': _,
+    'prefix': prefix,
+    'json': json,
+    'helper': helpers(),
+    'web': web,
+    'config': config,
+    'crumbs': crumbs,
+    'version': VERSION
 })
 
 web.config.debug = True

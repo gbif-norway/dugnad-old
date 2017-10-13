@@ -1,0 +1,21 @@
+Hva skal til for å sette opp et nytt prosjekt i dugnadsportalen?
+
+= Prosjektnavn og prosjektbeskrivelse
+
+Beskrivelse trenger ikke være spesielt lang eller tung, og bør være publikumsrettet.
+Skap engasjement ved å fortelle hvordan resultatene fra dugnaden bidrar til samlingsforvaltning eller til forskning!
+
+Eksempel på prosjektbeskrivelse: https://data.gbif.no/dugnad/project/telemark/info
+
+= Liste over termer som skal samles inn
+
+For transkripsjonsprosjekter er dette stort sett en liste over hva man kan forvente å finne på etikettene, for andre prosjekter (som georefereringsprosjekter) bør man ikke gjøre listen for omfattende.
+
+Skriv gjerne en kort hjelpetekst for hver av termene (igjen, kort, enkel og publkumsrettet!).
+
+Eksempel på termliste (med hjelpetekster): https://data.gbif.no/dugnad/project/telemark/help
+
+= Bilder
+
+Skal være offentlig tilgjengelige på web. Deep zoom-versjoner av bildene skapes automatisk.
+

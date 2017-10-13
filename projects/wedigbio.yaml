@@ -1,0 +1,60 @@
+title: Fossildugnad
+image: wedigbio.jpg
+description: <p>Flere hundre millioner år gamle fossiler fra Svalbard skal bli digitale, og vi trenger din hjelp! Bli med på fossildugnad og bidra til å spre kunnskap om livets historie. 
+  <p>Vi har tusenvis av spennende fossiler fra mange feltekspedisjoner på Svalbard, og forskerne og kuratorene på museet trenger nå din hjelp for å få oversikt over alle de dyrebare objektene.
+  <p>Siden materialet ikke er katalogisert vet vi ikke hvilke fossiler som dere kommer til å treffe på. Her kan det være både trilobitter, armføttinger og blekkspruter, og annet hvem vet hva som skjuler seg her. Alle fossilgrupper er representert i denne samlingen fra de polare strøk.
+help:
+  introduction: Transkriberingen skal i størst mulig grad gjøres verbatimt. Det betyr at dere følger innholdet på etiketten, men de må likevel plasseres i de aktuelle feltene.
+source:
+  database: projects.db
+  table: fossil
+key: catalogNumber
+annotate:
+  order: [ event, taxonomy, geography, comment ]
+forms:
+  event:
+    - { name: catalogNumber, type: hidden }
+    - { name: placement, type: text }
+    - { name: recordedBy, type: text, help: "help-fossil-recordedBy" }
+    - { name: eventDate, type: date, help: "help-eventDate" }
+  taxonomy:
+    - { name: fossilGroup, type: text, pick: [ Alge, Amfibium, Blekksprut, Bløtdyr (molluska), Brachiopode, Bryozo (mosdyr), Fisk, Graptolitt, Ichthyosaur (fiskeøgle), Korall, Krinoide, Leddyr, Molluska (bløtdyr), Mosdyr (bryozo), Musling, Nesledyr (manet), Ostracokode, Pattedyr, Pigghud, Plante, Plesiosaur (svaneøgle), Problematica, Reptil, Rugos korall, Sjøskorpion, Snegle, Sporfossil, Stein (uspesifisert), Stromatoporide, Svamp, Tabulat korall, Trilobitt, Vertebrat ], help: "help-fossilGroup" }
+    - { name: scientificName, type: text, help: 'help-fossil-scientificName' }
+  geography:
+    - { name: locality, type: textfield, help: "help-fossil-locality" }
+    - { name: "period", type: text, pick: [ Ukjent, Nåtid, Kenozoikum, Mesozoikum, Paleozoikum, Kvartær, Tertiær-kvartær, Tertiær, "Tertiær, sen", "Tertiær, tidlig", Kritt-tertiær, Kritt, "Kritt, sen", "Kritt, mellom", "Kritt, tidlig", Jura-kritt, Jura, "Jura, sen", "Jura, mellom", "Jura, tidlig", Trias-jura, Trias, "Trias, sen", "Trias, mellom", "Trias, tidlig", Perm-trias, Perm, "Perm, sen", "Perm, mellom", "Perm, tidlig", Karbon-perm, Karbon, "Karbon, sen", "Karbon, mellom", "Karbon, tidlig", Devon-karbon, Devon, "Devon, sen", "Devon, mellom", "Devon, tidlig", Silur-devon, Silur, "Silur, sen", "Silur, mellom", "Silur, tidlig", Ordovicium-silur, Ordovicium, "Ordovicium, sen", "Ordovicium, mellom", "Ordovicium, tidlig", Kambrium-ordovicium, Kambrium, "Kambrium, sen", "Kambrium, mellom", "Kambrium, tidlig", Prekambrium ], help: "help-fossil-period" }
+    - { name: "lithostratigraphy", type: text, help: "help-lithostratigraphy" }
+  comment:
+    - { name: "annotationRemarks", type: textfield, help: "help-remarks" }
+submit: transcribe
+bakrom:
+  - name: top
+    description: top-description
+    type: bar
+    label: getusername
+    data:
+      - { type: count, sql: "SELECT user as label, count(*) as count from transcriptions where project = 'wedigbio' group by user order by count desc", database: "dugnad.db" }
+  - name: growth
+    description: growth-entire-period
+    type: long-period
+    data:
+      - { type: total, sql: "SELECT date as label, count(*) as count from transcriptions group by date order by date asc", database: 'dugnad.db' }
+stats:
+  - name: progress
+    description: progress-description
+    type: pie
+    data:
+      - { label: 'remaining', type: sql, sql: 'SELECT count(*) * 2 as result from fossil', database: 'projects.db' }
+      - { label: 'completed', type: sql, sql: 'SELECT count(*) as result from transcriptions where project = "wedigbio"', database: 'dugnad.db'  }
+  - name: growth
+    description: growth-description
+    type: area
+    data:
+      - { type: total, sql: "SELECT date as label, count(*) as count from transcriptions where project = 'wedigbio' group by date order by date asc", database: 'dugnad.db', limit: 5 }
+  - name: top5
+    description: top5-description
+    type: bar
+    label: getusername
+    data:
+      - { type: count, sql: 'SELECT user as label, count(*) as count from transcriptions where project = "wedigbio" group by user order by count desc limit 5', database: "dugnad.db" }
+
