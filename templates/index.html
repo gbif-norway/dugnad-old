@@ -13,6 +13,7 @@ $def with(projects, changes)
           $ date = change['date']
         <dd>$change['text']</dd>
       </dl>
+      <p><a href='$prefix/changelog'>$_('all-changes')</a>
     </aside>
 
     <p>$:_('introduction')
@@ -26,7 +27,7 @@ $def with(projects, changes)
       <a href='$prefix/$_('url-project')/$project['slug']/info'>
         $if 'image' in project:
           <img src='$config['base']/images/$project['image']'>
-        <h3>$project['title']</h3>
+        <h3>$_(project['title'])</h3>
       </a>
       $if 'difficulty' in project:
         <p class=difficulty>$_('difficulty'): <b>$project['difficulty']</b>

@@ -1,5 +1,6 @@
 $def with (key, record, forms, project, showfilters, nick)
 <!doctype html>
+<meta charset=utf-8>
 <title>Dugnad</title>
 <link rel='stylesheet' href='$config['base']/css/transcribe.css?$version'>
 <link rel='stylesheet' href='$config['base']/css/leaflet.css?$version'>
@@ -16,6 +17,9 @@ $def with (key, record, forms, project, showfilters, nick)
 <script src='$config['base']/js/auto-complete.js?$version'></script>
 <script src='$config['base']/js/dugnad.js?$version'></script>
 
+$ crumbs().append(['', 'dugnad'])
+$ crumbs().append([key + '/info', _(project['title'])])
+$ crumbs().append([None, _('transcribe')])
 <header>
   <nav>
     <a href='$prefix'>
@@ -43,16 +47,25 @@ $def with (key, record, forms, project, showfilters, nick)
     </a>
   </nav>
 
-  <nav class=actions>
+  <nav class=crumbs>
+    <p>
+      $if crumbs:
+        $for crumb in crumbs():
+          $if crumb[0] is not None:
+            <a href="$prefix/$crumb[0]">$crumb[1]</a> /
+          $else:
+            <a>$crumb[1]</a> 
+        $if helper.admin():
+          <p><a href='$prefix/$_('url-backroom')'>$_('backroom')</a>
     <p>
       $if helper.uid():
-        <a href='/user/'>$_('greeting') $helper.name()</a>
-        ·
         <a href='$prefix/$_('url-unfinished')'>$_('link-unfinished')</a>
+        ·
+        <a href='$prefix/$_('url-finished')'>$_('revise-transcriptions')</a>
         ·
       <a id='open-chat' target='chat' href='#'>$_('chat')</a>
       ·
-      <a id='open-help' target='help' href='$prefix/project/telemark/$_('url-help')'>$_('help')</a>
+      <a id='open-help' target='help' href='$prefix/$key/$_('url-help')'>$_('help')</a>
   </nav>
 </header>
 
@@ -65,11 +78,11 @@ $def with (key, record, forms, project, showfilters, nick)
     <section id="dz">
     <p class=modes>
       $if project.get('georeference'):
-        $if record["_zoom"]:
+        $if record.get("_zoom"):
           <a id=show-map data-replace="$_('link-image')" href='#'>$_('link-map')</a>
         $else:
           <a id=show-map>$_('no-image')</a>
-    $if record["_zoom"]:
+    $if record.get("_zoom"):
       <section id='dzi'></section>
       <script>
       var viewer = OpenSeadragon({

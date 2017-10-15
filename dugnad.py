@@ -135,11 +135,6 @@ def getrecord(db, data, project, oid=None):
     for rec in recs: records.append(rec)
     record = random.choice(records)
 
-    # fjern dette asap
-    if record.get('genus') and record.get('species'):
-      record['scientificName'] = "%s %s" % (
-          record.get('genus'), record.get('species')
-      )
     record['_zoom'] = zoomify(record.get('associatedMedia'))
     record['_id'] = record[project['key']]
     return record
@@ -313,7 +308,7 @@ class index:
     def GET(self):
         changelog = []
         with open('changelog') as log:
-            changes = list(islice(log, 4))
+            changes = list(islice(log, 3))
         for change in changes:
             m = re.match(r"(?P<date>.+):\s*(?P<text>.*)\s*\((?P<project>.*)\)",
                     change)
@@ -341,9 +336,8 @@ class help:
             return web.seeother('%s/static/help.pdf' % prefix)
         return render.help(project, forms, key, project)
 
-class unfinished:
+class revise:
     def GET(self, id):
-        uid = session.get('id')
         nick = session.get('name', "Anonym")
         data = web.input()
         try:
@@ -353,13 +347,43 @@ class unfinished:
             project = yaml.load(open('projects/' + record['project'] + '.yaml'))
             anno = json.loads(record['annotation'])
             pdb = web.database(dbn='sqlite', db=project['source']['database'])
-            origid = { config['key']: record['key'] }
+            origid = { project['key']: record['key'] }
             origs = pdb.select(project['source']['table'],
                 where = web.db.sqlwhere(origid), limit=1)
             orig = origs[0]
             if orig.get("associatedMedia"):
                 record['_zoom'] = zoomify(orig['associatedMedia'])
             forms = OrderedDict((form, buildform(form, project)) for form in project['annotate']['order'])
+            anno['_id'] = anno[project['key']]
+            for _, form in forms.iteritems(): form.validates(anno)
+            return simplerender.transcribe("revise/" + record['id'], anno, forms, project, False, nick)
+        except ValueError as e:
+            raise web.seeother('%s/revised' % prefix)
+
+    def POST(self, id):
+        uid = session.get('id')
+        updatetranscription(id, web.input())
+        raise web.seeother("%s/revise" % prefix)
+
+class unfinished:
+    def GET(self, id):
+        nick = session.get('name', "Anonym")
+        data = web.input()
+        try:
+            where = dict(id = id)
+            recs = db.select('transcriptions', where = web.db.sqlwhere(where))
+            record = recs[0]
+            project = yaml.load(open('projects/' + record['project'] + '.yaml'))
+            anno = json.loads(record['annotation'])
+            pdb = web.database(dbn='sqlite', db=project['source']['database'])
+            origid = { project['key']: record['key'] }
+            origs = pdb.select(project['source']['table'],
+                where = web.db.sqlwhere(origid), limit=1)
+            orig = origs[0]
+            if orig.get("associatedMedia"):
+                record['_zoom'] = zoomify(orig['associatedMedia'])
+            forms = OrderedDict((form, buildform(form, project)) for form in project['annotate']['order'])
+            anno['_id'] = anno[project['key']]
             for _, form in forms.iteritems(): form.validates(anno)
             return simplerender.transcribe("unfinished/" + record['id'], anno, forms, project, False, nick)
         except ValueError as e:
@@ -370,6 +394,24 @@ class unfinished:
         updatetranscription(id, web.input())
         raise web.seeother("%s/unfinished" % prefix)
 
+class changelog:
+    def GET(self):
+        changelog = []
+        with open('changelog') as log:
+            changes = list(log)
+        for change in changes:
+            m = re.match(r"(?P<date>.+):\s*(?P<text>.*)\s*\((?P<project>.*)\)",
+                    change)
+            if m: changelog.append(m.groupdict())
+        return render.changelog(changelog)
+
+class listfinished:
+    def GET(self):
+        uid = session.get('id')
+        if not uid: raise web.seeother('%s' % prefix)
+        reqs = { 'user': uid, 'finished': True }
+        recs = db.select('transcriptions', order="updated DESC", where=web.db.sqlwhere(reqs), limit=10)
+        return render.list("revise", recs)
 
 class listunfinished:
     def GET(self):
@@ -377,7 +419,7 @@ class listunfinished:
         if not uid: raise web.seeother('%s' % prefix)
         reqs = { 'user': uid, 'finished': False }
         recs = db.select('transcriptions', order="updated DESC", where=web.db.sqlwhere(reqs))
-        return render.list(recs)
+        return render.list("unfinished", recs)
 
 class projectstats:
     def GET(self, key):
@@ -508,6 +550,8 @@ urls = (
     '%s' % prefix, 'index',
     '%s/' % prefix, 'index',
 
+    '%s/changelog' % prefix, 'changelog',
+
     '%s/hjelp' % prefix, 'help',
     '%s/help' % prefix, 'help',
 
@@ -519,6 +563,12 @@ urls = (
 
     '%s/unfinished' % prefix, 'listunfinished',
     '%s/unfinished/(.+)' % prefix, 'unfinished',
+
+    '%s/revider' % prefix, 'listfinished',
+    '%s/revider/(.+)' % prefix, 'revise',
+
+    '%s/revise' % prefix, 'listfinished',
+    '%s/revise/(.+)' % prefix, 'revise',
 
     '%s/prosjekt/(.+)/info' % prefix, 'projectinfo',
     '%s/prosjekt/(.+)/log' % prefix, 'projectlog',
@@ -547,7 +597,7 @@ urls = (
     '%s/(.+)' % prefix, 'annotate',
 )
 
-languages = ['en_US', "nb_NO"]
+languages = ["en_US", "nb_NO"]
 gettext.install('messages', 'lang', unicode=True)
 for lang in languages:
     gettext.translation('messages', 'lang', languages = [lang]).install(True)
@@ -575,6 +625,7 @@ simplerender = template.render('templates', globals={
     'helper': helpers(),
     'web': web,
     'config': config,
+    'crumbs': crumbs,
     'version': VERSION
 })
 

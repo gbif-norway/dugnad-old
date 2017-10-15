@@ -1,0 +1,16 @@
+$def with(changes)
+
+<section class=stats>
+  <h1>$_('all-changes')</h1>
+  <p>Denne listen inkluderer ikke informasjon om mindre endringer eller feilretting.
+  <dl>
+  $ date = None
+  $for change in changes:
+    $if not date == change['date']:
+      <dt><time>$change['date']</time></dt>
+      $ date = change['date']
+    <dd>$change['text']</dd>
+  </dl>
+</section>
+
+

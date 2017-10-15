@@ -1,13 +1,14 @@
-$def with(recs)
+$def with(title, recs)
+$ crumbs().append(['', 'dugnad'])
+$ crumbs().append([None, _(title)])
 
 <section class=stats>
-  <section>
-    <h1>Unfinished transcriptions</h1>
-    <table>
+    <h1>$_(title)</h1>
+    <table class=list>
       <tr>
-        <th>ID</th>
-        <th>Project</th>
-        <th>Last updated</th>
+        <th>$_('id')</th>
+        <th>$_('project')</th>
+        <th>$_('last-update')</th>
         <th></th>
       </tr>
     
@@ -16,9 +17,8 @@ $def with(recs)
           <td>$rec['id']</td>
           <td>$rec['project']</td>
           <td>$rec['date']</td>
-          <td><a href='$prefix/unfinished/$rec['id']'>Continue</a></td>
+          <td><a href='$prefix/$title/$rec['id']'>$_('edit')</a></td>
         </tr>
     </table>
-  </section>
 </section>
 

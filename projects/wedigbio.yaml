@@ -1,10 +1,10 @@
-title: Fossildugnad
+title: project-wedigbio-title
+logos:
+  /static/images/wedigbio-logo.png: https://www.wedigbio.org/
 image: wedigbio.jpg
-description: <p>Flere hundre millioner år gamle fossiler fra Svalbard skal bli digitale, og vi trenger din hjelp! Bli med på fossildugnad og bidra til å spre kunnskap om livets historie. 
-  <p>Vi har tusenvis av spennende fossiler fra mange feltekspedisjoner på Svalbard, og forskerne og kuratorene på museet trenger nå din hjelp for å få oversikt over alle de dyrebare objektene.
-  <p>Siden materialet ikke er katalogisert vet vi ikke hvilke fossiler som dere kommer til å treffe på. Her kan det være både trilobitter, armføttinger og blekkspruter, og annet hvem vet hva som skjuler seg her. Alle fossilgrupper er representert i denne samlingen fra de polare strøk.
+description: project-wedigbio-description
 help:
-  introduction: Transkriberingen skal i størst mulig grad gjøres verbatimt. Det betyr at dere følger innholdet på etiketten, men de må likevel plasseres i de aktuelle feltene.
+  introduction: project-wedigbio-introduction
 source:
   database: projects.db
   table: fossil
@@ -15,17 +15,17 @@ forms:
   event:
     - { name: catalogNumber, type: hidden }
     - { name: placement, type: text }
-    - { name: recordedBy, type: text, help: "help-fossil-recordedBy" }
-    - { name: eventDate, type: date, help: "help-eventDate" }
+    - { name: recordedBy, type: text, help: help-fossil-recordedBy }
+    - { name: eventDate, type: date, help: help-eventDate }
   taxonomy:
-    - { name: fossilGroup, type: text, pick: [ Alge, Amfibium, Blekksprut, Bløtdyr (molluska), Brachiopode, Bryozo (mosdyr), Fisk, Graptolitt, Ichthyosaur (fiskeøgle), Korall, Krinoide, Leddyr, Molluska (bløtdyr), Mosdyr (bryozo), Musling, Nesledyr (manet), Ostracokode, Pattedyr, Pigghud, Plante, Plesiosaur (svaneøgle), Problematica, Reptil, Rugos korall, Sjøskorpion, Snegle, Sporfossil, Stein (uspesifisert), Stromatoporide, Svamp, Tabulat korall, Trilobitt, Vertebrat ], help: "help-fossilGroup" }
-    - { name: scientificName, type: text, help: 'help-fossil-scientificName' }
+    - { name: fossilGroup, type: text, pick: [ Alge, Amfibium, Blekksprut, Bløtdyr (molluska), Brachiopode, Bryozo (mosdyr), Fisk, Graptolitt, Ichthyosaur (fiskeøgle), Korall, Krinoide, Leddyr, Molluska (bløtdyr), Mosdyr (bryozo), Musling, Nesledyr (manet), Ostracokode, Pattedyr, Pigghud, Plante, Plesiosaur (svaneøgle), Problematica, Reptil, Rugos korall, Sjøskorpion, Snegle, Sporfossil, Stein (uspesifisert), Stromatoporide, Svamp, Tabulat korall, Trilobitt, Vertebrat ], help: help-fossilGroup }
+    - { name: scientificName, type: text, help: help-fossil-scientificName }
   geography:
-    - { name: locality, type: textfield, help: "help-fossil-locality" }
+    - { name: locality, type: textfield, help: help-fossil-locality }
     - { name: "period", type: text, pick: [ Ukjent, Nåtid, Kenozoikum, Mesozoikum, Paleozoikum, Kvartær, Tertiær-kvartær, Tertiær, "Tertiær, sen", "Tertiær, tidlig", Kritt-tertiær, Kritt, "Kritt, sen", "Kritt, mellom", "Kritt, tidlig", Jura-kritt, Jura, "Jura, sen", "Jura, mellom", "Jura, tidlig", Trias-jura, Trias, "Trias, sen", "Trias, mellom", "Trias, tidlig", Perm-trias, Perm, "Perm, sen", "Perm, mellom", "Perm, tidlig", Karbon-perm, Karbon, "Karbon, sen", "Karbon, mellom", "Karbon, tidlig", Devon-karbon, Devon, "Devon, sen", "Devon, mellom", "Devon, tidlig", Silur-devon, Silur, "Silur, sen", "Silur, mellom", "Silur, tidlig", Ordovicium-silur, Ordovicium, "Ordovicium, sen", "Ordovicium, mellom", "Ordovicium, tidlig", Kambrium-ordovicium, Kambrium, "Kambrium, sen", "Kambrium, mellom", "Kambrium, tidlig", Prekambrium ], help: "help-fossil-period" }
-    - { name: "lithostratigraphy", type: text, help: "help-lithostratigraphy" }
+    - { name: lithostratigraphy, type: text, help: help-lithostratigraphy }
   comment:
-    - { name: "annotationRemarks", type: textfield, help: "help-remarks" }
+    - { name: annotationRemarks, type: textfield, help: help-remarks }
 submit: transcribe
 bakrom:
   - name: top

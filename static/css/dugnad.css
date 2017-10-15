@@ -1,4 +1,4 @@
-body { font: 24px/1.2 "Helvetica Neue", Helvetica, Arial, sans-serif; margin: 0; }
+body { font: 24px/1.4 "Helvetica Neue", Helvetica, Arial, sans-serif; margin: 0; }
 header, main, section, nav, aside, article { display: block; }
 
 header { background: #333; color: #fff; border-bottom: 2px solid #000; padding: 0 1em; }
@@ -7,13 +7,16 @@ header h1 { font-size: medium; color: #ccc; font-weight: normal; margin: 0.75em 
 header nav { display: flex; width: 970px; max-width: 100%; margin: 0 auto; justify-content: space-between; box-sizing: border-box; }
 header .register-login { font-size: medium; font-weight: normal; margin: 0.75em 0; }
 header a { color: #7FDBFF;}
+header a:hover { color: #fff; }
 header a:visited { color: #eee; }
 header .crumbs p { margin: 0 0 1em 0; font-size: small; }
+
+.project-logo { float: right; }
 
 main {}
 section {}
 
-section.info { background: #f6f6f6; padding: 1em; border-bottom: 1px dashed #333; box-shadow: 0px 5px 5px #999; }
+section.info { background: #f6f6f6; padding: 1em; border-bottom: 1px solid #333; box-shadow: 0px 5px 5px #999; }
 section.info h1 { font-size: 240%; font-weight: normal; margin: 0; }
 section.info > section { width: 970px; max-width: 100%; margin: 0 auto; }
 section.info aside { float: right; min-width: 200px; max-width: 20%; font-size: small; border: 1px solid #000; padding: 1em; border-radius: 2em 1em 2em 1em; background: #fff; margin: 1em; }
@@ -57,6 +60,10 @@ section.projects article a.disabled:hover img { border: 2px dotted #000; }
 main > nav { width: 970px; max-width: 100%; }
 main > nav { margin: 1em auto; text-align: center; }
 
+section.stats h1 { font-size: x-large; }
+section.stats .list { text-align: left; width: 100%; }
+section.stats .list tr { }
+
 a.btn { display: inline-block; padding: 10px 16px; font-size: 18px; border-radius: 6px; color: #fff; background: #337ab7; border: 1px solid #2e6da4; vertical-align: middle; text-align: center; font-weight: normal; }
 a.btn:hover { background: #286090; border-color: #204d74; }
 
@@ -78,3 +85,4 @@ footer { width: 1170px; }
 
   footer { position: fixed; bottom: 0; width: 100%; text-align: center; color: #444; }
 }
+

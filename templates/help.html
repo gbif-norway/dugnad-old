@@ -7,7 +7,7 @@ $ crumbs().append([None, _('help')])
 <section class=help>
   <h1>$_(project['title'])</h1>
 
-  <p>$:_('howto')
+  <p>$:_(key + '-howto')
 
   <h2>$_('terms')</h2>
   <p>$_(config.get('help', {}).get('introduction'))
@@ -18,10 +18,10 @@ $ crumbs().append([None, _('help')])
     $for term in terms:
       $if term.get('help'):
         <dt><b>$_(term['name'])</b></dt>
-        <dd>$_(term['help'])</dd>
+        <dd>$:_(term['help'])</dd>
     </dl>
   <footer>
-    <p><small>Sist oppdatert 2017-05-03</small>
+    <p><small>Sist oppdatert 2017-10-15</small>
   </footer>
 </section>
 

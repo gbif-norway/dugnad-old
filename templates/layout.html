@@ -30,8 +30,13 @@ $def with (content)
           <a href="$prefix/$crumb[0]">$crumb[1]</a> /
         $else:
           <a>$crumb[1]</a> 
+      <p>
       $if helper.admin():
-        <p><a href='$prefix/$_('url-backroom')'>$_('backroom')</a>
+        <a href='$prefix/$_('url-backroom')'>$_('backroom')</a>
+      $if helper.uid():
+        <a href='$prefix/$_('url-unfinished')'>$_('link-unfinished')</a>
+        ·
+        <a href='$prefix/$_('url-finished')'>$_('revise-transcriptions')</a>
     </nav>
 </header>
 
@@ -43,8 +48,13 @@ $def with (content)
 
 <footer>
   <p>
+    <a href='https://nhm.uio.no/'>
+      <img height=40 src='/static/images/nhm-logo.png'>
+    </a>
+    <br>
     <a href='mailto:gbif-drift@nhm.uio.no'>
       <img width='151' src='https://www.gbif.no/vrtx/decorating/resources/images/logo.png'>
     </a>
+</footer>
 </footer>
 

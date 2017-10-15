@@ -8,6 +8,8 @@ $ crumbs().append([None, _(project['title'])])
 <section class=info>
   <section>
     <h1>$_(project['title'])</h1>
+    $for logo, url in project.get('logos', {}).iteritems():
+      <a href='$url'><img class=project-logo width=160 src='$logo' alt></a>
     <p>$:_(project['description'])
   
     <p id=start-transcribing>

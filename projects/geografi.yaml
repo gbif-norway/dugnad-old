@@ -1,6 +1,6 @@
-title: "Kartfesting: Karplanter fra Telemark"
+title: project-geografi-title
 image: geografi.jpg
-description: ""
+description: project-geografi-description
 georeference: true
 template: georeference
 postfilters: "verbatimUncertaintyInMeters > 700 and completed < 1"
