@@ -237,6 +237,18 @@ document.addEventListener("DOMContentLoaded", function(e) {
       });
     }
   }
+  var footprint = document.getElementsByName('footprintWKT')[0];
+  if(footprint && footprint.value) {
+    var wkt = new Wkt.Wkt();
+    wkt.read(footprint.value);
+    var obj = wkt.toObject(T.map.defaults);
+    obj.addTo(T.map);
+    T.map.fitBounds(obj.getBounds(), {
+      paddingBottomRight: [300, 150],
+      paddingTopLeft: [0, 100]
+    });
+  }
+
   var chatln = document.getElementById('open-chat');
   if(chatln) {
     chatln.onclick = function(e) {

@@ -313,7 +313,7 @@ class index:
     def GET(self):
         changelog = []
         with open('changelog') as log:
-            changes = list(islice(log, 3))
+            changes = list(islice(log, 4))
         for change in changes:
             m = re.match(r"(?P<date>.+):\s*(?P<text>.*)\s*\((?P<project>.*)\)",
                     change)
