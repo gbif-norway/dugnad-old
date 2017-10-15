@@ -1,29 +1,14 @@
 fra møtet 2017/09/06
 
 * gjør annoteringer til en helt "vanlig" type...
-* logg over tidligere annoteringer/transkripsjoner, med mulighet til å gå
-  tilbake for å rette
 * nettbrett...
-
 * kan innloggede få samme objekt flere ganger? det skal ikke være mulig
 * frie termer (i alle fall for annotering)
-
-* aggregate & be quite specific - by user / by image (difficulty)
-
-* redirect til "uferdige transkripsjoner" når man logger inn og har noen
-* skjul "uferdige transkripsjoner" hvis det ikke finnes noen
+* "priority"
 * hopp over -> liten liste velg hvorfor
-
-* fullføre norsk oversettelse
-
-* autocomplete av provins/distrikt, innsamler?
+* gjøre engelsk oversettelse
+* ajax-autocomplete
 * håndtere koordinater (mgrs, utm osv)
-
-* statistikk (både for alle og for enkeltbrukere)
-* statistikkside med fargekodet kart etter hvor mange i hvert land
-
-* whoa si fra før store endringer
-
 * "premiesystem"...
   - n transcriptons (+)
   - n transcriptions from country
