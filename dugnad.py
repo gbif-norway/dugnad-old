@@ -438,6 +438,14 @@ class listunfinished:
         recs = db.select('transcriptions', order="updated DESC", where=web.db.sqlwhere(reqs))
         return render.list("unfinished", recs)
 
+class screencast:
+    def GET(self, key):
+        uid = session.get('id')
+        nick = session.get('name', "Anonym")
+        project = loadproject(key)
+        return render.screencast(key, project)
+
+
 class projectstats:
     def GET(self, key):
         uid = session.get('id')
@@ -587,6 +595,7 @@ urls = (
     '%s/revise' % prefix, 'listfinished',
     '%s/revise/(.+)' % prefix, 'revise',
 
+    '%s/prosjekt/(.+)/screencast' % prefix, 'screencast',
     '%s/prosjekt/(.+)/info' % prefix, 'projectinfo',
     '%s/prosjekt/(.+)/log' % prefix, 'projectlog',
     '%s/prosjekt/(.+)/bakrom' % prefix, 'projectstats',
@@ -596,6 +605,7 @@ urls = (
     '%s/prosjekt/(.+)/' % prefix, 'project',
     '%s/prosjekt/(.+)' % prefix, 'project',
 
+    '%s/project/(.+)/screencast' % prefix, 'screencast',
     '%s/project/(.+)/info' % prefix, 'projectinfo',
     '%s/project/(.+)/log' % prefix, 'projectlog',
     '%s/project/(.+)/backroom' % prefix, 'projectstats',

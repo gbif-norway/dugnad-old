@@ -1,0 +1,9 @@
+$def with(key, project)
+
+$ crumbs().append(['', 'dugnad'])
+$ crumbs().append(['project/' + key + '/info', _(project['title'])])
+$ crumbs().append([None, _('help')])
+
+<section class=video>
+  <video controls width='1280' src='$project['screencast']'>
+</section>
