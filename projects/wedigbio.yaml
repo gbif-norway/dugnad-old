@@ -1,4 +1,5 @@
 title: project-wedigbio-title
+hidden: true
 logos:
   /static/images/wedigbio-logo.png: https://www.wedigbio.org/
 image: wedigbio.jpg

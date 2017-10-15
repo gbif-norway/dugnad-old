@@ -52,7 +52,7 @@ stats:
     description: growth-description
     type: area
     data:
-      - { type: total, sql: "SELECT date as label, count(*) as count from transcriptions where project = 'geografi' group by date order by date asc", database: 'dugnad.db' }
+      - { type: total, sql: "SELECT date as label, count(*) as count from transcriptions where project = 'geografi' group by date order by date asc", database: 'dugnad.db', limit: 5 }
   - name: top5
     description: top5-description
     type: bar

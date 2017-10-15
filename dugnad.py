@@ -44,6 +44,11 @@ config = yaml.load(file('config.yaml'))
 prefix = re.search(r"http?s:\/\/[^\/]+(.*)", config['prefix']).groups()[0]
 db = web.database(dbn='sqlite', db='dugnad.db')
 
+def loadproject(key):
+  p = yaml.load(open('projects/' + key + '.yaml'))
+  p['_key'] = key
+  return p
+
 try:
     from gi.repository import Vips
     config['zoom'] = True
@@ -282,7 +287,7 @@ def updatetranscription(id, data):
     )
     
 def savetranscription(uid, pkey, data):
-    project = yaml.load(open('projects/' + pkey + '.yaml'))
+    project = loadproject(pkey)
     pdb = web.database(dbn='sqlite', db=project['source']['database'])
 
     finished = True
@@ -324,13 +329,19 @@ class index:
 class bakrom:
     def GET(self, key=None):
         if not session.get('admin'): return web.seeother("%s" % prefix)
-        return render.bakrom(key)
+        projects = []
+        for f in glob.glob("projects/*.yaml"):
+            if not os.path.basename(f) in config.get('hidden', []):
+                data = yaml.load(open(f))
+                data['slug'] = os.path.splitext(os.path.basename(f))[0]
+                projects.append(data)
+        return render.bakrom(key, projects)
 
 class help:
     def GET(self, key=None):
         project = config
         if key:
-            project = yaml.load(open('projects/' + key + '.yaml'))
+            project = loadproject(key)
         forms = OrderedDict((form, project['forms'][form]) for form in project['annotate']['order'])
         if 'pdf' in web.input():
             return web.seeother('%s/static/help.pdf' % prefix)
@@ -344,7 +355,7 @@ class revise:
             where = dict(id = id)
             recs = db.select('transcriptions', where = web.db.sqlwhere(where))
             record = recs[0]
-            project = yaml.load(open('projects/' + record['project'] + '.yaml'))
+            project = loadproject(record['project'])
             anno = json.loads(record['annotation'])
             pdb = web.database(dbn='sqlite', db=project['source']['database'])
             origid = { project['key']: record['key'] }
@@ -352,9 +363,11 @@ class revise:
                 where = web.db.sqlwhere(origid), limit=1)
             orig = origs[0]
             if orig.get("associatedMedia"):
-                record['_zoom'] = zoomify(orig['associatedMedia'])
+                anno['_zoom'] = zoomify(orig['associatedMedia'])
             forms = OrderedDict((form, buildform(form, project)) for form in project['annotate']['order'])
             anno['_id'] = anno[project['key']]
+            if record.get('finished'):
+              anno['_finished'] = True
             for _, form in forms.iteritems(): form.validates(anno)
             return simplerender.transcribe("revise/" + record['id'], anno, forms, project, False, nick)
         except ValueError as e:
@@ -373,17 +386,21 @@ class unfinished:
             where = dict(id = id)
             recs = db.select('transcriptions', where = web.db.sqlwhere(where))
             record = recs[0]
-            project = yaml.load(open('projects/' + record['project'] + '.yaml'))
-            anno = json.loads(record['annotation'])
+            project = loadproject(record['project'])
+            annoz = json.loads(record['annotation'])
             pdb = web.database(dbn='sqlite', db=project['source']['database'])
             origid = { project['key']: record['key'] }
             origs = pdb.select(project['source']['table'],
                 where = web.db.sqlwhere(origid), limit=1)
             orig = origs[0]
+            anno = orig.copy()
+            anno.update(annoz)
             if orig.get("associatedMedia"):
-                record['_zoom'] = zoomify(orig['associatedMedia'])
+                anno['_zoom'] = zoomify(orig['associatedMedia'])
             forms = OrderedDict((form, buildform(form, project)) for form in project['annotate']['order'])
             anno['_id'] = anno[project['key']]
+            if record.get('finished'):
+              anno['_finished'] = True
             for _, form in forms.iteritems(): form.validates(anno)
             return simplerender.transcribe("unfinished/" + record['id'], anno, forms, project, False, nick)
         except ValueError as e:
@@ -425,7 +442,7 @@ class projectstats:
     def GET(self, key):
         uid = session.get('id')
         nick = session.get('name', "Anonym")
-        project = yaml.load(open('projects/' + key + '.yaml'))
+        project = loadproject(key)
         stats = getstats(key, project)
         charts = []
         for item in project.get('bakrom', []):
@@ -437,7 +454,7 @@ class projectinfo:
         uid = session.get('id')
         nick = session.get('name', "Anonym")
         try:
-            project = yaml.load(open('projects/' + key + '.yaml'))
+            project = loadproject(key)
             charts = []
             for item in project.get('stats', []):
                 charts.append(chart(item))
@@ -460,7 +477,7 @@ class project:
       nick = session.get("name", "Anonym")
       data = web.input()
       try:
-        project = yaml.load(open('projects/' + key + '.yaml'))
+        project = loadproject(key)
         for prefilter in project.get('prefilters', []):
             if prefilter['name'] not in data:
                 return self.prefilter(prefilter, key, uid, nick, data, project)

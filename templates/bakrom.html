@@ -1,4 +1,4 @@
-$def with(key)
+$def with(key, projects)
 
 $ crumbs().append(['', 'dugnad'])
 $ crumbs().append([None, _('bakrom')])
@@ -14,29 +14,15 @@ $ crumbs().append([None, _('bakrom')])
 </section>
 
 <section class=projects>
-  <article>
-    <a href='$prefix/$_('url-project')/telemark/$_('url-backroom')'>
-      <img src='$config['base']/images/telemark.jpg'>
-      <h3>Annotering</h3>
-    </a>
-    <p class=difficulty>$_('difficulty'): <b>-</b>
-  </article>
-
-  <article>
-    <a href='$prefix/$_('url-project')/telemark/$_('url-backroom')'>
-      <img src='$config['base']/images/telemark.jpg'>
-      <h3>Transkribering: Karplanter fra Telemark</h3>
-    </a>
-    <p class=difficulty>$_('difficulty'): <b>★☆☆</b>
-  </article>
-
-  <article>
-    <a href='$prefix/$_('url-project')/geo-telemark/$_('url-backroom')'>
-      <img src='$config['base']/images/telemark.jpg'>
-      <h3>Georeferering: Karplanter fra Telemark</h3>
-    </a>
-    <p class=difficulty>$_('difficulty'): <b>★★☆</b>
-  </article>
-
+  $for project in projects:
+    <article>
+      <a href='$prefix/$_('url-project')/$project['slug']/$_('url-backroom')'>
+        $if 'image' in project:
+          <img src='$config['base']/images/$project['image']'>
+        <h3>$_(project['title'])</h3>
+      </a>
+      $if 'difficulty' in project:
+        <p class=difficulty>$_('difficulty'): <b>$project['difficulty']</b>
+    </article>
 </section>
 

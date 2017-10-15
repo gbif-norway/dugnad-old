@@ -33,6 +33,7 @@ $def with (content)
       <p>
       $if helper.admin():
         <a href='$prefix/$_('url-backroom')'>$_('backroom')</a>
+        ·
       $if helper.uid():
         <a href='$prefix/$_('url-unfinished')'>$_('link-unfinished')</a>
         ·
@@ -55,6 +56,5 @@ $def with (content)
     <a href='mailto:gbif-drift@nhm.uio.no'>
       <img width='151' src='https://www.gbif.no/vrtx/decorating/resources/images/logo.png'>
     </a>
-</footer>
 </footer>
 
