@@ -1,5 +1,6 @@
 title: project-telemark-title
 image: telemark.jpg
+finished: true
 description: project-telemark-description
 help:
   introduction: Transkriberingen skal i størst mulig grad gjøres verbatimt. Det betyr at dere følger slavisk innholdet på etiketten, men de må likevel plasseres i de aktuelle feltene.
@@ -51,7 +52,7 @@ stats:
     type: pie
     data:
       - { label: 'remaining', type: sql, sql: 'SELECT count(*) * 2 as result from telemark', database: 'projects.db' }
-      - { label: 'completed', type: sql, sql: 'SELECT count(*) as result from transcriptions where project = "telemark"', database: 'dugnad.db'  }
+      - { label: 'completed', type: sql, sql: 'SELECT count(*) * 2 as result from telemark', database: 'projects.db' }
   - name: growth
     description: growth-description
     type: area

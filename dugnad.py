@@ -32,6 +32,8 @@ from yapsy.PluginManager import PluginManager
 from yapsy.IPlugin import IPlugin
 from dugnadplugins import *
 
+RESOLVER = "https://data.gbif.no/resolver/"
+
 logging.basicConfig(level=logging.INFO)
 
 manager = PluginManager()
@@ -536,12 +538,14 @@ class annotate:
         nick = session.get("name", "Anonym")
         key = key.replace("urn:catalog:", "")
         url = "%s%s.json" % (RESOLVER, key)
+        config['_key'] = "annotation"
         try:
           raw = json.loads(urllib2.urlopen(url).read())
           record = {}
           for k,v in raw.iteritems():
             record[k.replace("dwc:", "")] = v
           date = record.get('eventDate')
+          record['_id'] = key
           record['_zoom'] = zoomify(record['associatedMedia'])
           if date:
             record['year'], record['month'], record['day'] = date.split("-")
@@ -556,20 +560,24 @@ class annotate:
         uid = session.get('id')
         key = key.replace("urn:catalog:", "")
         url = "%s%s.json" % (RESOLVER, key)
+        data = web.input()
         record = json.loads(urllib2.urlopen(url).read())
         now = str(datetime.date.today())
         finished = True
         id = str(uuid.uuid4())
-        if 'later' in data: finished = False
+        if data.pop('finished', False):
+          finished = False
         db.insert('annotations',
             id=id, key=key, user=uid, date=now, finished=finished,
             annotation=json.dumps(web.input()),
             original=json.dumps(record)
         )
-        web.sendmail('noreply@nhmbif.uio.no',
-            'gbif-drift@nhm.uio.no', '[dugnad] ny annotering',
-            "https://nhmbif.uio.no/dugnad/annotation/%s / https://nhmbif.uio.no/dugnad/annotations/%s" % (id, key))
-        raise web.seeother('%s/annotation/%s' % id)
+            #'gbif-drift@nhm.uio.no', '[dugnad] ny annotering',
+        web.sendmail('noreply@data.gbif.no',
+            'christian.svindseth@nhm.uio.no', '[dugnad] ny annotering',
+            "https://data.gbif.no/dugnad/annotation/%s / https://data.gbif.no/dugnad/annotations/%s" % (id, key))
+        referer = web.ctx.env.get('HTTP_REFERER', '%s' % prefix)
+        raise web.seeother(referer)
 
 urls = (
     '%s' % prefix, 'index',

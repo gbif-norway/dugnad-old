@@ -12,10 +12,14 @@ $ crumbs().append([None, _(project['title'])])
       <a href='$url'><img class=project-logo width=160 src='$logo' alt></a>
     <p>$:_(project['description'])
   
-    <p id=start-transcribing>
-      <a class=btn href='$prefix/project/$key'>$_('start-project') »</a>
-    <p id=start-transcribing>
-      <a class=btn href='$prefix/project/$key/screencast'>$_('screencast') »</a>
+    $if not 'finished' in project:
+      <p id=start-transcribing>
+        <a class=btn href='$prefix/project/$key'>$_('start-project') »</a>
+    $else:
+      <p><b>Dette prosjektet er nå fullført! Tusen takk til alle dugnadsfolk!
+    $if 'screencast' in project:
+      <p id=start-transcribing>
+        <a class=btn href='$prefix/project/$key/screencast'>$_('screencast') »</a>
   </section>
 </section>
 
