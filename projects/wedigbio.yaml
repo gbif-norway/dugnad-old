@@ -14,8 +14,8 @@ annotate:
   order: [ event, taxonomy, geography, comment ]
 forms:
   event:
-    - { name: catalogNumber, type: hidden }
-    - { name: placement, type: text }
+    - { name: catalogNumber, type: text, disabled: true }
+    - { name: placement, type: text, disabled: true }
     - { name: recordedBy, type: text, help: help-fossil-recordedBy }
     - { name: eventDate, type: date, help: help-eventDate }
   taxonomy:
