@@ -136,7 +136,7 @@ def getrecord(db, data, project, oid=None):
     else:
         where = web.db.sqlwhere(filters)
     recs = db.select(project['source']['table'],
-            where=where, limit=200, order="priority ASC")
+            where=where, limit=200, order="priority DESC")
   try:
     records = []
     for rec in recs: records.append(rec)

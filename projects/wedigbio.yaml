@@ -15,6 +15,7 @@ annotate:
 forms:
   event:
     - { name: catalogNumber, type: text, disabled: true }
+    - { name: catalogNumber, type: hidden }
     - { name: placement, type: text, disabled: true }
     - { name: recordedBy, type: text, help: help-fossil-recordedBy }
     - { name: eventDate, type: date, help: help-eventDate }
@@ -39,7 +40,7 @@ bakrom:
     description: growth-entire-period
     type: long-period
     data:
-      - { type: total, sql: "SELECT date as label, count(*) as count from transcriptions group by date order by date asc", database: 'dugnad.db' }
+      - { type: total, sql: "SELECT date as label, count(*) as count from transcriptions where project = 'wedigbio' group by date order by date asc", database: 'dugnad.db' }
 stats:
   - name: progress
     description: progress-description

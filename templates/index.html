@@ -11,7 +11,10 @@ $def with(projects, changes)
         $if not date == change['date']:
           <dt><time>$change['date']</time></dt>
           $ date = change['date']
-        <dd>$change['text']</dd>
+        $if change['project'] != 'dugnad':
+          <dd>$change['text'] ($change['project'])</dd>
+        $else:
+          <dd>$change['text']</dd>
       </dl>
       <p><a href='$prefix/changelog'>$_('all-changes')</a>
     </aside>

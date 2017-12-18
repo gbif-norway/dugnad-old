@@ -45,7 +45,7 @@ bakrom:
     description: growth-entire-period
     type: long-period
     data:
-      - { type: total, sql: "SELECT date as label, count(*) as count from transcriptions group by date order by date asc", database: 'dugnad.db' }
+      - { type: total, sql: "SELECT date as label, count(*) as count from transcriptions where project = 'telemark' group by date order by date asc", database: 'dugnad.db' }
 stats:
   - name: progress
     description: progress-description
@@ -57,11 +57,11 @@ stats:
     description: growth-description
     type: area
     data:
-      - { type: total, sql: "SELECT date as label, count(*) as count from transcriptions group by date order by date asc", database: 'dugnad.db', limit: 5 }
+      - { type: total, sql: "SELECT date as label, count(*) as count from transcriptions where project = 'telemark' group by date order by date asc", database: 'dugnad.db', limit: 5 }
   - name: top5
     description: top5-description
     type: bar
     label: getusername
     data:
-      - { type: count, sql: "SELECT user as label, count(*) as count from transcriptions group by user order by count desc limit 5", database: "dugnad.db" }
+      - { type: count, sql: "SELECT user as label, count(*) as count from transcriptions where project = 'telemark' group by user order by count desc limit 5", database: "dugnad.db" }
 
