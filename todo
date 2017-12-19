@@ -1,19 +1,33 @@
 fra møtet 2017/09/06
 
+= hopp over -> lite liste velg hvorfor
+
+= til desember
+
+* nettbrett (åse johanne halvorsen)
+* utvide kartfesting
+
+= til ???
+
+* pdf-støtte, med en litt annen arbeidsflyt (ntnu)
+
 * gjør annoteringer til en helt "vanlig" type...
-* nettbrett... (ta kontakt med Åse Johanne Halvorsen for å si fra når det er gjort)
-* kan innloggede få samme objekt flere ganger? det skal ikke være mulig
-* frie termer (i alle fall for annotering)
-* "priority"
+* frie termer (for alt!) - "avansert modus"
 * hopp over -> liten liste velg hvorfor
 * gjøre engelsk oversettelse
-* ajax-autocomplete
+* ajax-autocomplete (har allerede "vanlig" autocomplete)
+
+= potensielle bugs
+
+* kan innloggede få samme objekt flere ganger? det skal ikke være mulig
 * håndtere koordinater (mgrs, utm osv)
-* "premiesystem"...
-  - n transcriptons (+)
-  - n transcriptions from country
-  - 1 specimen from each country
-  - stor variasjon i elevation
-  - "nøyaktig" - mye tid brukt per post? må regne med max n minutter
-  - registrert i x dager og n per dag!
+
+= langt inn i fremtiden...
+
+premiering ved hjelp av...
+
+' loddtrekning
+* sammenhengende dager med transkriberinger
+* kanskje noen overraskelser - den første som gjør x, der x er hemmelig og 
+  prosjektbasert.
 
