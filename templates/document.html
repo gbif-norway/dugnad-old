@@ -1,0 +1,177 @@
+$def with (key, page, project, source, forms)
+<!doctype html>
+<meta charset=utf-8>
+<title>Dugnad</title>
+<link rel='stylesheet' href='$config['base']/css/transcribe.css?$version'>
+<link rel='stylesheet' href='$config['base']/css/leaflet.css?$version'>
+<link rel='stylesheet' href='$config['base']/css/leaflet.draw.css?$version'>
+<link rel='stylesheet' href='$config['base']/css/leaflet.measure.css?$version'>
+<link rel='stylesheet' href='$config['base']/css/auto-complete.css?$version'>
+
+<script src='$config['base']/js/openseadragon.js?$version'></script>
+<script src='$config['base']/js/openseadragon-fabric.js?$version'></script>
+<script src='$config['base']/js/fabric.js?$version'></script>
+<script src='$config['base']/js/leaflet.js?$version'></script>
+<script src='$config['base']/js/leaflet.draw.js?$version'></script>
+<script src='$config['base']/js/leaflet.measure.js?$version'></script>
+<script src='$config['base']/js/wicket.js?$version'></script>
+<script src='$config['base']/js/wicket-leaflet.js?$version'></script>
+<script src='$config['base']/js/auto-complete.js?$version'></script>
+<script src='$config['base']/js/dugnad.js?$version'></script>
+
+$ crumbs().append(['', 'dugnad'])
+$ crumbs().append(['project/' + project['_key'] + '/info', _(project['title'])])
+$ crumbs().append([None, _('transcribe')])
+<header>
+  <nav>
+    <a href='$prefix'>
+      <h1><b>dugnad</b> annotering &amp; transkribering</h1>
+    </a>
+  
+    <form method=get>
+      <p>
+        <b>$_('select-page')</b>
+        <select id=select-page name=page>
+          $for n in range(1, source['pages']):
+            <option>$n</option>
+        </select>
+    </form>
+
+    <a class='register-login' target=user href='/user/'>
+      $if not helper.uid():
+        $_('link-login')
+      $else:
+        $if helper.name():
+          $_('signed-in-as')
+          $helper.name()
+        $else:
+          $_('signed-in')
+    </a>
+  </nav>
+
+  <nav class=crumbs>
+    <p>
+      $if crumbs:
+        $for crumb in crumbs():
+          $if crumb[0] is not None:
+            <a href="$prefix/$crumb[0]">$crumb[1]</a> /
+          $else:
+            <a>$crumb[1]</a> 
+    <p>
+      $if helper.admin():
+        <a href='$prefix/$_('url-backroom')'>$_('backroom')</a>
+        ·
+      $if helper.uid():
+        <a href='$prefix/$_('url-unfinished')'>$_('link-unfinished')</a>
+        ·
+        <a href='$prefix/$_('url-finished')'>$_('revise-transcriptions')</a>
+        ·
+      <a id='open-help' target='help' href='$prefix/$key/$_('url-help')'>$_('help')</a>
+  </nav>
+</header>
+
+<main>
+  <aside id=map-overlay class=overlay>
+    <div id="map"></div>
+    <a id=ring></a>
+  </aside>
+
+  <section id=dz>
+    <p class=modes>
+    $if project.get('georeference'):
+      <a data-document=1 id=show-map data-replace="$_('link-document')" href='#'>$_('link-map')</a>
+    <section id='dzi'></section>
+  </section>
+
+  <section id=tr>
+    <form id='transcription' method='post' action="$prefix/$key">
+      <h2 style='display: none;'>$source['document']</h2>
+      $for name, form in forms.iteritems():
+  			<fieldset>
+  				<legend>$_(name)</legend>
+  				$:form.render()
+  			</fieldset>
+      <p>
+        <input name=save type=submit value="$_('submit')">
+        $if helper.uid() and not '_finished' in record:
+          <input name=later type=submit value="$_('finish-later')">
+      <div id=help>
+        <h3>$_('help')</h3>
+        <p id=helptext>$_(project.get('help', {}).get('introduction'))
+      </div>
+    </form>
+  </section>
+</main>
+
+<script>
+var viewer = OpenSeadragon({
+  id: "dzi",
+  showRotationControl: true,
+  minZoomImageRatio: 0.5,
+  maxZoomImageRatio: 2.0,
+  showFullPageControl: false,
+  degrees: 0,
+  showHomeControl: false,
+  sequenceMode: true,
+  prefixUrl: "/static/images/",
+  tileSources: [
+  $for n in range(1, source['pages']):
+    "$source['dzi']/${n}.dzi.dzi",
+  ]
+});
+
+var overlay = this.viewer.fabricjsOverlay({ scale: 1000 });
+
+function markpage(button) {
+  var drawing = overlay.fabricCanvas().isDrawingMode;
+  if(drawing) {
+    viewer.setMouseNavEnabled(true);
+    viewer.outerTracker.setTracking(true);
+    overlay.fabricCanvas().isDrawingMode = false;
+    button.textContent = "$_("mark-page")";
+    serialize();
+  } else {
+    viewer.setMouseNavEnabled(false);
+    viewer.outerTracker.setTracking(false);
+    overlay.fabricCanvas().isDrawingMode = true;
+    overlay.fabricCanvas().freeDrawingBrush.width = 30;
+    overlay.fabricCanvas().freeDrawingBrush.color = "rgba(255, 0, 0, 0.3)";
+    button.textContent = "$_("finish-marking-page")";
+  }
+}
+
+var selectpage = document.getElementById('select-page');
+selectpage.onchange = function(e) {
+  viewer.goToPage(e.target.value - 1);
+
+}
+
+viewer.addHandler("page", function(e) {
+  overlay.fabricCanvas().clear();
+  var annotation = document.getElementById("annotation");
+  if(annotation && annotation.value) {
+    var pages = JSON.parse(annotation.value);
+    overlay.fabricCanvas().loadFromJSON(pages[e.page]);
+  }
+  T.getmarkings(e.page);
+});
+
+var pages = {};
+var serialize = function(e) {
+  var json = overlay.fabricCanvas().toJSON()
+  var annotation = document.getElementById("annotation");
+  var page = viewer.currentPage();
+  console.log("Lagrer " + viewer.currentPage());
+  pages[page] = json;
+  if(annotation) {
+    annotation.value = JSON.stringify(pages);
+  }
+  var overview = document.getElementById("marked-pages");
+  if(overview) {
+    var marked = Object.keys(pages).join(", ");
+    overview.value = marked;
+  }
+}
+T.getmarkings("0");
+</script>
+

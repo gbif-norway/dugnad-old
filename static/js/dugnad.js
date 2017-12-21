@@ -1,5 +1,31 @@
 var T = {};
 
+T.http = function(method, uri, query, callback) {
+  var req = new XMLHttpRequest();
+  req.onreadystatechange = function() {
+    if(req.readyState == 4 && req.status == 200) {
+      callback(req.responseText, req.status);
+    }
+  }
+  req.open(method, uri, true);
+  req.send(query);
+}
+
+T.getmarkings = function(page) {
+  var base = document.location + "";
+  var url = base.replace(/\/$/, "").replace("#", "") + "/markings/" + page;
+  T.http("GET", url, null, function(raw) {
+    var data = JSON.parse(raw);
+    for(var i = 0; i < data.length; i++) {
+      var cv = overlay.fabricCanvas();
+      cv.loadFromJSON(data[i], cv.renderAll.bind(cv), function(o, obj) {
+        obj.stroke = "rgba(255, 255, 0, 0.3)";
+        obj.selectable = false;
+      });
+    }
+  });
+}
+
 T.georeference = function(layer) {
   document.getElementById('decimalLatitude').value = "";
   document.getElementById('decimalLongitude').value = "";
@@ -208,7 +234,6 @@ document.addEventListener("DOMContentLoaded", function(e) {
     wkt.read(footprint.value);
     var obj = wkt.toObject(T.map.defaults);
     obj.addTo(T.map);
-    console.log(obj);
     T.map.fitBounds(obj.getBounds(), {
       paddingBottomRight: [300, 150],
       paddingTopLeft: [0, 100]
@@ -273,7 +298,8 @@ document.addEventListener("DOMContentLoaded", function(e) {
         overlay.style.visibility = "visible";
       }
     }
-    showMap.click();
+    if(!showMap.getAttribute('data-document'))
+      showMap.click();
   }
 
   var helpln = document.getElementsByClassName('help');
@@ -310,6 +336,76 @@ document.addEventListener("DOMContentLoaded", function(e) {
           }
         });
       })(inputs[i]);
+    }
+    if(inputs[i].getAttribute('data-url')) {
+      (function(input) {
+        var url = input.getAttribute('data-url');
+        new autoComplete({
+          delay: 150,
+          selector: input,
+          minChars: 3,
+          cache: true,
+          source: function(term, suggest) {
+            term = term.toLowerCase();
+            T.http("GET", url + "?q=" + term, null, function(raw) {
+              var data = JSON.parse(raw);
+              suggest(data);
+            });
+          },
+          renderItem: function(item, search) {
+            search = search.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+            var re = new RegExp("(" + search.split(' ').join('|') + ")", "gi");
+            var data = JSON.stringify(item)
+            var div = document.createElement('div');
+            div.className = 'autocomplete-suggestion';
+            div.setAttribute('data-val', item.name);
+            div.setAttribute('data-all', data);
+            div.innerHTML = item.name.replace(re, "<b>$1</b>");
+            return div.outerHTML;
+          },
+          onSelect: function(e, term, item) {
+            var raw = item.getAttribute('data-all');
+            var data = JSON.parse(raw);
+            for(k in data) {
+              if(k == "geography") {
+                var wkt = new Wkt.Wkt();
+                wkt.read(data[k]);
+                var footprint = document.getElementById("footprintWKT");
+                var obj = wkt.toObject(T.map.defaults);
+                obj.addTo(T.map);
+                T.map.fitBounds(obj.getBounds(), {
+                  paddingBottomRight: [300, 150],
+                  paddingTopLeft: [0, 100]
+                });
+                if(footprint) {
+                  footprint.value = wkt.write();
+                }
+              } else if(k == "id") {
+                var locationid = document.getElementById("locationID");
+                if(locationid) {
+                  locationid.value = "NVE:" + data[k];
+                }
+              } else if(k == "masl") {
+                var elevation = document.getElementById("verbatimElevation");
+                if(elevation) {
+                  elevation.value = data[k];
+                }
+              }
+            }
+            e.preventDefault();
+          }
+        });
+      })(inputs[i]);
+    }
+  }
+
+  var mark = document.getElementById("mark-page");
+  if(mark) {
+    mark.onclick = function(e) {
+      if(viewer && markpage) {
+        markpage(e.target);
+      }
+      return false;
     }
   }
 });

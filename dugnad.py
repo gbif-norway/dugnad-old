@@ -161,8 +161,10 @@ def buildform(key, config):
             opts['post'] = helplink(i.get('help'))
             if 'disabled' in i:
                 opts['disabled'] = True
+            if 'url' in i:
+                opts['data-url'] = i['url']
             if 'pick' in i:
-                opts['data-pick'] = i['pick'] = json.dumps(i['pick'])
+                opts['data-pick'] = i['pick'] = json.dumps(i['pick']) # ???
             inputs.append(form.Textbox(k, **opts))
         elif i['type'] == "hidden":
             inputs.append(form.Hidden(k, description = _(k)))
@@ -208,6 +210,10 @@ def buildform(key, config):
           inputs.append(form.Hidden("verbatimLatitude", description = _('verbatimLatitude'), disabled = True))
           inputs.append(form.Hidden("verbatimUncertaintyInMeters", description = _('verbatimUncertaintyInMeters'), disabled = True))
           inputs.append(form.Hidden("verbatimLongitude", description = _('verbatimLongitude'), disabled = True))
+        elif i['type'] == "annotation":
+          inputs.append(form.Hidden(k))
+          inputs.append(form.Textbox(_('marked-pages'), disabled = True, id = "marked-pages"))
+          inputs.append(form.Button(_("mark-page"), id = "mark-page"))
         else: raise Exception("Unknown type %s" % i['type'])
     return form.Form(*inputs)
 
@@ -290,7 +296,10 @@ def updatetranscription(id, data):
     
 def savetranscription(uid, pkey, data):
     project = loadproject(pkey)
-    pdb = web.database(dbn='sqlite', db=project['source']['database'])
+    if 'database' in project['source']:
+      pdb = web.database(dbn='sqlite', db=project['source']['database'])
+    else:
+      pdb = False
 
     finished = True
     if data.pop('skip', False):
@@ -299,7 +308,15 @@ def savetranscription(uid, pkey, data):
     if data.pop('later', False):
         finished = False
     now = str(datetime.date.today())
-    key = data[project['key']]
+    if project['key'] == "_none":
+      key = ""
+    else:
+      key = data[project['key']]
+    if project.get('markings') and data['annotation']:
+      pages = json.loads(data['annotation'])
+      for page, markings in pages.iteritems():
+        id = str(uuid.uuid4())
+        db.insert('markings', id=id, project=pkey, page=page, markings=json.dumps(markings), user=uid, date=now)
     id = str(uuid.uuid4())
     db.insert('transcriptions',
         id=id, project=pkey, key=key, user=uid, date=now, finished=finished,
@@ -307,7 +324,7 @@ def savetranscription(uid, pkey, data):
     )
     where = dict()
     where[project['key']] = key
-    if finished:
+    if finished and pdb:
         pdb.update(project['source']['table'], where=web.db.sqlwhere(where),
                 completed = web.db.SQLLiteral("completed + 1"))
 
@@ -488,12 +505,17 @@ class project:
       data = web.input()
       try:
         project = loadproject(key)
-        for prefilter in project.get('prefilters', []):
-            if prefilter['name'] not in data:
-                return self.prefilter(prefilter, key, uid, nick, data, project)
-        pdb = web.database(dbn='sqlite', db=project['source']['database'])
-        record, forms = validaterecord(pdb, data, project, oid)
-        return simplerender.transcribe("project/" + key, record, forms, project, True, nick)
+        if 'document' in project['source']:
+          forms = OrderedDict((form, buildform(form, project)) for form in project['annotate']['order'])
+          page = 1
+          return simplerender.document('project/' + key, page, project, project['source'], forms)
+        else:
+          for prefilter in project.get('prefilters', []):
+              if prefilter['name'] not in data:
+                  return self.prefilter(prefilter, key, uid, nick, data, project)
+          pdb = web.database(dbn='sqlite', db=project['source']['database'])
+          record, forms = validaterecord(pdb, data, project, oid)
+          return simplerender.transcribe("project/" + key, record, forms, project, True, nick)
       except IOError as e:
         raise web.seeother('%s' % prefix)
       except ValueError as e:
@@ -531,6 +553,30 @@ class showannotations:
           else:
             return web.notfound()
         return render.annotations(final)
+
+class lookup:
+  def GET(self, key):
+    data = web.input()
+    q = data.get('q')
+    if q and key in config['lookup']:
+      source = config['lookup'][key]
+      where = { 'table': source['table'], 'key': source['key'], 'q': "%" + q + "%" }
+      raw = db.query("SELECT * FROM " + source['table'] + " WHERE " + source['key'] + " LIKE $q LIMIT 20", vars=where)
+      results = []
+      for result in raw:
+        results.append(result)
+      return json.dumps(results)
+
+class markings:
+  def GET(self, key, page):
+    project = loadproject(key)
+    data = web.input()
+    where = dict(page = page)
+    raw = db.select('markings', where = web.db.sqlwhere(where))
+    markings = []
+    for m in raw:
+      markings.append(json.loads(m['markings']))
+    return json.dumps(markings)
 
 class annotate:
     def GET(self, key):
@@ -609,6 +655,7 @@ urls = (
     '%s/prosjekt/(.+)/bakrom' % prefix, 'projectstats',
     '%s/prosjekt/(.+)/help' % prefix, 'help',
     '%s/prosjekt/(.+)/hjelp' % prefix, 'help',
+    '%s/prosjekt/(.+)/markings/(.+)' % prefix, 'markings',
     '%s/prosjekt/(.+)/(.+)' % prefix, 'project',
     '%s/prosjekt/(.+)/' % prefix, 'project',
     '%s/prosjekt/(.+)' % prefix, 'project',
@@ -619,6 +666,7 @@ urls = (
     '%s/project/(.+)/backroom' % prefix, 'projectstats',
     '%s/project/(.+)/help' % prefix, 'help',
     '%s/project/(.+)/hjelp' % prefix, 'help',
+    '%s/project/(.+)/markings/(.+)' % prefix, 'markings',
     '%s/project/(.+)/(.+)' % prefix, 'project',
     '%s/project/(.+)/' % prefix, 'project',
     '%s/project/(.+)' % prefix, 'project',
@@ -628,6 +676,8 @@ urls = (
 
     '%s/annotation/(.+)' % prefix, 'showannotation',
     '%s/annotations/(.+)' % prefix, 'showannotations',
+
+    '%s/lookup/(.+)' % prefix, 'lookup',
 
     '%s/(.+)' % prefix, 'annotate',
 )

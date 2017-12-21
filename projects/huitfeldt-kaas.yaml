@@ -1,0 +1,33 @@
+title: project-huitfeldt-kaas-title
+image: huitfeldt-kaas.jpg
+description: project-huitfeldt-kaas-description
+georeference: true
+hidden: true
+template: pdf
+help:
+  introduction: hjelpetekst her
+source:
+  document: /static/huitfeldt-kaas.pdf
+  pages: 176
+  dzi: /static/huitfeldt/
+key: _none
+markings: True
+annotate:
+  order: [ annotation, taxonomy, locality, comment ]
+forms:
+  annotation:
+    - { name: "annotation", type: annotation }
+  taxonomy:
+    - { name: "scientificName", type: text }
+  locality:
+    - { name: "locality", type: text, url: "/dugnad/lookup/nve" }
+    - { name: "footprintWKT", type: text, disabled: true }
+    - { name: "locationID", type: text }
+    - { name: "verbatimElevation", type: text }
+    - { name: "decimalLatitude", type: hidden }
+    - { name: "decimalLongitude", type: hidden }
+    - { name: "coordinateUncertaintyInMeters", type: hidden }
+  comment:
+    - { name: "annotationRemarks", type: textfield }
+submit: transcribe
+
