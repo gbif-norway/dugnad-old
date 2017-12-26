@@ -93,8 +93,6 @@ $ crumbs().append([None, _('transcribe')])
   			</fieldset>
       <p>
         <input name=save type=submit value="$_('submit')">
-        $if helper.uid() and not '_finished' in record:
-          <input name=later type=submit value="$_('finish-later')">
       <div id=help>
         <h3>$_('help')</h3>
         <p id=helptext>$_(project.get('help', {}).get('introduction'))
