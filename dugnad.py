@@ -57,6 +57,9 @@ try:
 except ImportError:
     config['zoom'] = False
 
+def user():
+  return web.ctx.user
+
 def crumbs():
     if not 'crumbs' in web.ctx: web.ctx['crumbs'] = []
     return web.ctx['crumbs']
@@ -70,13 +73,13 @@ class HelpBox(object):
 
 class helpers:
   def name(self):
-    return session.get('name')
+    return web.ctx.nick
 
   def uid(self):
-    return session.get('id')
+    return web.ctx.uid
 
   def admin(self):
-    return session.get('admin')
+    return web.ctx.isadmin
 
   def showfilter(self, config):
     if 'filter' in config:
@@ -121,6 +124,7 @@ def validaterecord(db, data, project, oid=None):
     return (record, forms)
 
 def getrecord(db, data, project, oid=None):
+  if not db: return {}
   filters = {}
   if oid:
     q = { 'key': oid }
@@ -159,8 +163,8 @@ def buildform(key, config):
             opts = {}
             opts['description'] = _(k)
             opts['post'] = helplink(i.get('help'))
-            if 'disabled' in i:
-                opts['disabled'] = True
+            if 'disabled' in i or 'readonly' in i:
+                opts['readonly'] = True
             if 'url' in i:
                 opts['data-url'] = i['url']
             if 'pick' in i:
@@ -203,16 +207,16 @@ def buildform(key, config):
           inputs.append(form.Textbox("month", description = _('month'), post = helplink('help-month')))
           inputs.append(form.Textbox("day", description = _('day'), post = helplink('help-day')))
         elif i['type'] == 'location':
-          inputs.append(form.Textbox("county", description = _('county'), disabled = True))
-          inputs.append(form.Textarea("locality", description = _('locality'), disabled = True))
-          inputs.append(form.Textbox("verbatimCoordinates", description = _('verbatimCoordinates'), disabled = True))
-          inputs.append(form.Hidden("verbatimWKT", description = _('verbatimWKT'), disabled = True))
-          inputs.append(form.Hidden("verbatimLatitude", description = _('verbatimLatitude'), disabled = True))
-          inputs.append(form.Hidden("verbatimUncertaintyInMeters", description = _('verbatimUncertaintyInMeters'), disabled = True))
-          inputs.append(form.Hidden("verbatimLongitude", description = _('verbatimLongitude'), disabled = True))
+          inputs.append(form.Textbox("county", description = _('county'), readonly = True))
+          inputs.append(form.Textarea("locality", description = _('locality'), readonly = True))
+          inputs.append(form.Textbox("verbatimCoordinates", description = _('verbatimCoordinates'), readonly = True))
+          inputs.append(form.Hidden("verbatimWKT", description = _('verbatimWKT'), readonly = True))
+          inputs.append(form.Hidden("verbatimLatitude", description = _('verbatimLatitude'), readonly = True))
+          inputs.append(form.Hidden("verbatimUncertaintyInMeters", description = _('verbatimUncertaintyInMeters'), readonly = True))
+          inputs.append(form.Hidden("verbatimLongitude", description = _('verbatimLongitude'), readonly = True))
         elif i['type'] == "annotation":
           inputs.append(form.Hidden(k))
-          inputs.append(form.Textbox(_('marked-pages'), disabled = True, id = "marked-pages"))
+          inputs.append(form.Textbox(_('marked-pages'), readonly = True, id = "marked-pages"))
           inputs.append(form.Button(_("mark-page"), id = "mark-page"))
         else: raise Exception("Unknown type %s" % i['type'])
     return form.Form(*inputs)
@@ -347,7 +351,7 @@ class index:
 
 class bakrom:
     def GET(self, key=None):
-        if not session.get('admin'): return web.seeother("%s" % prefix)
+        if not web.ctx.isadmin: return web.seeother("%s" % prefix)
         projects = []
         for f in glob.glob("projects/*.yaml"):
             if not os.path.basename(f) in config.get('hidden', []):
@@ -368,14 +372,20 @@ class help:
 
 class revise:
     def GET(self, id):
-        nick = session.get('name', "Anonym")
+        nick = web.ctx.nick
         data = web.input()
         try:
             where = dict(id = id)
             recs = db.select('transcriptions', where = web.db.sqlwhere(where))
             record = recs[0]
+            pkey = record['project']
             project = loadproject(record['project'])
             anno = json.loads(record['annotation'])
+            if 'document' in project['source']:
+              forms = OrderedDict((form, buildform(form, project)) for form in project['annotate']['order'])
+              page = 1
+              for _, form in forms.iteritems(): form.validates(anno)
+              return simplerender.document('project/' + pkey, page, project, project['source'], forms)
             pdb = web.database(dbn='sqlite', db=project['source']['database'])
             origid = { project['key']: record['key'] }
             origs = pdb.select(project['source']['table'],
@@ -393,13 +403,12 @@ class revise:
             raise web.seeother('%s/revised' % prefix)
 
     def POST(self, id):
-        uid = session.get('id')
         updatetranscription(id, web.input())
         raise web.seeother("%s/revise" % prefix)
 
 class unfinished:
     def GET(self, id):
-        nick = session.get('name', "Anonym")
+        nick = web.ctx.nick
         data = web.input()
         try:
             where = dict(id = id)
@@ -426,7 +435,7 @@ class unfinished:
             raise web.seeother('%s/unfinished' % prefix)
 
     def POST(self, id):
-        uid = session.get('id')
+        uid = web.ctx.uid
         updatetranscription(id, web.input())
         raise web.seeother("%s/unfinished" % prefix)
 
@@ -443,7 +452,7 @@ class changelog:
 
 class listfinished:
     def GET(self):
-        uid = session.get('id')
+        uid = web.ctx.uid
         if not uid: raise web.seeother('%s' % prefix)
         reqs = { 'user': uid, 'finished': True }
         recs = db.select('transcriptions', order="updated DESC", where=web.db.sqlwhere(reqs), limit=10)
@@ -451,7 +460,7 @@ class listfinished:
 
 class listunfinished:
     def GET(self):
-        uid = session.get('id')
+        uid = web.ctx.uid
         if not uid: raise web.seeother('%s' % prefix)
         reqs = { 'user': uid, 'finished': False }
         recs = db.select('transcriptions', order="updated DESC", where=web.db.sqlwhere(reqs))
@@ -459,16 +468,14 @@ class listunfinished:
 
 class screencast:
     def GET(self, key):
-        uid = session.get('id')
-        nick = session.get('name', "Anonym")
         project = loadproject(key)
         return render.screencast(key, project)
 
 
 class projectstats:
     def GET(self, key):
-        uid = session.get('id')
-        nick = session.get('name', "Anonym")
+        uid = web.ctx.uid
+        nick = web.ctx.nick
         project = loadproject(key)
         stats = getstats(key, project)
         charts = []
@@ -478,8 +485,8 @@ class projectstats:
 
 class projectinfo:
     def GET(self, key):
-        uid = session.get('id')
-        nick = session.get('name', "Anonym")
+        uid = web.ctx.uid
+        nick = web.ctx.nick
         try:
             project = loadproject(key)
             charts = []
@@ -500,14 +507,15 @@ class project:
       return render.prefilter(key, project, options)
 
     def GET(self, key, oid=None):
-      uid = session.get('id')
-      nick = session.get("name", "Anonym")
+      uid = web.ctx.uid
+      nick = web.ctx.nick
       data = web.input()
       try:
         project = loadproject(key)
         if 'document' in project['source']:
           forms = OrderedDict((form, buildform(form, project)) for form in project['annotate']['order'])
           page = 1
+          record, forms = validaterecord(None, data, project, oid)
           return simplerender.document('project/' + key, page, project, project['source'], forms)
         else:
           for prefilter in project.get('prefilters', []):
@@ -522,9 +530,16 @@ class project:
         raise web.seeother('%s' % prefix)
 
     def POST(self, pkey):
-        uid = session.get('id')
+        project = loadproject(pkey)
+        uid = web.ctx.uid
         savetranscription(uid, pkey, web.input())
         referer = web.ctx.env.get('HTTP_REFERER', '%s' % prefix)
+        if 'sticky' in project:
+          base = referer.split("?")[0]
+          params = {}
+          for k, v in web.input().iteritems():
+            if k in project['sticky']: params[k] = v
+          referer = base + "?" + urllib.urlencode(params)
         raise web.seeother(referer)
 
 class showannotation:
@@ -580,8 +595,8 @@ class markings:
 
 class annotate:
     def GET(self, key):
-        uid = session.get('id')
-        nick = session.get("name", "Anonym")
+        uid = web.ctx.uid
+        nick = web.ctx.nick
         key = key.replace("urn:catalog:", "")
         url = "%s%s.json" % (RESOLVER, key)
         config['_key'] = "annotation"
@@ -603,7 +618,7 @@ class annotate:
           return render.error(message)
 
     def POST(self, key):
-        uid = session.get('id')
+        uid = web.ctx.uid
         key = key.replace("urn:catalog:", "")
         url = "%s%s.json" % (RESOLVER, key)
         data = web.input()
@@ -724,6 +739,13 @@ render = template.render('templates', base='layout', globals={
     'crumbs': crumbs,
     'version': VERSION
 })
+
+def login():
+  web.ctx.uid = 1 # session.get('id')
+  web.ctx.nick = "bie" # session.get('name', "Anonym")
+  web.ctx.isadmin = True # session.get('admin')
+
+app.add_processor(web.loadhook(login))
 
 web.config.debug = True
 

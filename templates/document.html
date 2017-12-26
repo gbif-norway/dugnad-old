@@ -102,6 +102,11 @@ $ crumbs().append([None, _('transcribe')])
 </main>
 
 <script>
+var selectpage = document.getElementById('select-page');
+var currentpage = document.getElementById('currentPage');
+
+selectpage.value = (currentpage && currentpage.value) ? currentpage.value : 1;
+
 var viewer = OpenSeadragon({
   id: "dzi",
   showRotationControl: true,
@@ -111,6 +116,7 @@ var viewer = OpenSeadragon({
   degrees: 0,
   showHomeControl: false,
   sequenceMode: true,
+  initialPage: currentpage ? currentpage.value : 0,
   prefixUrl: "/static/images/",
   tileSources: [
   $for n in range(1, source['pages']):
@@ -138,10 +144,9 @@ function markpage(button) {
   }
 }
 
-var selectpage = document.getElementById('select-page');
 selectpage.onchange = function(e) {
   viewer.goToPage(e.target.value - 1);
-
+  if(currentpage) currentpage.value = e.target.value;
 }
 
 viewer.addHandler("page", function(e) {
@@ -151,6 +156,10 @@ viewer.addHandler("page", function(e) {
     var pages = JSON.parse(annotation.value);
     overlay.fabricCanvas().loadFromJSON(pages[e.page]);
   }
+  if(selectpage) {
+    selectpage.value = e.page + 1;
+  }
+  if(currentpage) currentpage.value = e.page;
   T.getmarkings(e.page);
 });
 
@@ -170,6 +179,6 @@ var serialize = function(e) {
     overview.value = marked;
   }
 }
-T.getmarkings("0");
+T.getmarkings((currentpage && currentpage.value) ? currentpage.value : 0);
 </script>
 

@@ -12,8 +12,9 @@ T.http = function(method, uri, query, callback) {
 }
 
 T.getmarkings = function(page) {
-  var base = document.location + "";
+  var base = location.href.split('?')[0] + "";
   var url = base.replace(/\/$/, "").replace("#", "") + "/markings/" + page;
+  console.log(url);
   T.http("GET", url, null, function(raw) {
     var data = JSON.parse(raw);
     for(var i = 0; i < data.length; i++) {

@@ -14,9 +14,11 @@ key: _none
 markings: True
 annotate:
   order: [ annotation, taxonomy, locality, comment ]
+sticky: scientificName, establishmentMeans, currentPage
 forms:
   annotation:
     - { name: "annotation", type: annotation }
+    - { name: "currentPage", type: hidden }
   taxonomy:
     - { name: "scientificName", type: text }
   locality:
@@ -27,6 +29,7 @@ forms:
     - { name: "decimalLatitude", type: hidden }
     - { name: "decimalLongitude", type: hidden }
     - { name: "coordinateUncertaintyInMeters", type: hidden }
+    - { name: "establishmentMeans", type: text }
   comment:
     - { name: "annotationRemarks", type: textfield }
 submit: transcribe

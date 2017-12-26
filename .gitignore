@@ -6,3 +6,5 @@ sessions/
 *.db
 static/tmp
 config.yaml
+static/huitfeldt
+static/video
