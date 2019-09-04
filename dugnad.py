@@ -26,7 +26,6 @@ import cStringIO as StringIO
 from itertools import islice
 from collections import OrderedDict
 from web import form, template
-from tokyo import cabinet
 
 from yapsy.PluginManager import PluginManager
 from yapsy.IPlugin import IPlugin
@@ -104,7 +103,7 @@ def getusername(label):
     if not label: return _("anonymous")
     try:
       where = dict(uid=label)
-      udb = web.database(dbn='sqlite', db="/site/gbif/loans/users.db")
+      udb = web.database(dbn='sqlite', db="/gbif/loans/users.db")
       rec = udb.select("users", where=where)[0]
       return rec.get('nick') or rec.get('name', _('unknown'))
     except Exception:
@@ -741,9 +740,9 @@ render = template.render('templates', base='layout', globals={
 })
 
 def login():
-  web.ctx.uid = 1 # session.get('id')
-  web.ctx.nick = "bie" # session.get('name', "Anonym")
-  web.ctx.isadmin = True # session.get('admin')
+  web.ctx.uid = session.get('id')
+  web.ctx.nick = session.get('name', "Anonym")
+  web.ctx.isadmin = session.get('admin')
 
 app.add_processor(web.loadhook(login))
 

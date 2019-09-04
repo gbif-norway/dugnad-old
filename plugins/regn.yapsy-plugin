@@ -1,9 +1,0 @@
-[Core]
-Name = regn
-Module = regn
-
-[Documentation]
-Author = GBIF Norway
-Version = 0.1
-Website = https://gbif.no/
-Description = Rain rain rain
